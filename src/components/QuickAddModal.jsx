@@ -36,7 +36,7 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
   const [paymentMethod, setPaymentMethod] = useState('');
   const [date, setDate] = useState(() => {
     const today = new Date().toISOString().split('T')[0];
-    return today.startsWith(selectedMonth || '2026-11') ? today : `${selectedMonth || '2026-11'}-01`;
+    return today.startsWith(selectedMonth || '2026-10') ? today : `${selectedMonth || '2026-10'}-01`;
   });
   const [notes, setNotes] = useState('');
 
@@ -57,7 +57,7 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
         setNotes(editingTx.notes || '');
       } else {
         const today = new Date().toISOString().split('T')[0];
-        const initialDate = today.startsWith(selectedMonth || '2026-11') ? today : `${selectedMonth || '2026-11'}-01`;
+        const initialDate = today.startsWith(selectedMonth || '2026-10') ? today : `${selectedMonth || '2026-10'}-01`;
         setType(defaultType || 'Keluar');
         setTitle('');
         setAmount('');

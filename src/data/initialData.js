@@ -15,7 +15,7 @@ export const YASMEEN_CATEGORIES = [
   { id: 'belanja_lain', name: 'Belanja lain', iconName: 'ShoppingBag', budgetCny: 70, color: '#f472b6', note: 'Keperluan harian' },
   { id: 'toiletries', name: 'Toiletries', iconName: 'Luggage', budgetCny: 0, color: '#a855f7', note: 'Peralatan mandi' },
   { id: 'asrama', name: 'Asrama', iconName: 'Zap', budgetCny: 0, color: '#6366f1', note: 'Keperluan asrama' },
-  { id: 'kebutuhan_awal', name: 'Kebutuhan awal', iconName: 'Luggage', budgetCny: 182, color: '#fb923c', note: 'Biaya awal Nov: Rp 500rb (¥182)' },
+  { id: 'kebutuhan_awal', name: 'Kebutuhan awal', iconName: 'Luggage', budgetCny: 182, color: '#fb923c', note: 'Biaya awal Okt: Rp 500rb (¥182)' },
   { id: 'tiket_pesawat', name: 'Tiket Pesawat', iconName: 'Plane', budgetCny: 0, color: '#0ea5e9', note: 'Penerbangan Indo ⇄ China' },
 ];
 
@@ -65,7 +65,7 @@ export const DEFAULT_USERS = {
 export const SAMPLE_YASMEEN_TRANSACTIONS = [
   {
     id: 'tx-y1',
-    date: '2026-11-01',
+    date: '2026-10-20',
     category: 'makan',
     title: 'Nasi ayam',
     amountCny: 12,
@@ -78,7 +78,7 @@ export const SAMPLE_YASMEEN_TRANSACTIONS = [
   },
   {
     id: 'tx-y2',
-    date: '2026-11-01',
+    date: '2026-10-20',
     category: 'jajan',
     title: 'Teh',
     amountCny: 5,
@@ -91,7 +91,7 @@ export const SAMPLE_YASMEEN_TRANSACTIONS = [
   },
   {
     id: 'tx-y3',
-    date: '2026-11-02',
+    date: '2026-10-20',
     category: 'jajan',
     title: 'Kafe bersama Najma',
     amountCny: 45,

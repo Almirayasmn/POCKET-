@@ -22,6 +22,59 @@ const STORAGE_KEY = 'pocket_duo_storage_v10';
 const PocketContext = createContext(null);
 
 export function PocketProvider({ children }) {
+  // 1. Device-local UI State (NEVER synced to Firebase or between devices)
+  const [activeView, setActiveViewState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pocket_device_active_view');
+      if (saved && ['landing', 'yasmeen', 'adziima', 'gold'].includes(saved)) {
+        return saved;
+      }
+    } catch (e) {}
+    return 'landing';
+  });
+
+  const setActiveView = (view) => {
+    setActiveViewState(view);
+    try {
+      localStorage.setItem('pocket_device_active_view', view);
+    } catch (e) {}
+  };
+
+  const [selectedMonth, setSelectedMonthState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pocket_device_selected_month');
+      if (saved && saved >= '2026-10') {
+        return saved;
+      }
+    } catch (e) {}
+    return '2026-10';
+  });
+
+  const setSelectedMonth = (month) => {
+    const val = (month && month >= '2026-10') ? month : '2026-10';
+    setSelectedMonthState(val);
+    try {
+      localStorage.setItem('pocket_device_selected_month', val);
+    } catch (e) {}
+  };
+
+  const [yasmeenCurrencyView, setYasmeenCurrencyViewState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('pocket_device_yasmeen_currency');
+      if (saved && ['CNY', 'IDR'].includes(saved)) {
+        return saved;
+      }
+    } catch (e) {}
+    return 'CNY';
+  });
+
+  const setYasmeenCurrencyView = (curr) => {
+    setYasmeenCurrencyViewState(curr);
+    try {
+      localStorage.setItem('pocket_device_yasmeen_currency', curr);
+    } catch (e) {}
+  };
+
   const [data, setData] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -87,9 +140,7 @@ export function PocketProvider({ children }) {
               lastUpdatedLabel: parsed.goldSavings?.lastUpdatedLabel || DEFAULT_GOLD_SAVINGS.lastUpdatedLabel,
               valuationMode: parsed.goldSavings?.valuationMode || 'sell'
             },
-            selectedMonth: parsed.selectedMonth < '2026-11' ? '2026-11' : (parsed.selectedMonth || '2026-11'),
-            monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
-            yasmeenCurrencyView: parsed.yasmeenCurrencyView || 'CNY'
+            monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} }
           };
         }
       }
@@ -97,7 +148,6 @@ export function PocketProvider({ children }) {
       console.error('Failed to load from localStorage:', e);
     }
     return {
-      activeView: 'landing', // 'landing' | 'yasmeen' | 'adziima'
       exchangeRate: DEFAULT_EXCHANGE_RATE,
       users: DEFAULT_USERS,
       yasmeenCategories: YASMEEN_CATEGORIES,
@@ -105,8 +155,6 @@ export function PocketProvider({ children }) {
       yasmeenTransactions: SAMPLE_YASMEEN_TRANSACTIONS,
       adziimaTransactions: SAMPLE_ADZIIMA_TRANSACTIONS,
       goldSavings: DEFAULT_GOLD_SAVINGS,
-      selectedMonth: '2026-11',
-      yasmeenCurrencyView: 'CNY', // 'CNY' | 'IDR'
       monthlyBudgets: { yasmeen: {}, adziima: {} }
     };
   });
@@ -141,11 +189,10 @@ export function PocketProvider({ children }) {
         if (!isMounted) return;
         if (remote && remote.users?.yasmeen && remote.users?.adziima) {
           isRemoteUpdatingRef.current = true;
+          const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
           setData(prev => ({
             ...prev,
-            ...remote,
-            activeView: prev.activeView,
-            selectedMonth: prev.selectedMonth
+            ...cleanRemote
           }));
           setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
           setIsCloudConnected(true);
@@ -170,11 +217,10 @@ export function PocketProvider({ children }) {
         if (!isMounted || !remote) return;
         if (remote.users?.yasmeen && remote.users?.adziima) {
           isRemoteUpdatingRef.current = true;
+          const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
           setData(prev => ({
             ...prev,
-            ...remote,
-            activeView: prev.activeView,
-            selectedMonth: prev.selectedMonth
+            ...cleanRemote
           }));
           setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
           setIsCloudConnected(true);
@@ -212,11 +258,10 @@ export function PocketProvider({ children }) {
     const remote = await fetchCloudData(clean);
     if (remote && remote.users) {
       isRemoteUpdatingRef.current = true;
+      const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
       setData(prev => ({
         ...prev,
-        ...remote,
-        activeView: prev.activeView,
-        selectedMonth: prev.selectedMonth
+        ...cleanRemote
       }));
       setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
     } else {
@@ -230,11 +275,10 @@ export function PocketProvider({ children }) {
     const remote = await fetchCloudData(firebaseDbUrl);
     if (remote && remote.users) {
       isRemoteUpdatingRef.current = true;
+      const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
       setData(prev => ({
         ...prev,
-        ...remote,
-        activeView: prev.activeView,
-        selectedMonth: prev.selectedMonth
+        ...cleanRemote
       }));
       setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
       setIsCloudConnected(true);
@@ -245,18 +289,6 @@ export function PocketProvider({ children }) {
     if (!firebaseDbUrl) throw new Error('URL Database belum diatur');
     await pushCloudData(firebaseDbUrl, data);
     setIsCloudConnected(true);
-  };
-
-  const setActiveView = (view) => {
-    setData(prev => ({ ...prev, activeView: view }));
-  };
-
-  const setSelectedMonth = (month) => {
-    setData(prev => ({ ...prev, selectedMonth: month }));
-  };
-
-  const setYasmeenCurrencyView = (currency) => {
-    setData(prev => ({ ...prev, yasmeenCurrencyView: currency }));
   };
 
   const setExchangeRate = (rate) => {
@@ -293,13 +325,13 @@ export function PocketProvider({ children }) {
   };
 
   const toggleStipend = (targetMonth = null) => {
-    const month = targetMonth || data.selectedMonth || '2026-11';
+    const month = targetMonth || selectedMonth || '2026-10';
     setData(prev => {
       const yasmeen = prev.users?.yasmeen || DEFAULT_USERS.yasmeen;
       const stipendByMonth = { ...(yasmeen.stipendByMonth || {}) };
       const currentVal = stipendByMonth[month] !== undefined
         ? Boolean(stipendByMonth[month])
-        : (month === '2026-11' ? Boolean(yasmeen.stipendReceived) : false);
+        : (month === '2026-10' ? false : (month === '2026-11' ? Boolean(yasmeen.stipendReceived) : false));
       const nextVal = !currentVal;
       stipendByMonth[month] = nextVal;
 
@@ -393,7 +425,7 @@ export function PocketProvider({ children }) {
 
   // Category Budget update with monthly inheritance template
   const updateCategoryBudget = (userId, catId, newBudget, targetMonth = null) => {
-    const month = targetMonth || data.selectedMonth || '2026-11';
+    const month = targetMonth || selectedMonth || '2026-10';
     const num = parseFloat(newBudget) || 0;
     const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
 
@@ -563,7 +595,7 @@ export function PocketProvider({ children }) {
       const rate = data?.exchangeRate || DEFAULT_EXCHANGE_RATE;
       const yasmeen = data?.users?.yasmeen || DEFAULT_USERS.yasmeen;
       const adziima = data?.users?.adziima || DEFAULT_USERS.adziima;
-      const currentMonth = data?.selectedMonth || '2026-11';
+      const currentMonth = selectedMonth || '2026-10';
 
       // Check if Yasmeen is in China for the selected month
       const isYasmeenInChina = currentMonth <= '2027-01';
@@ -572,8 +604,8 @@ export function PocketProvider({ children }) {
       const monthYasmeenTx = (data?.yasmeenTransactions || []).filter(tx => (tx?.date || '').startsWith(currentMonth));
       const monthAdziimaTx = (data?.adziimaTransactions || []).filter(tx => (tx?.date || '').startsWith(currentMonth));
 
-      // 1. Rolling Monthly Balance calculation starting from November 2026 ('2026-11')
-      const startBaselineMonth = '2026-11';
+      // 1. Rolling Monthly Balance calculation starting from Oktober 2026 ('2026-10')
+      const startBaselineMonth = '2026-10';
       const baseInitialYasmeenCny = (yasmeen?.initialFundCny !== undefined && yasmeen?.initialFundCny !== null)
         ? parseFloat(yasmeen.initialFundCny)
         : ((parseFloat(yasmeen?.initialFundIdr) || 10000000) / rate);
@@ -604,7 +636,7 @@ export function PocketProvider({ children }) {
       pastMonths.forEach(m => {
         const isStipendCair = yasmeen?.stipendByMonth?.[m] !== undefined
           ? Boolean(yasmeen.stipendByMonth[m])
-          : (m === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false);
+          : (m === '2026-10' ? false : (m === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false));
         const mStipend = (m <= '2027-01' && isStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
         let mIncome = 0;
         let mOutflow = 0;
@@ -644,9 +676,9 @@ export function PocketProvider({ children }) {
         }
 
         // Special rule for Yasmeen's kebutuhan_awal:
-        // November has initial cost of Rp 500.000 (¥182). Future months (Dec+) default to ¥0 / Rp 0
+        // Oktober has initial cost of Rp 500.000 (¥182). Future months default to ¥0 / Rp 0
         if (userId === 'yasmeen' && catId === 'kebutuhan_awal') {
-          return currentMonth === '2026-11' ? 182 : 0;
+          return currentMonth === '2026-10' ? 182 : 0;
         }
 
         // 2. Look back through earlier months in chronological order
@@ -664,7 +696,7 @@ export function PocketProvider({ children }) {
       // 1. Yasmeen Monthly Calculations for currentMonth
       const isCurrentStipendCair = yasmeen?.stipendByMonth?.[currentMonth] !== undefined
         ? Boolean(yasmeen.stipendByMonth[currentMonth])
-        : (currentMonth === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false);
+        : (currentMonth === '2026-10' ? false : (currentMonth === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false));
       const stipendCny = (isYasmeenInChina && isCurrentStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
 
       let monthIncomeYasmeenCny = 0;
@@ -863,7 +895,7 @@ export function PocketProvider({ children }) {
       return {
         rate: DEFAULT_EXCHANGE_RATE,
         isYasmeenInChina: true,
-        currentMonth: '2026-11',
+        currentMonth: selectedMonth || '2026-10',
         yasmeen: {
           monthTx: [],
           isChina: true,
@@ -913,15 +945,19 @@ export function PocketProvider({ children }) {
         }
       };
     }
-  }, [data]);
+  }, [data, selectedMonth]);
 
   return (
     <PocketContext.Provider
       value={{
         ...data,
-        calculations,
+        activeView,
         setActiveView,
+        selectedMonth,
         setSelectedMonth,
+        yasmeenCurrencyView,
+        setYasmeenCurrencyView,
+        calculations,
         setExchangeRate,
         updateUser,
         setTotalMoney,

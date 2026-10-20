@@ -3,6 +3,7 @@ import { usePocket } from '../context/PocketContext';
 import { ChevronLeft, ChevronRight, Calendar, Download } from 'lucide-react';
 
 export const ALL_MONTH_OPTIONS = [
+  { value: '2026-10', label: 'Oktober 2026' },
   { value: '2026-11', label: 'November 2026' },
   { value: '2026-12', label: 'Desember 2026' },
   { value: '2027-01', label: 'Januari 2027' },

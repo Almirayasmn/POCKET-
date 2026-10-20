@@ -38,7 +38,7 @@ function getEndpointUrl(baseUrl) {
   return clean;
 }
 
-// Fetch current cloud data once
+// Fetch current cloud data once (stripping any legacy device-local UI states)
 export async function fetchCloudData(baseUrl) {
   const endpoint = getEndpointUrl(baseUrl);
   const response = await fetch(endpoint, {
@@ -48,19 +48,33 @@ export async function fetchCloudData(baseUrl) {
   if (!response.ok) {
     throw new Error(`Cloud fetch failed: ${response.status} ${response.statusText}`);
   }
-  return await response.json();
+  const result = await response.json();
+  if (result && typeof result === 'object') {
+    // Strip device-local properties so local screens are NEVER overwritten
+    const { activeView, selectedMonth, yasmeenCurrencyView, ...clean } = result;
+    return clean;
+  }
+  return result;
 }
 
-// Push local data to the cloud
+// Push local data to the cloud (strictly shared financial data)
 export async function pushCloudData(baseUrl, data) {
   const endpoint = getEndpointUrl(baseUrl);
+  // Sanitize: NEVER push activeView, selectedMonth, or yasmeenCurrencyView to cloud
+  const {
+    activeView,
+    selectedMonth,
+    yasmeenCurrencyView,
+    ...cleanPayload
+  } = data || {};
+
   const response = await fetch(endpoint, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify(cleanPayload)
   });
   if (!response.ok) {
     throw new Error(`Cloud push failed: ${response.status} ${response.statusText}`);
@@ -78,10 +92,24 @@ export function subscribeToCloudChanges(baseUrl, onRemoteData, onError) {
       try {
         const payload = JSON.parse(event.data);
         if (payload && payload.path === '/' && payload.data) {
-          onRemoteData(payload.data);
+          const { activeView, selectedMonth, yasmeenCurrencyView, ...cleanData } = payload.data;
+          onRemoteData(cleanData);
         } else if (payload && payload.data && typeof payload.data === 'object') {
-          // If a nested path was updated, refetch whole state
-          fetchCloudData(baseUrl).then(onRemoteData).catch(onError);
+          // If a nested path was updated (e.g. /users or /yasmeenTransactions)
+          // Ignore if it was just /activeView or /selectedMonth
+          if (
+            payload.path === '/activeView' ||
+            payload.path === '/selectedMonth' ||
+            payload.path === '/yasmeenCurrencyView'
+          ) {
+            return;
+          }
+          fetchCloudData(baseUrl).then(remote => {
+            if (remote) {
+              const { activeView, selectedMonth, yasmeenCurrencyView, ...cleanRemote } = remote;
+              onRemoteData(cleanRemote);
+            }
+          }).catch(onError);
         }
       } catch (err) {
         if (onError) onError(err);

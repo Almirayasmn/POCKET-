@@ -503,13 +503,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   Prinsip Keuangan: Pengeluaran Mandiri Sesuai Stipend (¥1.500 / bln)
                 </h4>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9d174d', background: '#fdf2f8', border: '1px solid #fbcfe8', padding: '0.2rem 0.65rem', borderRadius: 'var(--radius-full)' }}>
-                  {selectedMonth === '2026-11' ? 'Nov: + Kebutuhan Awal Rp 500rb' : 'Rutin: 100% Sesuai Stipend'}
+                  {selectedMonth === '2026-10' ? 'Okt: + Kebutuhan Awal Rp 500rb' : 'Rutin: 100% Sesuai Stipend'}
                 </span>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#831843', lineHeight: 1.55 }}>
                 Meskipun modal awal ada <strong>Rp 10.000.000</strong> (¥3.636,36), uang ini dijaga utuh sebagai tabungan aman. Pengeluaran bulanan dialokasikan pas dari stipend kampus <strong>¥1.500 / bulan</strong> (total alokasi pos rutin: <strong>¥1.470</strong>).
-                {selectedMonth === '2026-11'
-                  ? ' Khusus November terdapat pos Kebutuhan Awal sebesar Rp 500.000 (¥182) untuk persiapan tiba di China.'
+                {selectedMonth === '2026-10'
+                  ? ' Khusus Oktober terdapat pos Kebutuhan Awal sebesar Rp 500.000 (¥182) untuk persiapan tiba di China.'
                   : ' Untuk bulan ini dan selanjutnya, pos Kebutuhan Awal otomatis Rp 0 (sudah tidak diperlukan).'}
               </p>
             </div>
