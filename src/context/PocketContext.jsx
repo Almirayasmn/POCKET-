@@ -535,33 +535,52 @@ export function PocketProvider({ children }) {
 
       // 3. Gold Savings Calculations (Emas Batangan Galeri 24)
       const goldTx = data?.goldSavings?.transactions || [];
-      let totalGrams = 0;
-      let totalKeping = 0;
-      let totalGoldSpentIdr = 0;
-      let yasmeenContributedGrams = 0;
-      let adziimaContributedGrams = 0;
-
-      goldTx.forEach(g => {
-        const gGrams = parseFloat(g?.grams) || 0;
-        const gKeping = parseInt(g?.keping) || (gGrams > 0 ? 1 : 0);
-        totalGrams += gGrams;
-        totalKeping += gKeping;
-        totalGoldSpentIdr += (g?.amountIdr || 0);
-        if (g?.contributor === 'yasmeen') {
-          yasmeenContributedGrams += gGrams;
-        } else if (g?.contributor === 'adziima') {
-          adziimaContributedGrams += gGrams;
-        } else {
-          yasmeenContributedGrams += gGrams / 2;
-          adziimaContributedGrams += gGrams / 2;
-        }
-      });
-
       const valuationMode = data?.goldSavings?.valuationMode || 'sell';
       const pricePerGram = data?.goldSavings?.pricePerGramIdr || 2510000;
       const buybackPerGram = data?.goldSavings?.buybackPerGramIdr || 2363000;
       const activeValuationPrice = valuationMode === 'buyback' ? buybackPerGram : pricePerGram;
-      const currentAssetValueIdr = totalGrams * activeValuationPrice;
+      const priceTable = data?.goldSavings?.priceTable || GALERI24_DEFAULT_PRICE_TABLE;
+
+      let totalGrams = 0;
+      let totalKeping = 0;
+      let totalGoldSpentIdr = 0;
+      let currentAssetValueIdr = 0;
+      let yasmeenContributedGrams = 0;
+      let adziimaContributedGrams = 0;
+      let yasmeenContributedValueIdr = 0;
+      let adziimaContributedValueIdr = 0;
+
+      goldTx.forEach(g => {
+        const gGrams = parseFloat(g?.grams) || 0;
+        const gKeping = parseInt(g?.keping) || (gGrams > 0 ? 1 : 0);
+        const gPecahan = parseFloat(g?.pecahan) || (gKeping > 0 ? (gGrams / gKeping) : gGrams);
+
+        // Find exact Galeri 24 table row for this denomination
+        const match = priceTable.find(p => Math.abs(p.grams - gPecahan) < 0.001);
+        const unitVal = match
+          ? (valuationMode === 'buyback' ? match.buyback : match.sell)
+          : (gPecahan * activeValuationPrice);
+        const itemVal = unitVal * gKeping;
+
+        totalGrams += gGrams;
+        totalKeping += gKeping;
+        totalGoldSpentIdr += (g?.amountIdr || 0);
+        currentAssetValueIdr += itemVal;
+
+        if (g?.contributor === 'yasmeen') {
+          yasmeenContributedGrams += gGrams;
+          yasmeenContributedValueIdr += itemVal;
+        } else if (g?.contributor === 'adziima') {
+          adziimaContributedGrams += gGrams;
+          adziimaContributedValueIdr += itemVal;
+        } else {
+          yasmeenContributedGrams += gGrams / 2;
+          adziimaContributedGrams += gGrams / 2;
+          yasmeenContributedValueIdr += itemVal / 2;
+          adziimaContributedValueIdr += itemVal / 2;
+        }
+      });
+
       const targetGrams = data?.goldSavings?.targetGrams || 25;
       const goldProgressPercent = targetGrams > 0 ? Math.min(100, Math.round((totalGrams / targetGrams) * 100)) : 0;
       const profitLossIdr = currentAssetValueIdr - totalGoldSpentIdr;
@@ -617,6 +636,8 @@ export function PocketProvider({ children }) {
           progressPercent: goldProgressPercent,
           yasmeenContributedGrams,
           adziimaContributedGrams,
+          yasmeenContributedValueIdr,
+          adziimaContributedValueIdr,
           pricePerGram,
           buybackPerGram,
           activeValuationPrice,

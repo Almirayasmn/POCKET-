@@ -438,7 +438,7 @@ export default function GoldSavingsView() {
               {gold.yasmeenContributedGrams.toFixed(2)} gr
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              ≈ {formatIdr(gold.yasmeenContributedGrams * gold.activeValuationPrice)}
+              ≈ {formatIdr(gold.yasmeenContributedValueIdr || 0)}
             </div>
           </div>
 
@@ -448,7 +448,7 @@ export default function GoldSavingsView() {
               {gold.adziimaContributedGrams.toFixed(2)} gr
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              ≈ {formatIdr(gold.adziimaContributedGrams * gold.activeValuationPrice)}
+              ≈ {formatIdr(gold.adziimaContributedValueIdr || 0)}
             </div>
           </div>
 
@@ -513,7 +513,16 @@ export default function GoldSavingsView() {
               const itemGrams = parseFloat(entry.grams) || 0;
               const itemPecahan = entry.pecahan || (itemKeping > 0 ? (itemGrams / itemKeping) : itemGrams);
               const itemSpent = parseFloat(entry.amountIdr) || 0;
-              const itemCurrentValue = itemGrams * gold.activeValuationPrice;
+
+              // Find exact matching row from Galeri 24 official price table
+              const matchRow = (gold.priceTable || GALERI24_DEFAULT_PRICE_TABLE).find(
+                p => Math.abs(p.grams - itemPecahan) < 0.001
+              );
+              const unitCurrentPrice = matchRow
+                ? (isBuybackMode ? matchRow.buyback : matchRow.sell)
+                : (itemPecahan * gold.activeValuationPrice);
+              const itemCurrentValue = unitCurrentPrice * itemKeping;
+
               const itemProfit = itemCurrentValue - itemSpent;
               const itemProfitPercent = itemSpent > 0 ? Math.round(((itemProfit / itemSpent) * 100) * 10) / 10 : 0;
               const itemAvgBuyPrice = itemGrams > 0 ? Math.round(itemSpent / itemGrams) : 0;
