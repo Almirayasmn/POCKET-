@@ -21,8 +21,10 @@ import {
   Search,
   Download,
   Cloud,
-  RefreshCw
+  RefreshCw,
+  Sliders
 } from 'lucide-react';
+import ManageCategoriesModal from './ManageCategoriesModal';
 
 export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, onOpenCloudModal }) {
   const {
@@ -48,6 +50,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [catBudgetInput, setCatBudgetInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
+  const [isManageCatOpen, setIsManageCatOpen] = useState(false);
 
   const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
 
@@ -329,7 +332,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
       {/* Category Budget Section */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
               Pos Pengeluaran Adziima ({monthLabel})
@@ -338,6 +341,21 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               Target alokasi bulanan di Indonesia (Rupiah)
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsManageCatOpen(true)}
+            className="btn-back-home"
+            style={{
+              borderColor: 'var(--pastel-blue-border)',
+              color: '#0284c7',
+              background: '#ffffff'
+            }}
+            title="Tambah atau edit pos pengeluaran"
+          >
+            <Sliders size={14} />
+            <span>Kelola / Tambah Pos</span>
+          </button>
         </div>
 
         <div className="categories-grid">
@@ -541,6 +559,13 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </div>
         )}
       </div>
+
+      {/* Manage Categories Modal */}
+      <ManageCategoriesModal
+        isOpen={isManageCatOpen}
+        onClose={() => setIsManageCatOpen(false)}
+        userId="adziima"
+      />
     </div>
   );
 }

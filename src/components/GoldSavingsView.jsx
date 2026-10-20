@@ -23,6 +23,7 @@ import {
   Cloud
 } from 'lucide-react';
 import { GALERI24_DEFAULT_PRICE_TABLE } from '../data/initialData';
+import GoldTrendChart from './GoldTrendChart';
 
 export default function GoldSavingsView({ onOpenCloudModal }) {
   const {
@@ -484,6 +485,12 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
           </div>
         </div>
       </div>
+
+      {/* Gold Price Trend Chart (Mingguan, Bulanan, Tahunan) */}
+      <GoldTrendChart
+        currentPrice={gold.pricePerGram}
+        buybackPrice={gold.buybackPerGram || 2363000}
+      />
 
       {/* Gold Transaction / Holdings History */}
       <div className="pastel-card" style={{ padding: '1.4rem', marginTop: '1.5rem', background: '#ffffff', border: '1px solid #fef08a' }}>

@@ -19,8 +19,10 @@ import {
   Settings,
   Download,
   Cloud,
-  RefreshCw
+  RefreshCw,
+  Sliders
 } from 'lucide-react';
+import ManageCategoriesModal from './ManageCategoriesModal';
 
 const DAYS_OF_WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
@@ -66,6 +68,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [modalInput, setModalInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
+  const [isManageCatOpen, setIsManageCatOpen] = useState(false);
 
   const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
 
@@ -516,7 +519,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
       {/* Category Budget Section */}
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>
               {isChina ? `Budget Kategori Kampus Nanning (${isViewYuan ? 'Yuan ¥' : 'Rupiah Rp'})` : 'Budget Kategori Harian (Indonesia)'}
@@ -525,6 +528,21 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               {isChina ? 'Alokasi Yuan & Rupiah periode kuliah' : 'Alokasi pengeluaran Rupiah di Indonesia'}
             </p>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsManageCatOpen(true)}
+            className="btn-back-home"
+            style={{
+              borderColor: 'var(--pastel-pink-border)',
+              color: '#db2777',
+              background: '#ffffff'
+            }}
+            title="Tambah atau edit pos pengeluaran"
+          >
+            <Sliders size={14} />
+            <span>Kelola / Tambah Pos</span>
+          </button>
         </div>
 
         <div className="categories-grid">
@@ -756,6 +774,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </div>
         )}
       </div>
+
+      {/* Manage Categories Modal */}
+      <ManageCategoriesModal
+        isOpen={isManageCatOpen}
+        onClose={() => setIsManageCatOpen(false)}
+        userId="yasmeen"
+      />
     </div>
   );
 }

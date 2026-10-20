@@ -420,6 +420,60 @@ export function PocketProvider({ children }) {
     });
   };
 
+  // Add new Category / Pos
+  const addCategory = (userId, newCat) => {
+    const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
+    const id = (newCat.id || newCat.name || '').toLowerCase().replace(/[^a-z0-9]/g, '_') || `pos_${Date.now()}`;
+    const budget = parseFloat(newCat.budget) || 0;
+    const catObj = {
+      id,
+      name: newCat.name || 'Pos Baru',
+      iconName: newCat.iconName || 'Tag',
+      color: newCat.color || (userId === 'adziima' ? '#0284c7' : '#db2777'),
+      budgetCny: userId === 'yasmeen' ? budget : 0,
+      budgetIdr: userId === 'adziima' ? budget : 0,
+      note: newCat.note || ''
+    };
+
+    setData(prev => {
+      const existing = prev[key] || [];
+      const finalId = existing.some(c => c.id === id) ? `${id}_${Date.now()}` : id;
+      catObj.id = finalId;
+      return {
+        ...prev,
+        [key]: [...existing, catObj]
+      };
+    });
+    return catObj;
+  };
+
+  // Update Category (label, icon, color, budget, note)
+  const updateCategory = (userId, catId, updates) => {
+    const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
+    setData(prev => ({
+      ...prev,
+      [key]: (prev[key] || []).map(c => {
+        if (c.id !== catId) return c;
+        const merged = { ...c, ...updates };
+        if (updates.budget !== undefined) {
+          const num = parseFloat(updates.budget) || 0;
+          if (userId === 'adziima') merged.budgetIdr = num;
+          else merged.budgetCny = num;
+        }
+        return merged;
+      })
+    }));
+  };
+
+  // Delete Category
+  const deleteCategory = (userId, catId) => {
+    const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
+    setData(prev => ({
+      ...prev,
+      [key]: (prev[key] || []).filter(c => c.id !== catId)
+    }));
+  };
+
   // Gold Savings (Emas Batangan Galeri 24)
   const addGoldDeposit = (entry) => {
     const keping = parseInt(entry.keping) || 1;
@@ -876,6 +930,9 @@ export function PocketProvider({ children }) {
         updateTransaction,
         deleteTransaction,
         updateCategoryBudget,
+        addCategory,
+        updateCategory,
+        deleteCategory,
         addGoldDeposit,
         deleteGoldDeposit,
         updateGoldPrice,
