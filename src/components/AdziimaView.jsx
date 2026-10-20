@@ -233,7 +233,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       )}
 
       {/* Balance Cards for the Month */}
-      <div className="balance-grid">
+      <div className="balance-grid grid-3">
         <div className="balance-card" style={{ borderColor: 'var(--pastel-blue-border)' }}>
           <div>
             <div className="card-header-small">
@@ -293,54 +293,21 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       </div>
 
       {/* Quick Action Buttons for Adziima */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '0.6rem',
-          margin: '1.2rem 0 1.6rem',
-          flexWrap: 'wrap'
-        }}
-      >
+      <div className="action-buttons-grid">
         <button
-          className="btn-enter-profile btn-enter-blue"
+          className="btn-action-primary blue"
           onClick={() => onOpenAdd('Keluar')}
-          style={{ flex: '1 1 200px', padding: '0.85rem 1.2rem', fontSize: '0.95rem' }}
         >
           <Plus size={18} />
-          <span>Catat Pengeluaran</span>
+          <span>+ Catat Pengeluaran</span>
         </button>
 
         <button
-          className="btn-enter-profile"
+          className="btn-action-primary green"
           onClick={() => onOpenAdd('Masuk')}
-          style={{
-            flex: '1 1 170px',
-            padding: '0.85rem 1.2rem',
-            fontSize: '0.95rem',
-            background: 'var(--pastel-green-soft)',
-            borderColor: '#a7f3d0',
-            color: '#047857'
-          }}
         >
           <TrendingUp size={18} />
-          <span>Catat Pemasukan</span>
-        </button>
-
-        <button
-          className="btn-back-home"
-          onClick={() => {
-            setMoneyInput(adziima.initialIdr.toString());
-            setIsEditingMoney(true);
-          }}
-          style={{
-            padding: '0.85rem 1.1rem',
-            borderColor: 'var(--pastel-blue-border)',
-            color: '#0284c7',
-            background: '#ffffff'
-          }}
-        >
-          <Coins size={16} />
-          <span>Atur Saldo</span>
+          <span>+ Catat Pemasukan</span>
         </button>
       </div>
 

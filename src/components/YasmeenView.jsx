@@ -280,7 +280,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       )}
 
       {/* Balance Cards Grid */}
-      <div className="balance-grid">
+      <div className={`balance-grid ${isChina ? 'grid-4' : 'grid-3'}`}>
         <div className="balance-card" style={{ borderColor: 'var(--pastel-pink-border)' }}>
           <div>
             <div className="card-header-small">
@@ -403,68 +403,21 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       </div>
 
       {/* Quick Action Buttons for Yasmeen */}
-      <div
-        style={{
-          display: 'flex',
-          gap: '0.6rem',
-          margin: '1.2rem 0 1.6rem',
-          flexWrap: 'wrap'
-        }}
-      >
+      <div className="action-buttons-grid">
         <button
-          className="btn-enter-profile btn-enter-pink"
+          className="btn-action-primary pink"
           onClick={() => onOpenAdd('Keluar')}
-          style={{ flex: '1 1 200px', padding: '0.85rem 1.2rem', fontSize: '0.95rem' }}
         >
           <Plus size={18} />
-          <span>Catat Pengeluaran</span>
+          <span>+ Catat Pengeluaran</span>
         </button>
 
         <button
-          className="btn-enter-profile"
+          className="btn-action-primary green"
           onClick={() => onOpenAdd('Masuk')}
-          style={{
-            flex: '1 1 170px',
-            padding: '0.85rem 1.2rem',
-            fontSize: '0.95rem',
-            background: 'var(--pastel-green-soft)',
-            borderColor: '#a7f3d0',
-            color: '#047857'
-          }}
         >
           <TrendingUp size={18} />
-          <span>Catat Pemasukan</span>
-        </button>
-
-        <button
-          className="btn-back-home"
-          onClick={() => {
-            setModalInput(yasmeen.initialIdr.toString());
-            setIsEditingModal(true);
-          }}
-          style={{
-            padding: '0.85rem 1.1rem',
-            borderColor: 'var(--pastel-pink-border)',
-            color: '#be185d',
-            background: '#ffffff'
-          }}
-        >
-          <Coins size={16} />
-          <span>Atur Saldo</span>
-        </button>
-
-        <button
-          className="btn-back-home"
-          onClick={handleExportExcel}
-          style={{
-            padding: '0.85rem 1.1rem',
-            borderColor: '#a7f3d0',
-            color: '#047857',
-            background: 'var(--pastel-green-soft)'
-          }}
-        >
-          <Download size={16} />
-          <span>Unduh XLS</span>
+          <span>+ Catat Pemasukan</span>
         </button>
       </div>
 

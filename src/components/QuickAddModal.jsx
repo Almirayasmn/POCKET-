@@ -161,54 +161,104 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
           </button>
         </div>
 
-        {/* Transaction Type Tabs: Pengeluaran vs Pemasukan */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.2rem' }}>
+        {/* Transaction Type Tabs: Modern Segmented Pill */}
+        <div
+          style={{
+            display: 'flex',
+            background: '#f1f5f9',
+            padding: '4px',
+            borderRadius: 'var(--radius-full)',
+            marginBottom: '1.2rem',
+            gap: '4px'
+          }}
+        >
           <button
             type="button"
-            className="user-pill"
             style={{
               flex: 1,
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
-              background: type === 'Keluar' ? '#fff' : 'var(--bg-subtle)',
-              border: `2px solid ${type === 'Keluar' ? '#f43f5e' : 'var(--card-border-subtle)'}`,
-              color: type === 'Keluar' ? '#e11d48' : 'var(--text-muted)'
+              gap: '0.45rem',
+              padding: '0.65rem 0.5rem',
+              borderRadius: 'var(--radius-full)',
+              border: 'none',
+              background: type === 'Keluar' ? '#ffffff' : 'transparent',
+              color: type === 'Keluar' ? '#e11d48' : '#64748b',
+              fontWeight: type === 'Keluar' ? 800 : 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              boxShadow: type === 'Keluar' ? '0 2px 8px rgba(225, 29, 72, 0.15)' : 'none',
+              transition: 'all 0.15s ease'
             }}
             onClick={() => setType('Keluar')}
           >
-            <ArrowDownCircle size={15} />
-            <span>Pengeluaran (Keluar)</span>
+            <ArrowDownCircle size={16} />
+            <span>Pengeluaran</span>
           </button>
 
           <button
             type="button"
-            className="user-pill"
             style={{
               flex: 1,
+              display: 'flex',
+              alignItems: 'center',
               justifyContent: 'center',
-              background: type === 'Masuk' ? '#fff' : 'var(--bg-subtle)',
-              border: `2px solid ${type === 'Masuk' ? '#10b981' : 'var(--card-border-subtle)'}`,
-              color: type === 'Masuk' ? '#059669' : 'var(--text-muted)'
+              gap: '0.45rem',
+              padding: '0.65rem 0.5rem',
+              borderRadius: 'var(--radius-full)',
+              border: 'none',
+              background: type === 'Masuk' ? '#ffffff' : 'transparent',
+              color: type === 'Masuk' ? '#059669' : '#64748b',
+              fontWeight: type === 'Masuk' ? 800 : 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              boxShadow: type === 'Masuk' ? '0 2px 8px rgba(5, 150, 105, 0.15)' : 'none',
+              transition: 'all 0.15s ease'
             }}
             onClick={() => setType('Masuk')}
           >
-            <ArrowUpCircle size={15} />
-            <span>Pemasukan (Masuk)</span>
+            <ArrowUpCircle size={16} />
+            <span>Pemasukan</span>
           </button>
         </div>
 
-        {/* Presets (Only when adding expense) */}
+        {/* Presets: Horizontal Scrollable 1-Row Chips */}
         {!editingTx && type === 'Keluar' && (
-          <div style={{ marginBottom: '1.2rem' }}>
-            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-              Pilihan Cepat 1-Klik:
+          <div style={{ marginBottom: '1.1rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Pilihan Cepat (Geser ➡):</span>
             </div>
-            <div className="preset-chips-list">
+            <div
+              style={{
+                display: 'flex',
+                overflowX: 'auto',
+                gap: '0.45rem',
+                paddingBottom: '0.35rem',
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none'
+              }}
+            >
               {currentPresets.map((p, i) => (
                 <button
                   key={i}
                   type="button"
-                  className="preset-chip"
                   onClick={() => handleSelectPreset(p)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    background: '#f8fafc',
+                    border: '1px solid var(--card-border-subtle)',
+                    padding: '0.4rem 0.75rem',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    color: 'var(--text-main)',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    cursor: 'pointer'
+                  }}
                 >
                   <CategoryIcon name={p.iconName} size={13} color="currentColor" />
                   <span>
@@ -234,6 +284,7 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
                 placeholder={isAdziima ? 'Contoh: 25000' : 'Contoh: 15'}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
+                style={{ fontSize: '1.15rem', fontWeight: 800, fontFamily: 'var(--font-display)' }}
                 autoFocus
                 required
               />
@@ -241,13 +292,15 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
                 <button
                   type="button"
                   style={{
-                    padding: '0 0.8rem',
+                    padding: '0 0.9rem',
                     borderRadius: 'var(--radius-md)',
                     border: '1.5px solid var(--card-border-subtle)',
                     background: '#fdf2f8',
                     color: '#db2777',
-                    fontWeight: 700,
-                    cursor: 'pointer'
+                    fontWeight: 800,
+                    fontSize: '0.88rem',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
                   }}
                   onClick={() => setInputCurrency(inputCurrency === 'CNY' ? 'IDR' : 'CNY')}
                 >
@@ -256,7 +309,7 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
               )}
             </div>
             {previewText && (
-              <div style={{ fontSize: '0.78rem', color: '#10b981', marginTop: '0.3rem' }}>
+              <div style={{ fontSize: '0.78rem', color: '#10b981', marginTop: '0.3rem', fontWeight: 600 }}>
                 {previewText}
               </div>
             )}
@@ -275,32 +328,21 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
             />
           </div>
 
-          {/* Category Picker */}
+          {/* Category Dropdown & Quick Selector */}
           <div className="form-group">
             <label className="form-label">Kategori Pos</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '0.4rem', maxHeight: '160px', overflowY: 'auto', padding: '0.2rem' }}>
-              {currentCategories.map((cat) => (
-                <div
-                  key={cat.id}
-                  onClick={() => setCategory(cat.id)}
-                  style={{
-                    padding: '0.5rem',
-                    borderRadius: 'var(--radius-sm)',
-                    border: `1.5px solid ${category === cat.id ? (isAdziima ? '#38bdf8' : '#f472b6') : 'var(--card-border-subtle)'}`,
-                    background: category === cat.id ? (isAdziima ? 'var(--pastel-blue-soft)' : 'var(--pastel-pink-soft)') : '#ffffff',
-                    cursor: 'pointer',
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.45rem'
-                  }}
-                >
-                  <CategoryIcon name={cat.iconName} size={15} color={cat.color} />
-                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.name}</span>
-                </div>
+            <select
+              className="form-select"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              style={{ fontWeight: 700 }}
+            >
+              {currentCategories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} {c.budgetCny ? `(Budget: ¥${c.budgetCny})` : c.budgetIdr ? `(Budget: Rp ${c.budgetIdr.toLocaleString('id-ID')})` : ''}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
           <div className="form-row">
