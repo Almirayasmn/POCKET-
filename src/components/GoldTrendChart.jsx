@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { formatIdr } from '../utils/formatters';
 import {
   TrendingUp,
-  Calendar,
-  Sparkles,
-  Info,
-  ArrowUpRight,
-  ShieldCheck
+  ArrowUpRight
 } from 'lucide-react';
 
 // Historical Galeri 24 Gold Price Datasets (Pegadaian)
@@ -48,7 +44,7 @@ const YEAR_DATA = [
 ];
 
 export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 2363000 }) {
-  const [timeframe, setTimeframe] = useState('month'); // 'week' | 'month' | 'year'
+  const [timeframe, setTimeframe] = useState('year'); // default 1 Tahun
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
   const data = timeframe === 'week' ? WEEK_DATA : timeframe === 'month' ? MONTH_DATA : YEAR_DATA;
@@ -63,12 +59,12 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
   const diffPercent = Math.round(((diffAmount / firstPrice) * 100) * 10) / 10;
   const isPositive = diffAmount >= 0;
 
-  // SVG Chart Geometry
-  const svgWidth = 600;
-  const svgHeight = 220;
-  const paddingX = 45;
-  const paddingTop = 25;
-  const paddingBottom = 40;
+  // Sleek, Compact SVG Chart Geometry
+  const svgWidth = 560;
+  const svgHeight = 110;
+  const paddingX = 35;
+  const paddingTop = 14;
+  const paddingBottom = 24;
 
   const chartInnerWidth = svgWidth - paddingX * 2;
   const chartInnerHeight = svgHeight - paddingTop - paddingBottom;
@@ -96,38 +92,47 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
         background: '#ffffff',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid #fde047',
-        padding: '1.25rem 1.25rem 1rem',
-        marginTop: '1.2rem',
-        boxShadow: '0 4px 16px rgba(245, 158, 11, 0.08)'
+        padding: '0.85rem 1rem 0.65rem',
+        marginTop: '1rem',
+        boxShadow: '0 2px 10px rgba(245, 158, 11, 0.06)'
       }}
     >
-      {/* Header and Filter Tabs */}
+      {/* Header, Inline Stats, & Switcher */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '0.8rem',
-          marginBottom: '1rem'
+          gap: '0.5rem',
+          marginBottom: '0.5rem'
         }}
       >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#b45309', fontWeight: 800, fontSize: '1rem' }}>
-            <TrendingUp size={18} />
-            <span>Tren Harga Emas Batangan Galeri 24</span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#b45309', fontWeight: 800, fontSize: '0.88rem' }}>
+            <TrendingUp size={15} />
+            <span>Tren Harga Galeri 24</span>
           </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0.15rem 0 0' }}>
-            Grafik pergerakan harga emas pecahan 1 gram resmi Galeri 24 Pegadaian
-          </p>
+
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
+            <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#92400e', fontFamily: 'var(--font-display)' }}>
+              {formatIdr(activePoint.price)}
+            </span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: isPositive ? '#16a34a' : '#dc2626' }}>
+              {isPositive ? `+${diffPercent}%` : `${diffPercent}%`}
+            </span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
+              ({activePoint.label.split('(')[0].trim()})
+            </span>
+          </div>
         </div>
 
-        {/* Timeframe Switcher */}
+        {/* Compact Timeframe Switcher */}
         <div
           style={{
             display: 'inline-flex',
             background: '#fef9c3',
-            padding: '3px',
+            padding: '2px',
             borderRadius: 'var(--radius-full)',
             border: '1px solid #fde047'
           }}
@@ -139,9 +144,9 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               border: 'none',
               background: timeframe === 'week' ? '#f59e0b' : 'transparent',
               color: timeframe === 'week' ? '#ffffff' : '#92400e',
-              padding: '0.35rem 0.85rem',
+              padding: '0.22rem 0.65rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               fontWeight: 800,
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -157,9 +162,9 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               border: 'none',
               background: timeframe === 'month' ? '#f59e0b' : 'transparent',
               color: timeframe === 'month' ? '#ffffff' : '#92400e',
-              padding: '0.35rem 0.85rem',
+              padding: '0.22rem 0.65rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               fontWeight: 800,
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -175,9 +180,9 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               border: 'none',
               background: timeframe === 'year' ? '#f59e0b' : 'transparent',
               color: timeframe === 'year' ? '#ffffff' : '#92400e',
-              padding: '0.35rem 0.85rem',
+              padding: '0.22rem 0.65rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               fontWeight: 800,
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -188,60 +193,18 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
         </div>
       </div>
 
-      {/* Stats Cards Row */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-          gap: '0.6rem',
-          marginBottom: '1rem',
-          background: '#fffbeb',
-          padding: '0.75rem',
-          borderRadius: 'var(--radius-md)',
-          border: '1px solid #fef08a'
-        }}
-      >
-        <div>
-          <div style={{ fontSize: '0.72rem', color: '#b45309', fontWeight: 700 }}>
-            HARGA DISOROT ({activePoint.label.split('(')[0]})
-          </div>
-          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#92400e', fontFamily: 'var(--font-display)' }}>
-            {formatIdr(activePoint.price)}
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: '0.72rem', color: '#b45309', fontWeight: 700 }}>
-            PERUBAHAN ({timeframe === 'week' ? '7 Hari' : timeframe === 'month' ? '30 Hari' : '1 Tahun'})
-          </div>
-          <div style={{ fontSize: '1.15rem', fontWeight: 800, color: isPositive ? '#16a34a' : '#dc2626', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-            <span>{isPositive ? `+${diffPercent}%` : `${diffPercent}%`}</span>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>({formatIdr(Math.abs(diffAmount))})</span>
-          </div>
-        </div>
-
-        <div>
-          <div style={{ fontSize: '0.72rem', color: '#b45309', fontWeight: 700 }}>
-            TERTINGGI / TERENDAH
-          </div>
-          <div style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 700, marginTop: '0.2rem' }}>
-            <span>H: {formatIdr(maxPrice)}</span> • <span style={{ color: 'var(--text-dim)' }}>L: {formatIdr(minPrice)}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Interactive Responsive SVG Line Chart */}
+      {/* Compact Responsive SVG Line Chart */}
       <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          style={{ width: '100%', height: 'auto', display: 'block', minWidth: '320px' }}
+          style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '125px' }}
         >
           <defs>
-            <linearGradient id="goldGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#fef08a" stopOpacity="0.02" />
+            <linearGradient id="goldGradientCompact" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#fef08a" stopOpacity="0.01" />
             </linearGradient>
-            <linearGradient id="goldLine" x1="0" y1="0" x2="1" y2="0">
+            <linearGradient id="goldLineCompact" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#d97706" />
               <stop offset="100%" stopColor="#f59e0b" />
             </linearGradient>
@@ -254,36 +217,27 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
             x2={svgWidth - paddingX}
             y2={paddingTop}
             stroke="#fef08a"
-            strokeDasharray="4 4"
-            strokeWidth="1"
-          />
-          <line
-            x1={paddingX}
-            y1={paddingTop + chartInnerHeight / 2}
-            x2={svgWidth - paddingX}
-            y2={paddingTop + chartInnerHeight / 2}
-            stroke="#fef08a"
-            strokeDasharray="4 4"
-            strokeWidth="1"
+            strokeDasharray="3 3"
+            strokeWidth="0.8"
           />
           <line
             x1={paddingX}
             y1={svgHeight - paddingBottom}
             x2={svgWidth - paddingX}
             y2={svgHeight - paddingBottom}
-            stroke="#e2e8f0"
-            strokeWidth="1.5"
+            stroke="#f1f5f9"
+            strokeWidth="1.2"
           />
 
           {/* Area Fill */}
-          <path d={areaPathD} fill="url(#goldGradient)" />
+          <path d={areaPathD} fill="url(#goldGradientCompact)" />
 
           {/* Line Stroke */}
           <path
             d={linePathD}
             fill="none"
-            stroke="url(#goldLine)"
-            strokeWidth="3.5"
+            stroke="url(#goldLineCompact)"
+            strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -299,16 +253,16 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
                 style={{ cursor: 'pointer' }}
               >
                 {/* Hit target */}
-                <circle cx={p.x} cy={p.y} r="16" fill="transparent" />
+                <circle cx={p.x} cy={p.y} r="12" fill="transparent" />
 
                 {/* Visible dot */}
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r={isHovered ? 6 : 4}
+                  r={isHovered ? 4.5 : 2.5}
                   fill="#ffffff"
                   stroke={isHovered ? '#b45309' : '#f59e0b'}
-                  strokeWidth={isHovered ? 3.5 : 2.5}
+                  strokeWidth={isHovered ? 2.5 : 1.8}
                   style={{ transition: 'all 0.15s ease' }}
                 />
 
@@ -316,10 +270,10 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
                 {(timeframe === 'week' || idx % 2 === 0 || idx === points.length - 1) && (
                   <text
                     x={p.x}
-                    y={svgHeight - paddingBottom + 18}
+                    y={svgHeight - paddingBottom + 14}
                     textAnchor="middle"
                     fill="#92400e"
-                    fontSize="11"
+                    fontSize="9.5"
                     fontWeight={isHovered ? 800 : 600}
                   >
                     {p.date}
@@ -337,18 +291,18 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               x2={activePoint.x}
               y2={svgHeight - paddingBottom}
               stroke="#f59e0b"
-              strokeDasharray="3 3"
-              strokeWidth="1.5"
+              strokeDasharray="2 2"
+              strokeWidth="1"
               pointerEvents="none"
             />
           )}
         </svg>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.4rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <span>💡 Geser / tap titik pada grafik untuk melihat harga di tanggal tersebut.</span>
-        <span style={{ color: '#b45309', fontWeight: 700 }}>
-          Harga Buyback Pegadaian: {formatIdr(buybackPrice)} / gr
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.2rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+        <span>Geser/tap titik untuk lihat harga harian.</span>
+        <span style={{ color: '#b45309', fontWeight: 600 }}>
+          Buyback: {formatIdr(buybackPrice)}/gr
         </span>
       </div>
     </div>
