@@ -364,11 +364,11 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             <div className="card-footer-meta">
               <span>Status Cair:</span>
               <button
-                onClick={toggleStipend}
+                onClick={() => toggleStipend(selectedMonth)}
                 style={{
                   border: 'none',
-                  background: user.stipendReceived ? '#ecfdf5' : '#fdf2f8',
-                  color: user.stipendReceived ? '#059669' : '#db2777',
+                  background: yasmeen.isStipendCair ? '#ecfdf5' : '#fdf2f8',
+                  color: yasmeen.isStipendCair ? '#059669' : '#db2777',
                   padding: '0.25rem 0.6rem',
                   borderRadius: 'var(--radius-full)',
                   fontWeight: 700,
@@ -376,7 +376,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   cursor: 'pointer'
                 }}
               >
-                {user.stipendReceived ? '✓ Sudah Cair' : '⏳ Belum Cair'}
+                {yasmeen.isStipendCair ? '✓ Sudah Cair' : '⏳ Belum Cair'}
               </button>
             </div>
           </div>

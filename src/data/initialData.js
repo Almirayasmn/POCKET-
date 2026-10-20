@@ -64,19 +64,6 @@ export const DEFAULT_USERS = {
 
 export const SAMPLE_YASMEEN_TRANSACTIONS = [
   {
-    id: 'tx-y-flight-nov',
-    date: '2026-11-01',
-    category: 'tiket_pesawat',
-    title: 'Tiket Pesawat ke China',
-    amountCny: 1500,
-    amountIdr: 4125000,
-    inputCurrency: 'IDR',
-    type: 'Keluar',
-    paidBy: 'yasmeen',
-    paymentMethod: 'BCA / Transfer Bank',
-    notes: 'Penerbangan keberangkatan kuliah ke Nanning'
-  },
-  {
     id: 'tx-y1',
     date: '2026-11-01',
     category: 'makan',
@@ -114,19 +101,6 @@ export const SAMPLE_YASMEEN_TRANSACTIONS = [
     paidBy: 'yasmeen',
     paymentMethod: 'WeChat Pay',
     notes: 'Nongkrong kafe'
-  },
-  {
-    id: 'tx-y-flight-jan',
-    date: '2027-01-15',
-    category: 'tiket_pesawat',
-    title: 'Tiket Pesawat Pulang ke Indonesia',
-    amountCny: 1500,
-    amountIdr: 4125000,
-    inputCurrency: 'IDR',
-    type: 'Keluar',
-    paidBy: 'yasmeen',
-    paymentMethod: 'BCA / Transfer Bank',
-    notes: 'Penerbangan pulang kembali ke Indonesia'
   }
 ];
 

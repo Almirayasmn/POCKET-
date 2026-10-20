@@ -292,17 +292,29 @@ export function PocketProvider({ children }) {
     }
   };
 
-  const toggleStipend = () => {
-    setData(prev => ({
-      ...prev,
-      users: {
-        ...prev.users,
-        yasmeen: {
-          ...prev.users.yasmeen,
-          stipendReceived: !prev.users.yasmeen.stipendReceived
+  const toggleStipend = (targetMonth = null) => {
+    const month = targetMonth || data.selectedMonth || '2026-11';
+    setData(prev => {
+      const yasmeen = prev.users?.yasmeen || DEFAULT_USERS.yasmeen;
+      const stipendByMonth = { ...(yasmeen.stipendByMonth || {}) };
+      const currentVal = stipendByMonth[month] !== undefined
+        ? Boolean(stipendByMonth[month])
+        : (month === '2026-11' ? Boolean(yasmeen.stipendReceived) : false);
+      const nextVal = !currentVal;
+      stipendByMonth[month] = nextVal;
+
+      return {
+        ...prev,
+        users: {
+          ...prev.users,
+          yasmeen: {
+            ...yasmeen,
+            stipendByMonth,
+            stipendReceived: nextVal
+          }
         }
-      }
-    }));
+      };
+    });
   };
 
   // Add transaction (Expense or Income)
@@ -536,7 +548,10 @@ export function PocketProvider({ children }) {
       // Cumulative net change for Yasmeen across past months
       let yasmeenCumulativeNetCny = 0;
       pastMonths.forEach(m => {
-        const mStipend = (m <= '2027-01' && yasmeen?.stipendReceived) ? (yasmeen?.stipendCny || 0) : 0;
+        const isStipendCair = yasmeen?.stipendByMonth?.[m] !== undefined
+          ? Boolean(yasmeen.stipendByMonth[m])
+          : (m === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false);
+        const mStipend = (m <= '2027-01' && isStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
         let mIncome = 0;
         let mOutflow = 0;
         (data?.yasmeenTransactions || []).forEach(tx => {
@@ -593,7 +608,10 @@ export function PocketProvider({ children }) {
       };
 
       // 1. Yasmeen Monthly Calculations for currentMonth
-      const stipendCny = (isYasmeenInChina && yasmeen?.stipendReceived) ? (yasmeen?.stipendCny || 0) : 0;
+      const isCurrentStipendCair = yasmeen?.stipendByMonth?.[currentMonth] !== undefined
+        ? Boolean(yasmeen.stipendByMonth[currentMonth])
+        : (currentMonth === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false);
+      const stipendCny = (isYasmeenInChina && isCurrentStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
 
       let monthIncomeYasmeenCny = 0;
       let monthOutflowYasmeenCny = 0;
@@ -734,6 +752,7 @@ export function PocketProvider({ children }) {
           startBalanceIdr: startBalanceYasmeenCny * rate,
           stipendCny,
           stipendIdr: stipendCny * rate,
+          isStipendCair: Boolean(isCurrentStipendCair),
           totalInflowCny: totalInflowYasmeenCny,
           totalInflowIdr: totalInflowYasmeenCny * rate,
           totalOutflowCny: monthOutflowYasmeenCny,
