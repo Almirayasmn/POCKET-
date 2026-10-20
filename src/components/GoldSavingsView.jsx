@@ -382,7 +382,7 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
             style={{ width: 'auto', padding: '0.75rem 1.4rem', background: '#f59e0b', color: '#ffffff', border: 'none', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)' }}
           >
             <Plus size={18} strokeWidth={2.5} />
-            <span>+ Catat Emas Galeri 24</span>
+            <span>Catat Emas Galeri 24</span>
           </button>
         </div>
 
@@ -503,7 +503,7 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
             style={{ width: 'auto', padding: '0.45rem 1rem' }}
           >
             <Plus size={14} />
-            <span>+ Tambah Keping</span>
+            <span>Tambah Keping</span>
           </button>
         </div>
 

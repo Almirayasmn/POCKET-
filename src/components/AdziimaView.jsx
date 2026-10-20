@@ -299,7 +299,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           onClick={() => onOpenAdd('Keluar')}
         >
           <Plus size={18} />
-          <span>+ Catat Pengeluaran</span>
+          <span>Catat Pengeluaran</span>
         </button>
 
         <button
@@ -307,7 +307,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           onClick={() => onOpenAdd('Masuk')}
         >
           <TrendingUp size={18} />
-          <span>+ Catat Pemasukan</span>
+          <span>Catat Pemasukan</span>
         </button>
       </div>
 
