@@ -132,8 +132,26 @@ export const SAMPLE_YASMEEN_TRANSACTIONS = [
 
 export const SAMPLE_ADZIIMA_TRANSACTIONS = [];
 
+export const GALERI24_DEFAULT_PRICE_TABLE = [
+  { grams: 0.5, sell: 1316000, buyback: 1179000 },
+  { grams: 1, sell: 2510000, buyback: 2363000 },
+  { grams: 2, sell: 4960000, buyback: 4718000 },
+  { grams: 5, sell: 12307000, buyback: 11795000 },
+  { grams: 10, sell: 24549000, buyback: 23591000 },
+  { grams: 25, sell: 61040000, buyback: 58688000 },
+  { grams: 50, sell: 121984000, buyback: 117377000 },
+  { grams: 100, sell: 243849000, buyback: 234755000 }
+];
+
 export const DEFAULT_GOLD_SAVINGS = {
-  pricePerGramIdr: 1500000,
+  brand: 'Galeri 24 (Pegadaian)',
+  pricePerGramIdr: 2510000,
+  buybackPerGramIdr: 2363000,
+  valuationMode: 'sell', // 'sell' or 'buyback'
+  lastUpdated: '2026-10-20',
+  lastUpdatedLabel: 'Selasa, 20 Oktober 2026',
+  sourceUrl: 'https://galeri24.co.id/harga-emas',
+  priceTable: GALERI24_DEFAULT_PRICE_TABLE,
   targetGrams: 25,
   transactions: []
 };

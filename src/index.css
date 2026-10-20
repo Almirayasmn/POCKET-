@@ -63,19 +63,24 @@ body {
   transition: background-color 0.25s ease;
 }
 
-/* Solid Pastel Backgrounds - NO GRADIENTS AT ALL */
+/* Distinct Solid Pastel Backgrounds - NO GRADIENTS AT ALL, NOT WASHED OUT */
 body.view-landing {
-  background-color: #faf5fa !important;
+  background-color: #f8fafc !important; /* Clean soft slate tone */
   background-image: none !important;
 }
 
 body.view-yasmeen {
-  background-color: #fdf2f8 !important; /* Pure Solid Pastel Pink */
+  background-color: #fce7f3 !important; /* Visible Solid Pastel Pink */
   background-image: none !important;
 }
 
 body.view-adziima {
-  background-color: #f0f9ff !important; /* Pure Solid Pastel Blue */
+  background-color: #e0f2fe !important; /* Visible Solid Pastel Blue */
+  background-image: none !important;
+}
+
+body.view-gold {
+  background-color: #fef08a !important; /* Distinct Solid Pastel Yellow / Gold */
   background-image: none !important;
 }
 
@@ -296,36 +301,36 @@ button, input, select, textarea {
 }
 
 .profile-select-card.pink {
-  background: #fdf2f8; /* Pure Solid Pastel Pink */
-  border: 2px solid var(--pastel-pink-border);
+  background: #fce7f3; /* Distinct Solid Pastel Pink */
+  border: 2px solid #fbcfe8;
 }
 
 .profile-select-card.pink:hover {
   transform: translateY(-5px);
-  border-color: var(--pastel-pink);
-  box-shadow: 0 10px 25px -4px rgba(244, 114, 182, 0.25);
+  border-color: #f472b6;
+  box-shadow: 0 10px 25px -4px rgba(244, 114, 182, 0.3);
 }
 
 .profile-select-card.blue {
-  background: #f0f9ff; /* Pure Solid Pastel Blue */
-  border: 2px solid var(--pastel-blue-border);
+  background: #e0f2fe; /* Distinct Solid Pastel Blue */
+  border: 2px solid #bae6fd;
 }
 
 .profile-select-card.blue:hover {
   transform: translateY(-5px);
-  border-color: var(--pastel-blue);
-  box-shadow: 0 10px 25px -4px rgba(56, 189, 248, 0.25);
+  border-color: #38bdf8;
+  box-shadow: 0 10px 25px -4px rgba(56, 189, 248, 0.3);
 }
 
 .profile-select-card.gold {
-  background: #ffffff;
-  border: 2px solid var(--pastel-gold-border);
+  background: #fef08a; /* Distinct Solid Pastel Yellow */
+  border: 2px solid #fde047;
 }
 
 .profile-select-card.gold:hover {
   transform: translateY(-5px);
-  border-color: var(--pastel-gold);
-  box-shadow: var(--shadow-gold);
+  border-color: #f59e0b;
+  box-shadow: 0 10px 25px -4px rgba(245, 158, 11, 0.3);
 }
 
 .profile-avatar-circle {

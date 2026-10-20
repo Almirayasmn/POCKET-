@@ -27,13 +27,13 @@ export default function LandingPage({ onOpenEditProfile }) {
         </p>
       </div>
 
-      {/* 2 Selectable Profile Cards: Yasmeen & Adziima */}
+      {/* 3 Cards: Yasmeen, Adziima, & Aset Emas Berdua */}
       <div
         className="profile-select-grid"
         style={{
-          maxWidth: '780px',
+          maxWidth: '1080px',
           margin: '0 auto',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))'
         }}
       >
         {/* Card 1: Yasmeen */}
@@ -148,9 +148,70 @@ export default function LandingPage({ onOpenEditProfile }) {
                   onOpenEditProfile('adziima');
                 }}
                 title="Edit Profil & Foto"
-                style={{ padding: '0.75rem', background: '#f0f9ff', borderColor: '#bae6fd', color: '#0284c7' }}
+                style={{ padding: '0.75rem', background: '#ffffff', borderColor: '#bae6fd', color: '#0284c7' }}
               >
                 <Settings size={15} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Aset Emas Berdua (Galeri 24 Emas Batangan) */}
+        <div className="profile-select-card gold">
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div
+                style={{
+                  width: '82px',
+                  height: '82px',
+                  borderRadius: '50%',
+                  background: '#fef08a',
+                  border: '2px solid #fde047',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#b45309',
+                  boxShadow: '0 4px 12px rgba(245, 158, 11, 0.15)'
+                }}
+              >
+                <Coins size={40} />
+              </div>
+            </div>
+
+            <div className="profile-name">Aset Emas Berdua</div>
+            <div className="profile-tag tag-gold">
+              Galeri 24 · Emas Batangan
+            </div>
+            <p className="profile-desc" style={{ marginBottom: '1.2rem' }}>
+              Investasi fisik logam mulia Galeri 24 dengan nilai bergerak mengikuti tren pasar.
+            </p>
+          </div>
+
+          <div>
+            <div style={{ background: '#ffffff', padding: '0.85rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', textAlign: 'center', border: '1px solid #fef08a' }}>
+              <div style={{ fontSize: '0.72rem', color: '#92400e', fontWeight: 700, letterSpacing: '0.04em' }}>
+                NILAI ASET KINI
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', fontWeight: 800, color: '#b45309' }}>
+                {calculations.gold?.currentAssetValueIdr > 0
+                  ? formatIdr(calculations.gold.currentAssetValueIdr)
+                  : 'Rp 0'}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#92400e', marginTop: '0.15rem' }}>
+                {calculations.gold?.totalGrams > 0
+                  ? `${calculations.gold.totalGrams} gr (${calculations.gold.totalKeping} keping)`
+                  : 'Belum ada keping tersimpan'}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className="btn-enter-profile btn-enter-gold"
+                onClick={() => setActiveView('gold')}
+                style={{ flex: 1 }}
+              >
+                <span>Buka Aset Emas</span>
+                <ArrowRight size={15} />
               </button>
             </div>
           </div>

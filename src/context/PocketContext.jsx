@@ -67,6 +67,18 @@ export function PocketProvider({ children }) {
             adziimaCategories: updatedAdzCats,
             yasmeenCategories: updatedYasCats,
             yasmeenTransactions: updatedYasTx,
+            goldSavings: {
+              ...DEFAULT_GOLD_SAVINGS,
+              ...(parsed.goldSavings || {}),
+              pricePerGramIdr: (!parsed.goldSavings?.pricePerGramIdr || parsed.goldSavings?.pricePerGramIdr === 1500000)
+                ? DEFAULT_GOLD_SAVINGS.pricePerGramIdr
+                : parsed.goldSavings.pricePerGramIdr,
+              buybackPerGramIdr: parsed.goldSavings?.buybackPerGramIdr || DEFAULT_GOLD_SAVINGS.buybackPerGramIdr,
+              priceTable: parsed.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
+              lastUpdated: parsed.goldSavings?.lastUpdated || DEFAULT_GOLD_SAVINGS.lastUpdated,
+              lastUpdatedLabel: parsed.goldSavings?.lastUpdatedLabel || DEFAULT_GOLD_SAVINGS.lastUpdatedLabel,
+              valuationMode: parsed.goldSavings?.valuationMode || 'sell'
+            },
             selectedMonth: parsed.selectedMonth < '2026-11' ? '2026-11' : (parsed.selectedMonth || '2026-11'),
             monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
             yasmeenCurrencyView: parsed.yasmeenCurrencyView || 'CNY'
@@ -261,22 +273,28 @@ export function PocketProvider({ children }) {
     });
   };
 
-  // Gold Savings
+  // Gold Savings (Emas Batangan Galeri 24)
   const addGoldDeposit = (entry) => {
+    const keping = parseInt(entry.keping) || 1;
+    const pecahan = parseFloat(entry.pecahan) || parseFloat(entry.grams) || 1;
+    const totalGrams = parseFloat(entry.grams) || (keping * pecahan);
     const newEntry = {
       id: `gold-${Date.now()}`,
       date: entry.date || new Date().toISOString().split('T')[0],
       contributor: entry.contributor || 'berdua',
-      grams: parseFloat(entry.grams) || 0,
+      keping,
+      pecahan,
+      grams: totalGrams,
       amountIdr: parseFloat(entry.amountIdr) || 0,
-      place: entry.place || 'Antam',
+      place: entry.place || 'Galeri 24 (Pegadaian)',
+      serialNumber: entry.serialNumber || '',
       notes: entry.notes || ''
     };
 
     setData(prev => ({
       ...prev,
       goldSavings: {
-        ...prev.goldSavings,
+        ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
         transactions: [newEntry, ...(prev.goldSavings?.transactions || [])]
       }
     }));
@@ -296,8 +314,34 @@ export function PocketProvider({ children }) {
     setData(prev => ({
       ...prev,
       goldSavings: {
-        ...prev.goldSavings,
-        pricePerGramIdr: parseFloat(newPrice) || 1500000
+        ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
+        pricePerGramIdr: parseFloat(newPrice) || DEFAULT_GOLD_SAVINGS.pricePerGramIdr,
+        lastUpdated: new Date().toISOString().split('T')[0],
+        lastUpdatedLabel: 'Diperbarui Manual'
+      }
+    }));
+  };
+
+  const updateGaleri24Prices = ({ sell, buyback, table, dateLabel }) => {
+    setData(prev => ({
+      ...prev,
+      goldSavings: {
+        ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
+        pricePerGramIdr: parseFloat(sell) || prev.goldSavings?.pricePerGramIdr || 2510000,
+        buybackPerGramIdr: parseFloat(buyback) || prev.goldSavings?.buybackPerGramIdr || 2363000,
+        priceTable: table || prev.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
+        lastUpdated: new Date().toISOString().split('T')[0],
+        lastUpdatedLabel: dateLabel || 'Hari Ini (galeri24.co.id)'
+      }
+    }));
+  };
+
+  const setGoldValuationMode = (mode) => {
+    setData(prev => ({
+      ...prev,
+      goldSavings: {
+        ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
+        valuationMode: mode === 'buyback' ? 'buyback' : 'sell'
       }
     }));
   };
@@ -489,31 +533,39 @@ export function PocketProvider({ children }) {
         }
       });
 
-      // 3. Gold Savings Calculations (All time)
+      // 3. Gold Savings Calculations (Emas Batangan Galeri 24)
       const goldTx = data?.goldSavings?.transactions || [];
       let totalGrams = 0;
+      let totalKeping = 0;
       let totalGoldSpentIdr = 0;
       let yasmeenContributedGrams = 0;
       let adziimaContributedGrams = 0;
 
       goldTx.forEach(g => {
-        totalGrams += (g?.grams || 0);
+        const gGrams = parseFloat(g?.grams) || 0;
+        const gKeping = parseInt(g?.keping) || (gGrams > 0 ? 1 : 0);
+        totalGrams += gGrams;
+        totalKeping += gKeping;
         totalGoldSpentIdr += (g?.amountIdr || 0);
         if (g?.contributor === 'yasmeen') {
-          yasmeenContributedGrams += (g?.grams || 0);
+          yasmeenContributedGrams += gGrams;
         } else if (g?.contributor === 'adziima') {
-          adziimaContributedGrams += (g?.grams || 0);
+          adziimaContributedGrams += gGrams;
         } else {
-          yasmeenContributedGrams += (g?.grams || 0) / 2;
-          adziimaContributedGrams += (g?.grams || 0) / 2;
+          yasmeenContributedGrams += gGrams / 2;
+          adziimaContributedGrams += gGrams / 2;
         }
       });
 
-      const pricePerGram = data?.goldSavings?.pricePerGramIdr || 1500000;
-      const currentAssetValueIdr = totalGrams * pricePerGram;
+      const valuationMode = data?.goldSavings?.valuationMode || 'sell';
+      const pricePerGram = data?.goldSavings?.pricePerGramIdr || 2510000;
+      const buybackPerGram = data?.goldSavings?.buybackPerGramIdr || 2363000;
+      const activeValuationPrice = valuationMode === 'buyback' ? buybackPerGram : pricePerGram;
+      const currentAssetValueIdr = totalGrams * activeValuationPrice;
       const targetGrams = data?.goldSavings?.targetGrams || 25;
       const goldProgressPercent = targetGrams > 0 ? Math.min(100, Math.round((totalGrams / targetGrams) * 100)) : 0;
       const profitLossIdr = currentAssetValueIdr - totalGoldSpentIdr;
+      const profitLossPercent = totalGoldSpentIdr > 0 ? Math.round(((profitLossIdr / totalGoldSpentIdr) * 100) * 10) / 10 : 0;
 
       return {
         rate,
@@ -558,6 +610,7 @@ export function PocketProvider({ children }) {
         },
         gold: {
           totalGrams,
+          totalKeping,
           totalGoldSpentIdr,
           currentAssetValueIdr,
           targetGrams,
@@ -565,7 +618,15 @@ export function PocketProvider({ children }) {
           yasmeenContributedGrams,
           adziimaContributedGrams,
           pricePerGram,
-          profitLossIdr
+          buybackPerGram,
+          activeValuationPrice,
+          valuationMode,
+          lastUpdated: data?.goldSavings?.lastUpdated || DEFAULT_GOLD_SAVINGS.lastUpdated,
+          lastUpdatedLabel: data?.goldSavings?.lastUpdatedLabel || DEFAULT_GOLD_SAVINGS.lastUpdatedLabel,
+          priceTable: data?.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
+          profitLossIdr,
+          profitLossPercent,
+          avgBuyPricePerGram: totalGrams > 0 ? (totalGoldSpentIdr / totalGrams) : 0
         }
       };
     } catch (err) {
@@ -609,6 +670,7 @@ export function PocketProvider({ children }) {
         },
         gold: {
           totalGrams: 0,
+          totalKeping: 0,
           totalGoldSpentIdr: 0,
           currentAssetValueIdr: 0,
           targetGrams: 25,
@@ -616,7 +678,9 @@ export function PocketProvider({ children }) {
           yasmeenContributedGrams: 0,
           adziimaContributedGrams: 0,
           pricePerGram: 1500000,
-          profitLossIdr: 0
+          profitLossIdr: 0,
+          profitLossPercent: 0,
+          avgBuyPricePerGram: 0
         }
       };
     }
@@ -641,6 +705,8 @@ export function PocketProvider({ children }) {
         deleteGoldDeposit,
         updateGoldPrice,
         updateGoldTarget,
+        updateGaleri24Prices,
+        setGoldValuationMode,
         setYasmeenCurrencyView
       }}
     >
