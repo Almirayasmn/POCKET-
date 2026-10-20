@@ -19,10 +19,12 @@ import {
   Calendar,
   Settings,
   Search,
-  Download
+  Download,
+  Cloud,
+  RefreshCw
 } from 'lucide-react';
 
-export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile }) {
+export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, onOpenCloudModal }) {
   const {
     setActiveView,
     users,
@@ -31,7 +33,9 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
     deleteTransaction,
     updateCategoryBudget,
     setTotalMoney,
-    selectedMonth
+    selectedMonth,
+    isCloudConnected,
+    isCloudSyncing
   } = usePocket();
 
   const { adziima } = calculations;
@@ -120,7 +124,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
           <button
             className="btn-back-home"
             onClick={() => {
@@ -131,6 +135,24 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
           >
             <Coins size={14} />
             <span>Atur Saldo</span>
+          </button>
+
+          <button
+            className="btn-back-home"
+            onClick={onOpenCloudModal}
+            style={{
+              borderColor: isCloudConnected ? '#a7f3d0' : 'var(--pastel-blue-border)',
+              background: isCloudConnected ? '#ecfdf5' : '#ffffff',
+              color: isCloudConnected ? '#065f46' : '#0284c7'
+            }}
+            title="Sinkronisasi Cloud Multi-Device"
+          >
+            {isCloudSyncing ? (
+              <RefreshCw size={14} className="animate-spin" color="#059669" />
+            ) : (
+              <Cloud size={14} />
+            )}
+            <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
           </button>
         </div>
       </div>

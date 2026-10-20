@@ -6,6 +6,7 @@ import AdziimaView from './components/AdziimaView';
 import GoldSavingsView from './components/GoldSavingsView';
 import QuickAddModal from './components/QuickAddModal';
 import EditProfileModal from './components/EditProfileModal';
+import CloudSyncModal from './components/CloudSyncModal';
 import { Heart, Plus, Home } from 'lucide-react';
 
 function PocketAppContent() {
@@ -24,6 +25,9 @@ function PocketAppContent() {
   // Edit Profile & Photo Modal
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [targetProfileUser, setTargetProfileUser] = useState('yasmeen');
+
+  // Multi-Device Cloud Sync Modal
+  const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
 
   const handleOpenAdd = (defaultType = 'Keluar') => {
     setEditingTx(null);
@@ -47,6 +51,7 @@ function PocketAppContent() {
       {activeView === 'landing' && (
         <LandingPage
           onOpenEditProfile={handleOpenEditProfile}
+          onOpenCloudModal={() => setIsCloudModalOpen(true)}
         />
       )}
 
@@ -55,6 +60,7 @@ function PocketAppContent() {
           onOpenAdd={handleOpenAdd}
           onEditTx={handleEditTx}
           onOpenEditProfile={() => handleOpenEditProfile('yasmeen')}
+          onOpenCloudModal={() => setIsCloudModalOpen(true)}
         />
       )}
 
@@ -63,18 +69,36 @@ function PocketAppContent() {
           onOpenAdd={handleOpenAdd}
           onEditTx={handleEditTx}
           onOpenEditProfile={() => handleOpenEditProfile('adziima')}
+          onOpenCloudModal={() => setIsCloudModalOpen(true)}
         />
       )}
 
       {activeView === 'gold' && (
-        <GoldSavingsView />
+        <GoldSavingsView
+          onOpenCloudModal={() => setIsCloudModalOpen(true)}
+        />
       )}
 
       {/* Footer */}
-      <footer style={{ marginTop: '3.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+      <footer style={{ marginTop: '3.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
         <span>Pocket Duo · Yasmeen & Adziima</span>
         <Heart size={13} color="#f472b6" fill="#f472b6" />
         <span>Pelacak Keuangan Pribadi</span>
+        <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
+        <button
+          onClick={() => setIsCloudModalOpen(true)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            fontSize: 'inherit',
+            padding: 0
+          }}
+        >
+          ☁️ Sinkronisasi Multi-Device
+        </button>
       </footer>
 
       {/* Quick Add / Edit Transaction Modal */}
@@ -93,6 +117,12 @@ function PocketAppContent() {
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
         targetUserId={targetProfileUser}
+      />
+
+      {/* Cloud Sync Modal */}
+      <CloudSyncModal
+        isOpen={isCloudModalOpen}
+        onClose={() => setIsCloudModalOpen(false)}
       />
     </div>
   );

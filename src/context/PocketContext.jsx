@@ -1,4 +1,3 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import {
   DEFAULT_EXCHANGE_RATE,
   YASMEEN_CATEGORIES,
@@ -6,8 +5,16 @@ import {
   DEFAULT_USERS,
   SAMPLE_YASMEEN_TRANSACTIONS,
   SAMPLE_ADZIIMA_TRANSACTIONS,
-  DEFAULT_GOLD_SAVINGS
+  DEFAULT_GOLD_SAVINGS,
+  GALERI24_DEFAULT_PRICE_TABLE
 } from '../data/initialData';
+import {
+  getSavedFirebaseUrl,
+  saveFirebaseUrl,
+  fetchCloudData,
+  pushCloudData,
+  subscribeToCloudChanges
+} from '../services/cloudSync';
 
 const STORAGE_KEY = 'pocket_duo_storage_v10';
 
@@ -111,6 +118,133 @@ export function PocketProvider({ children }) {
       console.error('Failed to save to localStorage:', e);
     }
   }, [data]);
+
+  // Multi-Device Cloud Sync State (Firebase Realtime Database)
+  const [firebaseDbUrl, setFirebaseDbUrl] = useState(() => getSavedFirebaseUrl());
+  const [isCloudConnected, setIsCloudConnected] = useState(false);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
+  const isRemoteUpdatingRef = React.useRef(false);
+
+  // Initial pull and real-time SSE listener
+  useEffect(() => {
+    if (!firebaseDbUrl) {
+      setIsCloudConnected(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsCloudSyncing(true);
+
+    fetchCloudData(firebaseDbUrl)
+      .then(remote => {
+        if (!isMounted) return;
+        if (remote && remote.users?.yasmeen && remote.users?.adziima) {
+          isRemoteUpdatingRef.current = true;
+          setData(prev => ({
+            ...prev,
+            ...remote,
+            activeView: prev.activeView,
+            selectedMonth: prev.selectedMonth
+          }));
+          setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+          setIsCloudConnected(true);
+        } else {
+          // Cloud is empty, seed it with current local data
+          pushCloudData(firebaseDbUrl, data)
+            .then(() => { if (isMounted) setIsCloudConnected(true); })
+            .catch(() => {});
+        }
+      })
+      .catch(err => {
+        console.warn('Initial cloud sync error:', err);
+        if (isMounted) setIsCloudConnected(false);
+      })
+      .finally(() => {
+        if (isMounted) setIsCloudSyncing(false);
+      });
+
+    const unsubscribe = subscribeToCloudChanges(
+      firebaseDbUrl,
+      (remote) => {
+        if (!isMounted || !remote) return;
+        if (remote.users?.yasmeen && remote.users?.adziima) {
+          isRemoteUpdatingRef.current = true;
+          setData(prev => ({
+            ...prev,
+            ...remote,
+            activeView: prev.activeView,
+            selectedMonth: prev.selectedMonth
+          }));
+          setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+          setIsCloudConnected(true);
+        }
+      },
+      (err) => {
+        console.warn('Cloud listener error:', err);
+      }
+    );
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [firebaseDbUrl]);
+
+  // Debounced push to cloud whenever local data changes
+  useEffect(() => {
+    if (!firebaseDbUrl || !isCloudConnected || isRemoteUpdatingRef.current) return;
+    const timer = setTimeout(() => {
+      pushCloudData(firebaseDbUrl, data).catch(err => {
+        console.warn('Auto cloud sync failed:', err);
+      });
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [data, firebaseDbUrl, isCloudConnected]);
+
+  const saveCloudUrl = async (url) => {
+    const clean = saveFirebaseUrl(url);
+    setFirebaseDbUrl(clean);
+    if (!clean) {
+      setIsCloudConnected(false);
+      return;
+    }
+    const remote = await fetchCloudData(clean);
+    if (remote && remote.users) {
+      isRemoteUpdatingRef.current = true;
+      setData(prev => ({
+        ...prev,
+        ...remote,
+        activeView: prev.activeView,
+        selectedMonth: prev.selectedMonth
+      }));
+      setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+    } else {
+      await pushCloudData(clean, data);
+    }
+    setIsCloudConnected(true);
+  };
+
+  const syncFromCloud = async () => {
+    if (!firebaseDbUrl) throw new Error('URL Database belum diatur');
+    const remote = await fetchCloudData(firebaseDbUrl);
+    if (remote && remote.users) {
+      isRemoteUpdatingRef.current = true;
+      setData(prev => ({
+        ...prev,
+        ...remote,
+        activeView: prev.activeView,
+        selectedMonth: prev.selectedMonth
+      }));
+      setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+      setIsCloudConnected(true);
+    }
+  };
+
+  const syncToCloud = async () => {
+    if (!firebaseDbUrl) throw new Error('URL Database belum diatur');
+    await pushCloudData(firebaseDbUrl, data);
+    setIsCloudConnected(true);
+  };
 
   const setActiveView = (view) => {
     setData(prev => ({ ...prev, activeView: view }));
@@ -728,7 +862,13 @@ export function PocketProvider({ children }) {
         updateGoldTarget,
         updateGaleri24Prices,
         setGoldValuationMode,
-        setYasmeenCurrencyView
+        setYasmeenCurrencyView,
+        firebaseDbUrl,
+        isCloudConnected,
+        isCloudSyncing,
+        saveCloudUrl,
+        syncFromCloud,
+        syncToCloud
       }}
     >
       {children}

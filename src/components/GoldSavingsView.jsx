@@ -19,11 +19,12 @@ import {
   Layers,
   Scale,
   ExternalLink,
-  Table as TableIcon
+  Table as TableIcon,
+  Cloud
 } from 'lucide-react';
 import { GALERI24_DEFAULT_PRICE_TABLE } from '../data/initialData';
 
-export default function GoldSavingsView() {
+export default function GoldSavingsView({ onOpenCloudModal }) {
   const {
     setActiveView,
     goldSavings,
@@ -33,7 +34,9 @@ export default function GoldSavingsView() {
     updateGoldPrice,
     updateGoldTarget,
     updateGaleri24Prices,
-    setGoldValuationMode
+    setGoldValuationMode,
+    isCloudConnected,
+    isCloudSyncing
   } = usePocket();
 
   const { gold } = calculations;
@@ -250,6 +253,24 @@ export default function GoldSavingsView() {
           >
             <Target size={14} />
             <span>Target</span>
+          </button>
+
+          <button
+            className="btn-back-home"
+            onClick={onOpenCloudModal}
+            style={{
+              borderColor: isCloudConnected ? '#a7f3d0' : '#fde047',
+              background: isCloudConnected ? '#ecfdf5' : '#ffffff',
+              color: isCloudConnected ? '#065f46' : '#b45309'
+            }}
+            title="Sinkronisasi Cloud Multi-Device"
+          >
+            {isCloudSyncing ? (
+              <RefreshCw size={14} className="animate-spin" color="#059669" />
+            ) : (
+              <Cloud size={14} />
+            )}
+            <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
           </button>
         </div>
       </div>

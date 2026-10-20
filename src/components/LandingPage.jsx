@@ -2,10 +2,17 @@ import React from 'react';
 import { usePocket } from '../context/PocketContext';
 import { formatCny, formatIdr } from '../utils/formatters';
 import UserAvatar from './UserAvatar';
-import { ArrowRight, Coins, Heart, Settings, ShieldCheck, User } from 'lucide-react';
+import { ArrowRight, Coins, Heart, Settings, ShieldCheck, User, Cloud, RefreshCw } from 'lucide-react';
 
-export default function LandingPage({ onOpenEditProfile }) {
-  const { setActiveView, users, calculations, yasmeenCurrencyView } = usePocket();
+export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
+  const {
+    setActiveView,
+    users,
+    calculations,
+    yasmeenCurrencyView,
+    isCloudConnected,
+    isCloudSyncing
+  } = usePocket();
   const { yasmeen, adziima } = calculations;
 
   const isYasmeenIdr = yasmeenCurrencyView === 'IDR';
@@ -13,12 +20,49 @@ export default function LandingPage({ onOpenEditProfile }) {
   return (
     <div style={{ padding: '1rem 0 3.5rem' }}>
       <div className="landing-hero">
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#fdf2f8', padding: '0.35rem 0.9rem', borderRadius: 'var(--radius-full)', marginBottom: '1rem', border: '1px solid #fbcfe8' }}>
-          <Heart size={14} color="#f472b6" fill="#f472b6" />
-          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#db2777' }}>
-            Pocket Duo · Yasmeen & Adziima
-          </span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#fdf2f8', padding: '0.35rem 0.9rem', borderRadius: 'var(--radius-full)', border: '1px solid #fbcfe8' }}>
+            <Heart size={14} color="#f472b6" fill="#f472b6" />
+            <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#db2777' }}>
+              Pocket Duo · Yasmeen & Adziima
+            </span>
+          </div>
+
+          <button
+            onClick={onOpenCloudModal}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              background: isCloudConnected ? '#ecfdf5' : '#ffffff',
+              border: isCloudConnected ? '1px solid #a7f3d0' : '1px dashed #cbd5e1',
+              color: isCloudConnected ? '#065f46' : '#64748b',
+              padding: '0.35rem 0.85rem',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-xs)'
+            }}
+            title="Klik untuk konfigurasi sinkronisasi antar HP"
+          >
+            {isCloudSyncing ? (
+              <RefreshCw size={13} className="animate-spin" color="#059669" />
+            ) : (
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: isCloudConnected ? '#10b981' : '#f59e0b',
+                  display: 'inline-block'
+                }}
+              />
+            )}
+            <span>{isCloudConnected ? 'Cloud Aktif (HP Berdua Sinkron)' : '⚡ Sinkronkan HP Berdua'}</span>
+          </button>
         </div>
+
         <h1 className="landing-title">
           Kelola Keuangan Pribadi
         </h1>

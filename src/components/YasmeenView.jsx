@@ -17,12 +17,14 @@ import {
   Coffee,
   Coins,
   Settings,
-  Download
+  Download,
+  Cloud,
+  RefreshCw
 } from 'lucide-react';
 
 const DAYS_OF_WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
-export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile }) {
+export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, onOpenCloudModal }) {
   const {
     setActiveView,
     calculations,
@@ -34,7 +36,9 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
     users,
     selectedMonth,
     yasmeenCurrencyView,
-    setYasmeenCurrencyView
+    setYasmeenCurrencyView,
+    isCloudConnected,
+    isCloudSyncing
   } = usePocket();
 
   const { yasmeen } = calculations;
@@ -215,6 +219,24 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
           >
             <Coins size={14} />
             <span>Atur Saldo</span>
+          </button>
+
+          <button
+            className="btn-back-home"
+            onClick={onOpenCloudModal}
+            style={{
+              borderColor: isCloudConnected ? '#a7f3d0' : 'var(--pastel-pink-border)',
+              background: isCloudConnected ? '#ecfdf5' : '#ffffff',
+              color: isCloudConnected ? '#065f46' : '#db2777'
+            }}
+            title="Sinkronisasi Cloud Multi-Device"
+          >
+            {isCloudSyncing ? (
+              <RefreshCw size={14} className="animate-spin" color="#059669" />
+            ) : (
+              <Cloud size={14} />
+            )}
+            <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
           </button>
         </div>
       </div>
