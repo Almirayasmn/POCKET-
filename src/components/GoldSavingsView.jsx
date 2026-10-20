@@ -625,7 +625,7 @@ export default function GoldSavingsView() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', marginLeft: 'auto' }}>
+                  <div className="tx-right" style={{ marginLeft: 'auto' }}>
                     <div style={{ textAlign: 'right' }}>
                       <div className="tx-amount" style={{ color: '#b45309', fontSize: '1.05rem', fontWeight: 800 }}>
                         {formatIdr(itemCurrentValue)}

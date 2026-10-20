@@ -258,7 +258,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
       )}
 
       {/* Balance Cards Grid */}
-      <div className="balance-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))' }}>
+      <div className="balance-grid">
         <div className="balance-card" style={{ borderColor: 'var(--pastel-pink-border)' }}>
           <div>
             <div className="card-header-small">
@@ -447,7 +447,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
       </div>
 
       {/* Guide Banner & Nongkrong Tracker */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         <div className="pastel-card" style={{ padding: '1.2rem', background: '#fdf2f8', borderColor: '#fbcfe8' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
             <Sparkles size={18} color="#db2777" />
@@ -747,7 +747,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="tx-right">
                     <div className="tx-amount" style={{ color: isIncome ? '#059669' : '#db2777' }}>
                       {isIncome
                         ? (isChina ? `+${formatCny(tx.amountCny)}` : `+${formatIdr(tx.amountIdr)}`)
@@ -758,20 +758,22 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
                         </div>
                       )}
                     </div>
-                    <button
-                      onClick={() => onEditTx(tx)}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
-                      title="Edit Transaksi"
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                    <button
-                      onClick={() => deleteTransaction('yasmeen', tx.id)}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
-                      title="Hapus"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="tx-actions">
+                      <button
+                        onClick={() => onEditTx(tx)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        title="Edit Transaksi"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => deleteTransaction('yasmeen', tx.id)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        title="Hapus"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

@@ -525,24 +525,26 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile }) 
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="tx-right">
                     <div className="tx-amount" style={{ color: isIncome ? '#059669' : '#f43f5e' }}>
                       {isIncome ? `+${formatIdr(tx.amountIdr)}` : `-${formatIdr(tx.amountIdr)}`}
                     </div>
-                    <button
-                      onClick={() => onEditTx(tx)}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
-                      title="Edit Transaksi"
-                    >
-                      <Edit2 size={14} />
-                    </button>
-                    <button
-                      onClick={() => deleteTransaction('adziima', tx.id)}
-                      style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
-                      title="Hapus"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="tx-actions">
+                      <button
+                        onClick={() => onEditTx(tx)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        title="Edit Transaksi"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => deleteTransaction('adziima', tx.id)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        title="Hapus"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
