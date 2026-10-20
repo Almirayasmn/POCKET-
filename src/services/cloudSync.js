@@ -2,15 +2,18 @@
 // Uses native REST API & EventSource (Server-Sent Events) for instant cross-device updates
 
 const CONFIG_STORAGE_KEY = 'pocket_firebase_db_url_v1';
+export const DEFAULT_FIREBASE_URL = 'https://pocket-our-default-rtdb.asia-southeast1.firebasedatabase.app';
 
 export function getSavedFirebaseUrl() {
   const envUrl = import.meta.env.VITE_FIREBASE_DB_URL;
   if (envUrl && envUrl.trim()) return envUrl.trim();
   try {
-    return localStorage.getItem(CONFIG_STORAGE_KEY) || '';
+    const saved = localStorage.getItem(CONFIG_STORAGE_KEY);
+    if (saved && saved.trim()) return saved.trim();
   } catch (e) {
-    return '';
+    // ignore
   }
+  return DEFAULT_FIREBASE_URL;
 }
 
 export function saveFirebaseUrl(url) {
