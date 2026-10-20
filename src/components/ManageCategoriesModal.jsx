@@ -108,7 +108,7 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
         color,
         budget: parseFloat(budget) || 0,
         note: note.trim()
-      });
+      }, selectedMonth);
     } else if (mode === 'edit' && editingId) {
       updateCategory(userId, editingId, {
         name: name.trim(),
@@ -116,7 +116,7 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
         color,
         budget: parseFloat(budget) || 0,
         note: note.trim()
-      });
+      }, selectedMonth);
     }
 
     setMode('list');
@@ -124,8 +124,8 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
   };
 
   const handleDelete = (cat) => {
-    if (window.confirm(`Hapus pos "${cat.name}"? Catatan transaksi yang sudah ada tetap aman.`)) {
-      deleteCategory(userId, cat.id);
+    if (window.confirm(`Hapus pos "${cat.name}" khusus bulan ${selectedMonth}? Catatan transaksi yang sudah ada tetap aman.`)) {
+      deleteCategory(userId, cat.id, selectedMonth);
     }
   };
 
@@ -150,11 +150,25 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
               <Sliders size={16} />
             </div>
             <div>
-              <h3 style={{ fontSize: '1.15rem', color: themeColor }}>
-                Kelola Pos Anggaran
-              </h3>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: 0 }}>
-                {isAdziima ? 'Pos Keuangan Adziima (Rp)' : 'Pos Keuangan Yasmeen (¥)'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <h3 style={{ fontSize: '1.15rem', color: themeColor, margin: 0 }}>
+                  Kelola Pos Anggaran
+                </h3>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    padding: '0.15rem 0.55rem',
+                    background: isAdziima ? '#e0f2fe' : '#fce7f3',
+                    color: themeColor,
+                    borderRadius: 'var(--radius-full)',
+                    fontWeight: 700
+                  }}
+                >
+                  📅 Khusus Bulan {selectedMonth}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', margin: '0.2rem 0 0 0' }}>
+                {isAdziima ? 'Pos Keuangan Adziima (Rp)' : 'Pos Keuangan Yasmeen (¥)'} · Perubahan pos berlaku per bulan
               </p>
             </div>
           </div>

@@ -19,6 +19,34 @@ import {
 
 const STORAGE_KEY = 'pocket_duo_storage_v10';
 
+// Helper to resolve categories for a given month with fallback inheritance
+export function resolveCategories(catsState, userId, targetMonth) {
+  const month = targetMonth || '2026-10';
+  const userMonthlyCats = catsState?.monthlyCategories?.[userId];
+
+  // 1. Direct match for this specific month
+  if (userMonthlyCats?.[month] && Array.isArray(userMonthlyCats[month]) && userMonthlyCats[month].length > 0) {
+    return userMonthlyCats[month];
+  }
+
+  // 2. Look back through earlier months in chronological order
+  if (userMonthlyCats) {
+    const earlierMonths = Object.keys(userMonthlyCats)
+      .filter(m => m < month && Array.isArray(userMonthlyCats[m]) && userMonthlyCats[m].length > 0)
+      .sort();
+    if (earlierMonths.length > 0) {
+      const latestEarlierMonth = earlierMonths[earlierMonths.length - 1];
+      return userMonthlyCats[latestEarlierMonth];
+    }
+  }
+
+  // 3. Fallback to default base categories
+  if (userId === 'adziima') {
+    return catsState?.adziimaCategories || ADZIIMA_CATEGORIES;
+  }
+  return catsState?.yasmeenCategories || YASMEEN_CATEGORIES;
+}
+
 const PocketContext = createContext(null);
 
 export function PocketProvider({ children }) {
@@ -81,26 +109,7 @@ export function PocketProvider({ children }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.users?.yasmeen && parsed.users?.adziima) {
-          // Ensure Adziima categories include 'rokok' and 'lainnya_obat'
-          const existingAdzCats = parsed.adziimaCategories || ADZIIMA_CATEGORIES;
-          const adzIds = new Set(existingAdzCats.map(c => c.id));
-          const updatedAdzCats = [...existingAdzCats.filter(c => c.id !== 'kesehatan' && c.id !== 'kesehatan_darurat')];
-          if (!adzIds.has('rokok')) {
-            updatedAdzCats.splice(1, 0, ADZIIMA_CATEGORIES.find(c => c.id === 'rokok'));
-          }
-          if (!adzIds.has('lainnya_obat')) {
-            updatedAdzCats.push(ADZIIMA_CATEGORIES.find(c => c.id === 'lainnya_obat'));
-          }
-
-          // Ensure Yasmeen categories include 'tiket_pesawat'
-          const existingYasCats = parsed.yasmeenCategories || YASMEEN_CATEGORIES;
-          const yasCatIds = new Set(existingYasCats.map(c => c.id));
-          const updatedYasCats = [...existingYasCats];
-          if (!yasCatIds.has('tiket_pesawat')) {
-            updatedYasCats.push(YASMEEN_CATEGORIES.find(c => c.id === 'tiket_pesawat'));
-          }
-
-          // Ensure bios are emptied if they still have old default text
+          // Clean legacy bios if needed
           const users = {
             ...parsed.users,
             yasmeen: {
@@ -113,21 +122,14 @@ export function PocketProvider({ children }) {
             }
           };
 
-          // Ensure flight ticket transactions exist in yasmeenTransactions
-          const existingTxIds = new Set((parsed.yasmeenTransactions || []).map(t => t.id));
-          const updatedYasTx = [...(parsed.yasmeenTransactions || [])];
-          SAMPLE_YASMEEN_TRANSACTIONS.forEach(stx => {
-            if (stx.category === 'tiket_pesawat' && !existingTxIds.has(stx.id)) {
-              updatedYasTx.push(stx);
-            }
-          });
-
           return {
             ...parsed,
             users,
-            adziimaCategories: updatedAdzCats,
-            yasmeenCategories: updatedYasCats,
-            yasmeenTransactions: updatedYasTx,
+            adziimaCategories: parsed.adziimaCategories || ADZIIMA_CATEGORIES,
+            yasmeenCategories: parsed.yasmeenCategories || YASMEEN_CATEGORIES,
+            monthlyCategories: parsed.monthlyCategories || { yasmeen: {}, adziima: {} },
+            yasmeenTransactions: parsed.yasmeenTransactions || [],
+            adziimaTransactions: parsed.adziimaTransactions || [],
             goldSavings: {
               ...DEFAULT_GOLD_SAVINGS,
               ...(parsed.goldSavings || {}),
@@ -152,6 +154,7 @@ export function PocketProvider({ children }) {
       users: DEFAULT_USERS,
       yasmeenCategories: YASMEEN_CATEGORIES,
       adziimaCategories: ADZIIMA_CATEGORIES,
+      monthlyCategories: { yasmeen: {}, adziima: {} },
       yasmeenTransactions: SAMPLE_YASMEEN_TRANSACTIONS,
       adziimaTransactions: SAMPLE_ADZIIMA_TRANSACTIONS,
       goldSavings: DEFAULT_GOLD_SAVINGS,
@@ -423,6 +426,21 @@ export function PocketProvider({ children }) {
     }));
   };
 
+  // Helper to get categories for a given month
+  const getCategoriesForMonth = (userId, targetMonth = null) => {
+    return resolveCategories(data, userId, targetMonth || selectedMonth || '2026-10');
+  };
+
+  const currentYasmeenCategories = useMemo(
+    () => resolveCategories(data, 'yasmeen', selectedMonth || '2026-10'),
+    [data, selectedMonth]
+  );
+
+  const currentAdziimaCategories = useMemo(
+    () => resolveCategories(data, 'adziima', selectedMonth || '2026-10'),
+    [data, selectedMonth]
+  );
+
   // Category Budget update with monthly inheritance template
   const updateCategoryBudget = (userId, catId, newBudget, targetMonth = null) => {
     const month = targetMonth || selectedMonth || '2026-10';
@@ -435,25 +453,37 @@ export function PocketProvider({ children }) {
       currentMonthBudget[catId] = num;
       userMonthly[month] = currentMonthBudget;
 
+      // Also ensure this month's custom categories list reflects the new budget
+      const currentList = resolveCategories(prev, userId, month);
+      const updatedList = currentList.map(c => {
+        if (c.id !== catId) return c;
+        if (userId === 'adziima') return { ...c, budgetIdr: num };
+        return { ...c, budgetCny: num };
+      });
+      const monthlyCategories = { ...(prev.monthlyCategories || {}) };
+      const userMonthlyCats = { ...(monthlyCategories[userId] || {}) };
+      userMonthlyCats[month] = updatedList;
+      monthlyCategories[userId] = userMonthlyCats;
+
       return {
         ...prev,
         monthlyBudgets: {
           ...(prev.monthlyBudgets || {}),
           [userId]: userMonthly
         },
+        monthlyCategories,
         [key]: (prev[key] || []).map(c => {
           if (c.id !== catId) return c;
-          if (userId === 'adziima') {
-            return { ...c, budgetIdr: num };
-          }
+          if (userId === 'adziima') return { ...c, budgetIdr: num };
           return { ...c, budgetCny: num };
         })
       };
     });
   };
 
-  // Add new Category / Pos
-  const addCategory = (userId, newCat) => {
+  // Add new Category / Pos specifically for targetMonth
+  const addCategory = (userId, newCat, targetMonth = null) => {
+    const month = targetMonth || selectedMonth || '2026-10';
     const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
     const id = (newCat.id || newCat.name || '').toLowerCase().replace(/[^a-z0-9]/g, '_') || `pos_${Date.now()}`;
     const budget = parseFloat(newCat.budget) || 0;
@@ -468,23 +498,41 @@ export function PocketProvider({ children }) {
     };
 
     setData(prev => {
-      const existing = prev[key] || [];
-      const finalId = existing.some(c => c.id === id) ? `${id}_${Date.now()}` : id;
+      const currentList = resolveCategories(prev, userId, month);
+      const finalId = currentList.some(c => c.id === id) ? `${id}_${Date.now()}` : id;
       catObj.id = finalId;
+      const updatedList = [...currentList, catObj];
+
+      const monthlyCategories = { ...(prev.monthlyCategories || {}) };
+      const userMonthlyCats = { ...(monthlyCategories[userId] || {}) };
+      userMonthlyCats[month] = updatedList;
+      monthlyCategories[userId] = userMonthlyCats;
+
+      // Set budget for this month
+      const monthlyBudgets = { ...(prev.monthlyBudgets || {}) };
+      const userBudgets = { ...(monthlyBudgets[userId] || {}) };
+      const currentMonthBudgets = { ...(userBudgets[month] || {}) };
+      currentMonthBudgets[finalId] = budget;
+      userBudgets[month] = currentMonthBudgets;
+      monthlyBudgets[userId] = userBudgets;
+
       return {
         ...prev,
-        [key]: [...existing, catObj]
+        monthlyCategories,
+        monthlyBudgets,
+        [key]: [...(prev[key] || []), catObj]
       };
     });
     return catObj;
   };
 
-  // Update Category (label, icon, color, budget, note)
-  const updateCategory = (userId, catId, updates) => {
+  // Update Category specifically for targetMonth
+  const updateCategory = (userId, catId, updates, targetMonth = null) => {
+    const month = targetMonth || selectedMonth || '2026-10';
     const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
-    setData(prev => ({
-      ...prev,
-      [key]: (prev[key] || []).map(c => {
+    setData(prev => {
+      const currentList = resolveCategories(prev, userId, month);
+      const updatedList = currentList.map(c => {
         if (c.id !== catId) return c;
         const merged = { ...c, ...updates };
         if (updates.budget !== undefined) {
@@ -493,17 +541,74 @@ export function PocketProvider({ children }) {
           else merged.budgetCny = num;
         }
         return merged;
-      })
-    }));
+      });
+
+      const monthlyCategories = { ...(prev.monthlyCategories || {}) };
+      const userMonthlyCats = { ...(monthlyCategories[userId] || {}) };
+      userMonthlyCats[month] = updatedList;
+      monthlyCategories[userId] = userMonthlyCats;
+
+      const monthlyBudgets = { ...(prev.monthlyBudgets || {}) };
+      if (updates.budget !== undefined) {
+        const num = parseFloat(updates.budget) || 0;
+        const userBudgets = { ...(monthlyBudgets[userId] || {}) };
+        const currentMonthBudgets = { ...(userBudgets[month] || {}) };
+        currentMonthBudgets[catId] = num;
+        userBudgets[month] = currentMonthBudgets;
+        monthlyBudgets[userId] = userBudgets;
+      }
+
+      return {
+        ...prev,
+        monthlyCategories,
+        monthlyBudgets,
+        [key]: (prev[key] || []).map(c => {
+          if (c.id !== catId) return c;
+          const merged = { ...c, ...updates };
+          if (updates.budget !== undefined) {
+            const num = parseFloat(updates.budget) || 0;
+            if (userId === 'adziima') merged.budgetIdr = num;
+            else merged.budgetCny = num;
+          }
+          return merged;
+        })
+      };
+    });
   };
 
-  // Delete Category
-  const deleteCategory = (userId, catId) => {
+  // Delete Category specifically for targetMonth
+  const deleteCategory = (userId, catId, targetMonth = null) => {
+    const month = targetMonth || selectedMonth || '2026-10';
     const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
-    setData(prev => ({
-      ...prev,
-      [key]: (prev[key] || []).filter(c => c.id !== catId)
-    }));
+    setData(prev => {
+      const currentList = resolveCategories(prev, userId, month);
+      const updatedList = currentList.filter(c => c.id !== catId);
+
+      const monthlyCategories = { ...(prev.monthlyCategories || {}) };
+      const userMonthlyCats = { ...(monthlyCategories[userId] || {}) };
+      userMonthlyCats[month] = updatedList;
+      monthlyCategories[userId] = userMonthlyCats;
+
+      // Remove from monthly budgets for this month
+      const monthlyBudgets = { ...(prev.monthlyBudgets || {}) };
+      const userBudgets = { ...(monthlyBudgets[userId] || {}) };
+      if (userBudgets[month]) {
+        const currentMonthBudgets = { ...userBudgets[month] };
+        delete currentMonthBudgets[catId];
+        userBudgets[month] = currentMonthBudgets;
+        monthlyBudgets[userId] = userBudgets;
+      }
+
+      // Also remove from base categories so it never resurrects
+      const updatedBase = (prev[key] || []).filter(c => c.id !== catId);
+
+      return {
+        ...prev,
+        [key]: updatedBase,
+        monthlyCategories,
+        monthlyBudgets
+      };
+    });
   };
 
   // Gold Savings (Emas Batangan Galeri 24)
@@ -717,8 +822,8 @@ export function PocketProvider({ children }) {
 
       // Categories spending for selected month with inherited budget
       const baseYasmeenCats = isYasmeenInChina
-        ? (data?.yasmeenCategories || YASMEEN_CATEGORIES)
-        : (data?.adziimaCategories || ADZIIMA_CATEGORIES);
+        ? currentYasmeenCategories
+        : currentAdziimaCategories;
 
       const activeCategories = baseYasmeenCats.map(c => {
         const resolvedBudget = getCategoryBudget('yasmeen', c.id, isYasmeenInChina ? c.budgetCny : c.budgetIdr);
@@ -756,7 +861,7 @@ export function PocketProvider({ children }) {
       const reserveAdziimaIdr = adziima?.emergencyReserveIdr || 0;
       const safeAdziimaIdr = Math.max(0, netMonthAdziimaIdr - reserveAdziimaIdr);
 
-      const activeAdziimaCats = (data?.adziimaCategories || ADZIIMA_CATEGORIES).map(c => {
+      const activeAdziimaCats = currentAdziimaCategories.map(c => {
         const resolvedBudget = getCategoryBudget('adziima', c.id, c.budgetIdr);
         return { ...c, budgetIdr: resolvedBudget };
       });
@@ -957,6 +1062,9 @@ export function PocketProvider({ children }) {
         setSelectedMonth,
         yasmeenCurrencyView,
         setYasmeenCurrencyView,
+        yasmeenCategories: currentYasmeenCategories,
+        adziimaCategories: currentAdziimaCategories,
+        getCategoriesForMonth,
         calculations,
         setExchangeRate,
         updateUser,
