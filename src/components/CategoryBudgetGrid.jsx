@@ -73,11 +73,11 @@ export default function CategoryBudgetGrid() {
           const remaining = budget - spent;
           const percent = budget > 0 ? Math.min(100, Math.round((spent / budget) * 100)) : (spent > 0 ? 100 : 0);
           const isOver = spent > budget && budget > 0;
-          const isNear = percent >= 80 && !isOver;
+          const isWarning = percent >= 50 && !isOver;
 
           let barColor = cat.color || (isCowoku ? '#3b82f6' : '#ec4899');
-          if (isOver) barColor = '#ef4444';
-          else if (isNear) barColor = '#f59e0b';
+          if (isOver) barColor = '#f43f5e';
+          else if (isWarning) barColor = '#f59e0b';
 
           return (
             <div key={cat.id} className="glass-panel category-card">

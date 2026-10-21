@@ -45,13 +45,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     isCloudSyncing
   } = usePocket();
 
-  // Yasmeen begins tracking in China starting November 2026
-  React.useEffect(() => {
-    if (selectedMonth < '2026-11') {
-      setSelectedMonth('2026-11');
-    }
-  }, []);
-
   const { yasmeen } = calculations;
   const user = users.yasmeen || {};
   const isChina = yasmeen.isChina; // True if <= 2027-01, False if > 2027-01
@@ -454,68 +447,82 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </p>
         </div>
 
-        {/* Nongkrong Tracker */}
-        <div className="pastel-card" style={{ padding: '1.2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Coffee size={18} color="#f59e0b" />
-              <h4 style={{ fontSize: '0.95rem', fontWeight: 800 }}>Nongkrong Kafe</h4>
+        {/* Nongkrong Tracker (Khusus Mulai November 2026) */}
+        {selectedMonth >= '2026-11' ? (
+          <div className="pastel-card" style={{ padding: '1.2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Coffee size={18} color="#f59e0b" />
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 800 }}>Nongkrong Kafe</h4>
+              </div>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#b45309', background: '#fef3c7', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)' }}>
+                Target: 2x / minggu
+              </span>
             </div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#b45309', background: '#fef3c7', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)' }}>
-              Target: 2x / minggu
-            </span>
-          </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.35rem', marginTop: '0.6rem' }}>
-            {DAYS_OF_WEEK.map((day) => {
-              const isChecked = checkedDays.includes(day);
-              return (
-                <div
-                  key={day}
-                  onClick={() => toggleNongkrongDay(day, selectedMonth)}
-                  style={{
-                    flex: 1,
-                    textAlign: 'center',
-                    padding: '0.45rem 0.15rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: isChecked ? '#fdf2f8' : 'var(--bg-subtle)',
-                    border: isChecked ? '1.5px solid #f472b6' : '1px solid var(--card-border-subtle)',
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    transition: 'all 0.15s ease'
-                  }}
-                  title={`Klik untuk ceklis / unceklis hari ${day}`}
-                >
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: isChecked ? '#db2777' : 'var(--text-dim)', marginBottom: '0.25rem' }}>
-                    {day}
-                  </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.35rem', marginTop: '0.6rem' }}>
+              {DAYS_OF_WEEK.map((day) => {
+                const isChecked = checkedDays.includes(day);
+                return (
                   <div
+                    key={day}
+                    onClick={() => toggleNongkrongDay(day, selectedMonth)}
                     style={{
-                      width: 22,
-                      height: 22,
-                      margin: '0 auto',
-                      borderRadius: '6px',
-                      background: isChecked ? '#f472b6' : '#ffffff',
-                      border: isChecked ? 'none' : '1.5px solid #cbd5e1',
-                      color: '#ffffff',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '0.82rem',
-                      fontWeight: 900,
-                      boxShadow: isChecked ? '0 2px 6px rgba(244, 114, 182, 0.35)' : 'none'
+                      flex: 1,
+                      textAlign: 'center',
+                      padding: '0.45rem 0.15rem',
+                      borderRadius: 'var(--radius-sm)',
+                      background: isChecked ? '#fdf2f8' : 'var(--bg-subtle)',
+                      border: isChecked ? '1.5px solid #f472b6' : '1px solid var(--card-border-subtle)',
+                      cursor: 'pointer',
+                      userSelect: 'none',
+                      transition: 'all 0.15s ease'
                     }}
+                    title={`Klik untuk ceklis / unceklis hari ${day}`}
                   >
-                    {isChecked ? '✓' : ''}
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: isChecked ? '#db2777' : 'var(--text-dim)', marginBottom: '0.25rem' }}>
+                      {day}
+                    </div>
+                    <div
+                      style={{
+                        width: 22,
+                        height: 22,
+                        margin: '0 auto',
+                        borderRadius: '6px',
+                        background: isChecked ? '#f472b6' : '#ffffff',
+                        border: isChecked ? 'none' : '1.5px solid #cbd5e1',
+                        color: '#ffffff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.82rem',
+                        fontWeight: 900,
+                        boxShadow: isChecked ? '0 2px 6px rgba(244, 114, 182, 0.35)' : 'none'
+                      }}
+                    >
+                      {isChecked ? '✓' : ''}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', textAlign: 'center' }}>
+              {nongkrongCount} hari diceklis minggu ini (Klik hari untuk ceklis ✓) • Sisa target: {remainingSlots} kali
+            </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', textAlign: 'center' }}>
-            {nongkrongCount} hari diceklis minggu ini (Klik hari untuk ceklis ✓) • Sisa target: {remainingSlots} kali
+        ) : (
+          <div className="pastel-card" style={{ padding: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
+            <Coffee size={24} color="#d97706" />
+            <div>
+              <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#92400e', margin: '0 0 0.2rem 0' }}>
+                Nongkrong Kafe (Mulai November 2026)
+              </h4>
+              <p style={{ fontSize: '0.78rem', color: '#b45309', margin: 0 }}>
+                Target nongkrong kafe 2x/minggu aktif mulai November 2026 saat tiba di kampus Nanning.
+              </p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Prinsip Keuangan Yasmeen: Hidup Mandiri Sesuai Stipend */}
@@ -592,7 +599,12 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             const budgetIdr = cat.budgetIdr || 0;
             const remainingCny = budgetCny - spentCny;
             const remainingIdr = budgetIdr - spentIdr;
-            const percent = budgetCny > 0 ? Math.min(100, Math.round((spentCny / budgetCny) * 100)) : (spentCny > 0 ? 100 : 0);
+            const effectiveBudget = isChina ? budgetCny : (budgetIdr || budgetCny);
+            const effectiveSpent = isChina ? spentCny : (spentIdr || spentCny);
+            const percent = effectiveBudget > 0 ? Math.min(100, Math.round((effectiveSpent / effectiveBudget) * 100)) : (effectiveSpent > 0 ? 100 : 0);
+            const isOver = effectiveBudget > 0 && effectiveSpent > effectiveBudget;
+            const isWarning = percent >= 50 && !isOver;
+            const barColor = isOver ? '#f43f5e' : (isWarning ? '#f59e0b' : '#f472b6');
 
             return (
               <div key={cat.id} className="category-card">
@@ -603,7 +615,19 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                         <CategoryIcon name={cat.iconName} size={18} color={cat.color} />
                       </div>
                       <div>
-                        <div className="category-name">{cat.name}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span className="category-name">{cat.name}</span>
+                          {isOver && (
+                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#e11d48', background: '#ffe4e6', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                              🚨 Over
+                            </span>
+                          )}
+                          {isWarning && (
+                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                              ⚠️ 50%+
+                            </span>
+                          )}
+                        </div>
                         <div className="category-basis">{cat.note}</div>
                       </div>
                     </div>
@@ -636,12 +660,14 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                     )}
                   </div>
 
-                  <div className="progress-bar-bg">
+                  <div className="progress-bar-bg" style={{ position: 'relative' }}>
                     <div
                       className="progress-bar-fill"
                       style={{
                         width: `${percent}%`,
-                        background: percent > 90 ? '#f43f5e' : '#f472b6'
+                        background: barColor,
+                        boxShadow: isWarning ? '0 0 8px rgba(245, 158, 11, 0.4)' : (isOver ? '0 0 8px rgba(244, 63, 94, 0.4)' : 'none'),
+                        transition: 'all 0.3s ease'
                       }}
                     />
                   </div>
@@ -649,7 +675,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   <div className="progress-meta">
                     <span>
                       Terpakai:{' '}
-                      <span className="spent">
+                      <span className="spent" style={{ color: isOver ? '#f43f5e' : (isWarning ? '#d97706' : 'inherit') }}>
                         {formatPrimary(spentCny, spentIdr)}
                       </span>
                     </span>

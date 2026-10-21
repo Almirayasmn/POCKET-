@@ -364,6 +364,9 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             const spent = spending.totalIdr;
             const budget = cat.budgetIdr || 0;
             const percent = budget > 0 ? Math.min(100, Math.round((spent / budget) * 100)) : (spent > 0 ? 100 : 0);
+            const isOver = budget > 0 && spent > budget;
+            const isWarning = percent >= 50 && !isOver;
+            const barColor = isOver ? '#f43f5e' : (isWarning ? '#f59e0b' : '#38bdf8');
 
             return (
               <div key={cat.id} className="category-card">
@@ -374,7 +377,19 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                         <CategoryIcon name={cat.iconName} size={18} color={cat.color} />
                       </div>
                       <div>
-                        <div className="category-name">{cat.name}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                          <span className="category-name">{cat.name}</span>
+                          {isOver && (
+                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#e11d48', background: '#ffe4e6', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                              🚨 Over
+                            </span>
+                          )}
+                          {isWarning && (
+                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
+                              ⚠️ 50%+
+                            </span>
+                          )}
+                        </div>
                         <div className="category-basis">{cat.note}</div>
                       </div>
                     </div>
@@ -406,21 +421,32 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                     )}
                   </div>
 
-                  <div className="progress-bar-bg">
+                  <div className="progress-bar-bg" style={{ position: 'relative' }}>
                     <div
                       className="progress-bar-fill"
                       style={{
                         width: `${percent}%`,
-                        background: percent > 90 ? '#f43f5e' : '#38bdf8'
+                        background: barColor,
+                        boxShadow: isWarning ? '0 0 8px rgba(245, 158, 11, 0.4)' : (isOver ? '0 0 8px rgba(244, 63, 94, 0.4)' : 'none'),
+                        transition: 'all 0.3s ease'
                       }}
                     />
                   </div>
 
                   <div className="progress-meta">
                     <span>
-                      Terpakai: <span className="spent">{formatIdr(spent)}</span>
+                      Terpakai:{' '}
+                      <span className="spent" style={{ color: isOver ? '#f43f5e' : (isWarning ? '#d97706' : 'inherit') }}>
+                        {formatIdr(spent)}
+                      </span>
                     </span>
                     <span>Budget: {budget > 0 ? formatIdr(budget) : 'Belum diatur'}</span>
+                  </div>
+
+                  <div style={{ marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid var(--bg-subtle)', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ color: isOver ? '#f43f5e' : (isWarning ? '#b45309' : 'var(--text-muted)') }}>
+                      {isOver ? `⚠️ Lebih ${formatIdr(spent - budget)}` : `Sisa ${formatIdr(budget - spent)}`}
+                    </span>
                   </div>
                 </div>
               </div>
