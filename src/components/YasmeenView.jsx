@@ -127,15 +127,20 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       userName: user.name || 'Yasmeen',
       monthLabel,
       transactions: currentMonthTx,
-      categories: currentCategories,
+      categories: yasmeen.categories || currentCategories,
+      categorySpending: yasmeen.spending,
       currency: isViewYuan ? 'CNY' : 'IDR',
       exchangeRate,
       isChinaPeriod: isChina,
       summary: {
-        totalInflow: isChina ? `${formatCny(yasmeen.totalInflowCny)} (${formatIdr(yasmeen.totalInflowIdr)})` : formatIdr(yasmeen.totalInflowIdr),
-        totalOutflow: isChina ? `${formatCny(yasmeen.totalOutflowCny)} (${formatIdr(yasmeen.totalOutflowIdr)})` : formatIdr(yasmeen.totalOutflowIdr),
-        netBalance: isChina ? `${formatCny(yasmeen.totalBalanceCny)} (${formatIdr(yasmeen.totalBalanceIdr)})` : formatIdr(yasmeen.totalBalanceIdr),
-        reserve: isChina ? formatCny(yasmeen.reserveCny) : formatIdr(yasmeen.reserveIdr)
+        startBalance: formatPrimary(yasmeen.startBalanceCny, yasmeen.startBalanceIdr),
+        monthIncome: formatPrimary(yasmeen.monthIncomeCny, yasmeen.monthIncomeIdr),
+        totalInflow: formatPrimary(yasmeen.totalInflowCny, yasmeen.totalInflowIdr),
+        totalBudget: formatPrimary(yasmeen.totalAllBudgetCny, yasmeen.totalAllBudgetIdr),
+        totalOutflow: formatPrimary(yasmeen.totalOutflowCny, yasmeen.totalOutflowIdr),
+        remainingBudget: formatPrimary(yasmeen.remainingAllBudgetCny, yasmeen.remainingAllBudgetIdr),
+        plannedSavings: formatPrimary(yasmeen.plannedSavingsCny, yasmeen.plannedSavingsIdr),
+        netBalance: formatPrimary(yasmeen.totalBalanceCny, yasmeen.totalBalanceIdr)
       }
     });
   };

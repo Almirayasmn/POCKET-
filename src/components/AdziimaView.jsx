@@ -80,14 +80,19 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       userName: user.name || 'Adziima',
       monthLabel,
       transactions: currentMonthTx,
-      categories: adziimaCategories,
+      categories: adziima.categories || adziimaCategories,
+      categorySpending: adziima.spending,
       currency: 'IDR',
       isChinaPeriod: false,
       summary: {
+        startBalance: formatIdr(adziima.initialIdr),
+        monthIncome: formatIdr(adziima.monthIncomeIdr),
         totalInflow: formatIdr(adziima.totalInflowIdr),
+        totalBudget: formatIdr(adziima.totalAllBudgetIdr),
         totalOutflow: formatIdr(adziima.totalOutflowIdr),
-        netBalance: formatIdr(adziima.totalBalanceIdr),
-        reserve: formatIdr(adziima.reserveIdr)
+        remainingBudget: formatIdr(adziima.remainingAllBudgetIdr),
+        plannedSavings: formatIdr(adziima.plannedSavingsIdr),
+        netBalance: formatIdr(adziima.totalBalanceIdr)
       }
     });
   };
