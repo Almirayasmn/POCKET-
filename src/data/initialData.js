@@ -34,7 +34,7 @@ export const ADZIIMA_CATEGORIES = [
 export const DEFAULT_USERS = {
   yasmeen: {
     id: 'yasmeen',
-    name: 'Yasmeen',
+    name: 'Yasmeen Almira',
     avatarImage: null, // Base64 data URL or null
     avatarInitials: 'YA',
     roleTag: 'Nanning, China',
@@ -51,9 +51,9 @@ export const DEFAULT_USERS = {
   },
   adziima: {
     id: 'adziima',
-    name: 'Adziima',
+    name: 'Muhammad Mulkan Adziima',
     avatarImage: null,
-    avatarInitials: 'AD',
+    avatarInitials: 'MA',
     roleTag: 'Indonesia',
     bio: '', // Kosongkan awal sesuai permintaan
     currency: 'IDR',

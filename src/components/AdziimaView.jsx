@@ -118,7 +118,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <UserAvatar user={user} size={42} />
           <div>
             <div className="nav-user-title" style={{ color: '#0284c7', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>{user.name || 'Adziima'}</span>
+              <span>{user.name || 'Muhammad Mulkan Adziima'}</span>
               <Settings size={13} color="var(--text-dim)" />
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>

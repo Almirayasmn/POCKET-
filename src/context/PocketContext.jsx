@@ -117,10 +117,12 @@ export function PocketProvider({ children }) {
             ...parsed.users,
             yasmeen: {
               ...parsed.users.yasmeen,
+              name: (!parsed.users.yasmeen?.name || parsed.users.yasmeen?.name === 'Yasmeen') ? 'Yasmeen Almira' : parsed.users.yasmeen.name,
               bio: (parsed.users.yasmeen?.bio || '').includes('GXPC') ? '' : (parsed.users.yasmeen?.bio || '')
             },
             adziima: {
               ...parsed.users.adziima,
+              name: (!parsed.users.adziima?.name || parsed.users.adziima?.name === 'Adziima') ? 'Muhammad Mulkan Adziima' : parsed.users.adziima.name,
               bio: (parsed.users.adziima?.bio || '').includes('Sadar Finansial') ? '' : (parsed.users.adziima?.bio || '')
             }
           };

@@ -86,7 +86,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
           >
             <Heart size={14} color="#f472b6" fill="#f472b6" />
             <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#db2777', letterSpacing: '0.02em' }}>
-              Pocket Duo · Yasmeen & Adziima
+              Pocket Duo · Yasmeen Almira & Muhammad Mulkan Adziima
             </span>
           </div>
 
@@ -168,7 +168,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             title="Klik untuk buka catatan Yasmeen"
           >
             <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#db2777', textTransform: 'uppercase' }}>
-              🌸 Yasmeen
+              🌸 Yasmeen Almira
             </div>
             <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#9d174d', marginTop: '0.1rem' }}>
               {formatIdr(yasmeenBalanceIdr)}
@@ -188,7 +188,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             title="Klik untuk buka catatan Adziima"
           >
             <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
-              🌊 Adziima
+              🌊 Muhammad Mulkan Adziima
             </div>
             <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0369a1', marginTop: '0.1rem' }}>
               {formatIdr(adziimaBalanceIdr)}
@@ -254,10 +254,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
               </div>
             </div>
 
-            <div className="profile-name">{users.yasmeen?.name || 'Yasmeen'}</div>
-            <div className="profile-tag tag-pink">
-              <span>🇨🇳 Nanning, China · Pelajar</span>
-            </div>
+            <div className="profile-name">{users.yasmeen?.name || 'Yasmeen Almira'}</div>
 
             <p className="profile-desc">
               {users.yasmeen?.bio || 'Pengeluaran kuliah mandiri pas sesuai stipend bulanan kampus ¥1.500.'}
@@ -336,10 +333,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
               </div>
             </div>
 
-            <div className="profile-name">{users.adziima?.name || 'Adziima'}</div>
-            <div className="profile-tag tag-blue">
-              <span>🇮🇩 Jakarta, Indonesia · Pekerja</span>
-            </div>
+            <div className="profile-name">{users.adziima?.name || 'Muhammad Mulkan Adziima'}</div>
 
             <p className="profile-desc">
               {users.adziima?.bio || 'Pencatatan harian disiplin dengan pembagian pagu pos terencana.'}
