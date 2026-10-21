@@ -4,6 +4,7 @@ import { formatIdr, formatDateIndo } from '../utils/formatters';
 import { exportMonthToExcel } from '../utils/exportExcel';
 import UserAvatar from './UserAvatar';
 import CategoryIcon from './CategoryIcon';
+import UnifiedDashboardHeader from './UnifiedDashboardHeader';
 import MonthNavigator, { ALL_MONTH_OPTIONS } from './MonthNavigator';
 import {
   ArrowLeft,
@@ -111,68 +112,18 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   return (
     <div>
-      {/* Top Header */}
-      <div className="top-nav">
-        <button className="btn-back-home" onClick={() => setActiveView('landing')}>
-          <ArrowLeft size={16} />
-          <span>Halaman Utama</span>
-        </button>
-
-        <div
-          className="nav-user-badge"
-          onClick={onOpenEditProfile}
-          style={{ cursor: 'pointer' }}
-          title="Klik untuk ganti foto & edit profil"
-        >
-          <UserAvatar user={user} size={42} />
-          <div>
-            <div className="nav-user-title" style={{ color: '#0284c7', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>{user.name || 'Muhammad Mulkan Adziima'}</span>
-              <Settings size={13} color="var(--text-dim)" />
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-              Indonesia · 100% Rupiah (Rp)
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-          <button
-            className="btn-back-home"
-            onClick={() => {
-              setMoneyInput(adziima.initialIdr.toString());
-              setIsEditingMoney(true);
-            }}
-            style={{ borderColor: 'var(--pastel-blue-border)', color: '#0284c7' }}
-          >
-            <Coins size={14} />
-            <span>Atur Saldo</span>
-          </button>
-
-          <button
-            className="btn-back-home"
-            onClick={onOpenCloudModal}
-            style={{
-              borderColor: isCloudConnected ? '#a7f3d0' : 'var(--pastel-blue-border)',
-              background: isCloudConnected ? '#ecfdf5' : '#ffffff',
-              color: isCloudConnected ? '#065f46' : '#0284c7'
-            }}
-            title="Sinkronisasi Cloud Multi-Device"
-          >
-            {isCloudSyncing ? (
-              <RefreshCw size={14} className="animate-spin" color="#059669" />
-            ) : (
-              <Cloud size={14} />
-            )}
-            <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Month Navigator with Excel Download */}
-      <MonthNavigator
+      {/* Unified App Header (Profile, Quick Actions, and Integrated Month Navigator) */}
+      <UnifiedDashboardHeader
+        user={user}
         isYasmeen={false}
+        onOpenEditProfile={onOpenEditProfile}
+        onOpenBalanceModal={() => {
+          setMoneyInput(adziima.initialIdr.toString());
+          setIsEditingMoney(true);
+        }}
+        onOpenCloudModal={onOpenCloudModal}
         onExportExcel={handleExportExcel}
+        transactionCount={currentMonthTx.length}
       />
 
       {/* If Adziima hasn't entered total money yet */}

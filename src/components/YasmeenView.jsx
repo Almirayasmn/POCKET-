@@ -4,6 +4,7 @@ import { formatCny, formatIdr, formatDateIndo } from '../utils/formatters';
 import { exportMonthToExcel } from '../utils/exportExcel';
 import UserAvatar from './UserAvatar';
 import CategoryIcon from './CategoryIcon';
+import UnifiedDashboardHeader from './UnifiedDashboardHeader';
 import MonthNavigator, { ALL_MONTH_OPTIONS } from './MonthNavigator';
 import {
   ArrowLeft,
@@ -159,41 +160,28 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   return (
     <div>
-      {/* Top Header */}
-      <div className="top-nav">
-        <button className="btn-back-home" onClick={() => setActiveView('landing')}>
-          <ArrowLeft size={16} />
-          <span>Halaman Utama</span>
-        </button>
-
-        <div
-          className="nav-user-badge"
-          onClick={onOpenEditProfile}
-          style={{ cursor: 'pointer' }}
-          title="Klik untuk ganti foto & edit profil"
-        >
-          <UserAvatar user={user} size={42} />
-          <div>
-            <div className="nav-user-title" style={{ color: '#db2777', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span>{user.name || 'Yasmeen Almira'}</span>
-              <Settings size={13} color="var(--text-dim)" />
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
-              {isChina ? 'Nanning, China · Yuan (¥) & Rupiah (Rp)' : 'Indonesia · 100% Rupiah (Rp)'}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          {/* Currency Toggle Switch for Yasmeen */}
-          {isChina && (
+      {/* Unified App Header (Profile, Currency Switcher, Actions, and Integrated Month Navigator) */}
+      <UnifiedDashboardHeader
+        user={user}
+        isYasmeen={true}
+        isChina={isChina}
+        onOpenEditProfile={onOpenEditProfile}
+        onOpenBalanceModal={() => {
+          setModalInput((user.initialFundIdr || 10000000).toString());
+          setIsEditingModal(true);
+        }}
+        onOpenCloudModal={onOpenCloudModal}
+        onExportExcel={handleExportExcel}
+        transactionCount={currentMonthTx.length}
+        currencyToggle={
+          isChina && (
             <div
               style={{
                 display: 'inline-flex',
                 background: 'rgba(255, 255, 255, 0.9)',
                 padding: '0.2rem',
                 borderRadius: 'var(--radius-full)',
-                border: '1px solid var(--pastel-pink-border)',
+                border: '1.5px solid var(--pastel-pink-border)',
                 boxShadow: '0 2px 6px rgba(244, 114, 182, 0.12)'
               }}
             >
@@ -232,44 +220,8 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                 Rp IDR
               </button>
             </div>
-          )}
-
-          <button
-            className="btn-back-home"
-            onClick={() => {
-              setModalInput((user.initialFundIdr || 10000000).toString());
-              setIsEditingModal(true);
-            }}
-            style={{ borderColor: 'var(--pastel-pink-border)', color: '#db2777' }}
-          >
-            <Coins size={14} />
-            <span>Atur Saldo</span>
-          </button>
-
-          <button
-            className="btn-back-home"
-            onClick={onOpenCloudModal}
-            style={{
-              borderColor: isCloudConnected ? '#a7f3d0' : 'var(--pastel-pink-border)',
-              background: isCloudConnected ? '#ecfdf5' : '#ffffff',
-              color: isCloudConnected ? '#065f46' : '#db2777'
-            }}
-            title="Sinkronisasi Cloud Multi-Device"
-          >
-            {isCloudSyncing ? (
-              <RefreshCw size={14} className="animate-spin" color="#059669" />
-            ) : (
-              <Cloud size={14} />
-            )}
-            <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Month Navigator with Excel Download Button */}
-      <MonthNavigator
-        isYasmeen={true}
-        onExportExcel={handleExportExcel}
+          )
+        }
       />
 
       {/* Modal Edit Saldo */}
