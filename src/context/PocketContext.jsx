@@ -1032,9 +1032,9 @@ export function PocketProvider({ children }) {
           initialIdr: startBalanceYasmeenCny * rate,
           startBalanceCny: startBalanceYasmeenCny,
           startBalanceIdr: startBalanceYasmeenCny * rate,
-          stipendCny,
-          stipendIdr: stipendCny * rate,
-          isStipendCair: Boolean(isCurrentStipendCair),
+          stipendCny: 0,
+          stipendIdr: 0,
+          isStipendCair: false,
           monthIncomeCny: monthIncomeYasmeenCny,
           monthIncomeIdr: monthIncomeYasmeenCny * rate,
           totalInflowCny: totalInflowYasmeenCny,
@@ -1149,7 +1149,8 @@ export function PocketProvider({ children }) {
           reserveIdr: 0,
           safeToSpendIdr: 0,
           dailySafeIdr: 0,
-          spending: {}
+          spending: {},
+          categories: ADZIIMA_CATEGORIES
         },
         gold: {
           totalGrams: 0,
