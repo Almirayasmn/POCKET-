@@ -332,7 +332,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   <span style={{ color: '#0369a1' }}>
                     (dari sisa pagu pos {formatIdr(adziima.remainingDailyBudgetIdr)} untuk {adziima.remainingDays} hari tersisa sampai akhir bulan).
                   </span>{' '}
-                  Pos terkunci tetap aman sampai gajian lagi!
+                  Tabungan dan pos lainnya jadi tidak terganggu sampai gajian lagi!
                 </>
               ) : (
                 <>
