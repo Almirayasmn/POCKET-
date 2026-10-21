@@ -1000,6 +1000,13 @@ export function PocketProvider({ children }) {
         ? Math.round(remainingDailyBudgetAdziima / remainingDays)
         : 0;
 
+      // --- Ringkasan Alokasi Anggaran Semua Pos & Simpanan Bersih Adziima ---
+      const totalAllBudgetIdr = activeAdziimaCats.reduce((sum, c) => sum + (c.budgetIdr || 0), 0);
+      const remainingAllBudgetIdr = Math.max(0, totalAllBudgetIdr - monthOutflowAdziimaIdr);
+      const plannedSavingsIdr = Math.max(0, totalInflowAdziimaIdr - totalAllBudgetIdr);
+      const isOverAllocatedAdziima = totalAllBudgetIdr > totalInflowAdziimaIdr && totalInflowAdziimaIdr > 0;
+      const overAllocatedAmountAdziima = isOverAllocatedAdziima ? (totalAllBudgetIdr - totalInflowAdziimaIdr) : 0;
+
       // --- Perhitungan Jatah Harian Yasmeen (Murni dari Pos Daily: Makan, Jajan, Kebutuhan Harian, Belanja Lain) ---
       const dailyCatIdsYasmeen = ['makan', 'jajan', 'kebutuhan_harian', 'belanja_lain'];
       const dailyCatsYasmeen = activeCategories.filter(c => dailyCatIdsYasmeen.includes(c.id));
@@ -1011,6 +1018,13 @@ export function PocketProvider({ children }) {
       const dailySafeYasmeenCny = hasDailyBudgetYasmeen
         ? Math.round((remainingDailyBudgetYasmeenCny / remainingDays) * 10) / 10
         : 0;
+
+      // --- Ringkasan Alokasi Anggaran Semua Pos & Simpanan Bersih Yasmeen ---
+      const totalAllBudgetYasmeenCny = activeCategories.reduce((sum, c) => sum + (isYasmeenInChina ? (c.budgetCny || 0) : (c.budgetIdr || 0)), 0);
+      const remainingAllBudgetYasmeenCny = Math.max(0, totalAllBudgetYasmeenCny - monthOutflowYasmeenCny);
+      const plannedSavingsYasmeenCny = Math.max(0, totalInflowYasmeenCny - totalAllBudgetYasmeenCny);
+      const isOverAllocatedYasmeen = totalAllBudgetYasmeenCny > totalInflowYasmeenCny && totalInflowYasmeenCny > 0;
+      const overAllocatedAmountYasmeenCny = isOverAllocatedYasmeen ? (totalAllBudgetYasmeenCny - totalInflowYasmeenCny) : 0;
 
       return {
         rate,
@@ -1026,6 +1040,8 @@ export function PocketProvider({ children }) {
           stipendCny,
           stipendIdr: stipendCny * rate,
           isStipendCair: Boolean(isCurrentStipendCair),
+          monthIncomeCny: monthIncomeYasmeenCny,
+          monthIncomeIdr: monthIncomeYasmeenCny * rate,
           totalInflowCny: totalInflowYasmeenCny,
           totalInflowIdr: totalInflowYasmeenCny * rate,
           totalOutflowCny: monthOutflowYasmeenCny,
@@ -1042,6 +1058,15 @@ export function PocketProvider({ children }) {
           totalDailyBudgetCny: totalDailyBudgetYasmeenCny,
           dailySafeCny: dailySafeYasmeenCny,
           dailySafeIdr: dailySafeYasmeenCny * rate,
+          totalAllBudgetCny: totalAllBudgetYasmeenCny,
+          totalAllBudgetIdr: totalAllBudgetYasmeenCny * rate,
+          remainingAllBudgetCny: remainingAllBudgetYasmeenCny,
+          remainingAllBudgetIdr: remainingAllBudgetYasmeenCny * rate,
+          plannedSavingsCny: plannedSavingsYasmeenCny,
+          plannedSavingsIdr: plannedSavingsYasmeenCny * rate,
+          isOverAllocated: isOverAllocatedYasmeen,
+          overAllocatedAmountCny: overAllocatedAmountYasmeenCny,
+          overAllocatedAmountIdr: overAllocatedAmountYasmeenCny * rate,
           spending: yasmeenSpending,
           categories: activeCategories || [],
           nongkrongDays: data?.nongkrongChecklist?.[currentMonth] || []
@@ -1050,6 +1075,7 @@ export function PocketProvider({ children }) {
           monthTx: monthAdziimaTx,
           initialIdr: startBalanceAdziimaIdr,
           startBalanceIdr: startBalanceAdziimaIdr,
+          monthIncomeIdr: monthIncomeAdziimaIdr,
           totalInflowIdr: totalInflowAdziimaIdr,
           totalOutflowIdr: monthOutflowAdziimaIdr,
           totalBalanceIdr: netMonthAdziimaIdr,
@@ -1060,6 +1086,11 @@ export function PocketProvider({ children }) {
           remainingDailyBudgetIdr: remainingDailyBudgetAdziima,
           totalDailyBudgetIdr: totalDailyBudgetAdziima,
           dailySafeIdr: dailySafeAdziimaIdr,
+          totalAllBudgetIdr,
+          remainingAllBudgetIdr,
+          plannedSavingsIdr,
+          isOverAllocated: isOverAllocatedAdziima,
+          overAllocatedAmountIdr: overAllocatedAmountAdziima,
           spending: adziimaSpending,
           categories: activeAdziimaCats || []
         },

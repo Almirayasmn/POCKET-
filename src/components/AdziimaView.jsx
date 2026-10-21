@@ -22,7 +22,11 @@ import {
   Download,
   Cloud,
   RefreshCw,
-  Sliders
+  Sliders,
+  PieChart,
+  PiggyBank,
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 import ManageCategoriesModal from './ManageCategoriesModal';
 
@@ -235,27 +239,29 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         </div>
       )}
 
-      {/* Balance Cards for the Month */}
-      <div className="balance-grid grid-3">
+      {/* Unified Balance & Allocation Cards */}
+      <div className="balance-grid grid-4">
+        {/* Card 1: Sisa Saldo Kas */}
         <div className="balance-card" style={{ borderColor: 'var(--pastel-blue-border)' }}>
           <div>
             <div className="card-header-small">
-              <span style={{ color: '#0284c7' }}>Sisa Saldo ({monthLabel})</span>
+              <span style={{ color: '#0284c7' }}>Sisa Saldo Kas</span>
               <Wallet size={18} color="#0284c7" />
             </div>
             <div className="amount-main" style={{ color: '#0284c7' }}>
               {formatIdr(adziima.totalBalanceIdr)}
             </div>
             <div className="amount-sub">
-              Saldo awal: {formatIdr(adziima.initialIdr)}
+              Total modal: {formatIdr(adziima.totalInflowIdr)}
             </div>
           </div>
           <div className="card-footer-meta">
-            <span>Uang Masuk − Pengeluaran</span>
+            <span>Uang di rekening / dompet</span>
             <span style={{ color: '#0284c7', fontWeight: 700 }}>Aktif</span>
           </div>
         </div>
 
+        {/* Card 2: Pengeluaran Bulan Ini */}
         <div className="balance-card">
           <div>
             <div className="card-header-small">
@@ -266,31 +272,54 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               {formatIdr(adziima.totalOutflowIdr)}
             </div>
             <div className="amount-sub">
-              {currentMonthTx.filter(t => t.type !== 'Masuk').length} transaksi
+              {currentMonthTx.filter(t => t.type !== 'Masuk').length} transaksi tercatat
             </div>
           </div>
           <div className="card-footer-meta">
             <span>Bulan {monthLabel}</span>
-            <span style={{ color: '#f43f5e', fontWeight: 700 }}>Tercatat</span>
+            <span style={{ color: '#f43f5e', fontWeight: 700 }}>Terpakai</span>
           </div>
         </div>
 
+        {/* Card 3: Disisihkan ke Pos Belanja */}
         <div className="balance-card">
           <div>
             <div className="card-header-small">
-              <span>Sisa Uang Tersedia</span>
-              <ShieldCheck size={18} color="#10b981" />
+              <span>Disisihkan ke Pos</span>
+              <Sliders size={18} color="#ea580c" />
             </div>
-            <div className="amount-main" style={{ color: '#10b981' }}>
-              {formatIdr(adziima.safeToSpendIdr)}
+            <div className="amount-main" style={{ color: '#ea580c' }}>
+              {formatIdr(adziima.totalAllBudgetIdr)}
             </div>
             <div className="amount-sub">
-              Terkendali & aman
+              Sisa pagu: {formatIdr(adziima.remainingAllBudgetIdr)}
             </div>
           </div>
           <div className="card-footer-meta">
-            <span>Bisa dipakai belanja</span>
-            <span style={{ color: '#10b981', fontWeight: 700 }}>Aman</span>
+            <span>Target seluruh pos</span>
+            <span style={{ color: '#ea580c', fontWeight: 700 }}>Pagu</span>
+          </div>
+        </div>
+
+        {/* Card 4: Simpanan Bersih (Tabungan) */}
+        <div className="balance-card">
+          <div>
+            <div className="card-header-small">
+              <span>Simpanan Bersih</span>
+              <PiggyBank size={18} color="#10b981" />
+            </div>
+            <div className="amount-main" style={{ color: '#10b981' }}>
+              {formatIdr(adziima.plannedSavingsIdr)}
+            </div>
+            <div className="amount-sub">
+              {adziima.isOverAllocated ? 'Pagu pos melebihi saldo' : 'Di luar seluruh pos belanja'}
+            </div>
+          </div>
+          <div className="card-footer-meta">
+            <span>Murni ditabung</span>
+            <span style={{ color: adziima.isOverAllocated ? '#ef4444' : '#10b981', fontWeight: 700 }}>
+              {adziima.isOverAllocated ? 'Defisit Pagu' : 'Aman'}
+            </span>
           </div>
         </div>
       </div>
@@ -313,6 +342,16 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <span>Catat Pemasukan</span>
         </button>
       </div>
+
+      {/* Alert if Total Category Budgets exceed Total Available Funds */}
+      {adziima.isOverAllocated && (
+        <div style={{ marginBottom: '1.2rem', padding: '0.75rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', color: '#b91c1c', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <AlertCircle size={16} style={{ flexShrink: 0 }} />
+          <span>
+            <strong>Perhatian:</strong> Total pagu belanja pos ({formatIdr(adziima.totalAllBudgetIdr)}) melebihi total uang yang kamu miliki ({formatIdr(adziima.totalInflowIdr)}) sebesar <strong>{formatIdr(adziima.overAllocatedAmountIdr)}</strong>. Sesuaikan target pagu pos agar simpanan tabungan bisa terbentuk.
+          </span>
+        </div>
+      )}
 
       {/* Frugal Advice Banner (Prudent & Hemat Berdasarkan Pos Uang Daily) */}
       <div className="frugal-banner">

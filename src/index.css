@@ -739,6 +739,175 @@ button, input, select, textarea {
   color: #0c4a6e;
 }
 
+/* Budget Allocation & Savings Summary Card */
+.budget-summary-card {
+  background: #ffffff;
+  border: 1px solid var(--card-border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-subtle);
+  position: relative;
+  overflow: hidden;
+}
+
+.budget-summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1.1rem;
+}
+
+.budget-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.budget-summary-title h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0;
+}
+
+.budget-summary-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+}
+
+.budget-summary-badge.blue {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.budget-summary-badge.pink {
+  background: #fdf2f8;
+  color: #db2777;
+}
+
+.budget-summary-badge.emerald {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.budget-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem;
+  margin-bottom: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .budget-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.budget-summary-pill {
+  background: #ffffff;
+  border: 1px solid var(--card-border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.budget-summary-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.budget-summary-pill-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.4rem;
+}
+
+.budget-summary-pill-val {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin-bottom: 0.35rem;
+}
+
+.budget-summary-pill-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.budget-alloc-bar-container {
+  margin-bottom: 0.9rem;
+}
+
+.budget-alloc-bar-track {
+  width: 100%;
+  height: 9px;
+  background: #f1f5f9;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  display: flex;
+}
+
+.budget-alloc-bar-pos {
+  height: 100%;
+  background: #0284c7;
+  transition: width 0.4s ease;
+}
+
+.budget-alloc-bar-pos.pink {
+  background: #ec4899;
+}
+
+.budget-alloc-bar-savings {
+  height: 100%;
+  background: #10b981;
+  transition: width 0.4s ease;
+}
+
+.budget-alloc-bar-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  margin-top: 0.45rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.budget-summary-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.78rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
 /* Gold Savings Styles */
 .gold-banner {
   background: var(--pastel-gold-soft);

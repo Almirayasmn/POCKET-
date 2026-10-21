@@ -22,7 +22,10 @@ import {
   RefreshCw,
   Sliders,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  PieChart,
+  PiggyBank,
+  Lock
 } from 'lucide-react';
 import ManageCategoriesModal from './ManageCategoriesModal';
 
@@ -436,6 +439,16 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <span>Catat Pemasukan</span>
         </button>
       </div>
+
+      {/* Alert if Total Category Budgets exceed Total Available Funds */}
+      {yasmeen.isOverAllocated && (
+        <div style={{ marginBottom: '1.2rem', padding: '0.75rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', color: '#b91c1c', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <AlertTriangle size={16} style={{ flexShrink: 0 }} />
+          <span>
+            <strong>Perhatian:</strong> Total pagu pos belanja ({formatPrimary(yasmeen.totalAllBudgetCny, yasmeen.totalAllBudgetIdr)}) melebihi dana yang kamu miliki ({formatPrimary(yasmeen.totalInflowCny, yasmeen.totalInflowIdr)}) sebesar <strong>{formatPrimary(yasmeen.overAllocatedAmountCny, yasmeen.overAllocatedAmountIdr)}</strong>. Sesuaikan target pagu pos agar simpanan tabungan bisa terbentuk.
+          </span>
+        </div>
+      )}
 
       {/* Guide Banner & Nongkrong Tracker */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
