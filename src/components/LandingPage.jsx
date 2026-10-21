@@ -130,9 +130,6 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
         <h1 className="landing-title">
           Kelola Keuangan & Tabungan Bersama
         </h1>
-        <p className="landing-subtitle">
-          Satu aplikasi sinkron untuk pencatatan harian di Nanning & Jakarta serta akumulasi aset emas batangan Galeri 24.
-        </p>
       </div>
 
       {/* Hero Joint Wealth Dashboard (Akumulasi Aset Berdua) */}
