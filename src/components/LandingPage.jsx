@@ -137,32 +137,34 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
 
       {/* Hero Joint Wealth Dashboard (Akumulasi Aset Berdua) */}
       <div className="joint-wealth-banner">
-        <div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#ffffff', padding: '0.22rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #fbcfe8', marginBottom: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: '#ffffff', padding: '0.22rem 0.8rem', borderRadius: 'var(--radius-full)', border: '1px solid #fbcfe8', marginBottom: '0.55rem' }}>
             <Sparkles size={14} color="#d97706" />
             <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#9d174d', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               Akumulasi Aset & Tabungan Berdua
             </span>
           </div>
 
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.1rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.3rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.15, letterSpacing: '-0.02em', textAlign: 'center' }}>
             {formatIdr(totalJointWealthIdr)}
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.25rem' }}>
+          <div style={{ fontSize: '0.84rem', color: '#64748b', marginTop: '0.35rem', textAlign: 'center', maxWidth: '640px' }}>
             Gabungan tabungan mandiri Yasmeen & Adziima serta aset fisik emas batangan Galeri 24
           </div>
         </div>
 
         {/* Breakdown chips */}
-        <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.65rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center' }}>
           <div
             onClick={() => setActiveView('yasmeen')}
             style={{
               background: '#ffffff',
-              padding: '0.55rem 0.85rem',
+              padding: '0.55rem 0.95rem',
               borderRadius: 'var(--radius-md)',
               border: '1px solid #fbcfe8',
               cursor: 'pointer',
+              textAlign: 'center',
+              minWidth: '160px',
               transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka catatan Yasmeen"
@@ -170,7 +172,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#db2777', textTransform: 'uppercase' }}>
               🌸 Yasmeen Almira
             </div>
-            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#9d174d', marginTop: '0.1rem' }}>
+            <div style={{ fontSize: '0.94rem', fontWeight: 800, color: '#9d174d', marginTop: '0.1rem' }}>
               {formatIdr(yasmeenBalanceIdr)}
             </div>
           </div>
@@ -179,10 +181,12 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             onClick={() => setActiveView('adziima')}
             style={{
               background: '#ffffff',
-              padding: '0.55rem 0.85rem',
+              padding: '0.55rem 0.95rem',
               borderRadius: 'var(--radius-md)',
               border: '1px solid #bae6fd',
               cursor: 'pointer',
+              textAlign: 'center',
+              minWidth: '160px',
               transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka catatan Adziima"
@@ -190,7 +194,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
               🌊 Muhammad Mulkan Adziima
             </div>
-            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#0369a1', marginTop: '0.1rem' }}>
+            <div style={{ fontSize: '0.94rem', fontWeight: 800, color: '#0369a1', marginTop: '0.1rem' }}>
               {formatIdr(adziimaBalanceIdr)}
             </div>
           </div>
@@ -199,10 +203,12 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             onClick={() => setActiveView('gold')}
             style={{
               background: '#ffffff',
-              padding: '0.55rem 0.85rem',
+              padding: '0.55rem 0.95rem',
               borderRadius: 'var(--radius-md)',
               border: '1px solid #fde047',
               cursor: 'pointer',
+              textAlign: 'center',
+              minWidth: '160px',
               transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka portofolio emas"
@@ -210,7 +216,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase' }}>
               🪙 Emas Batangan
             </div>
-            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#92400e', marginTop: '0.1rem' }}>
+            <div style={{ fontSize: '0.94rem', fontWeight: 800, color: '#92400e', marginTop: '0.1rem' }}>
               {formatIdr(goldAssetValueIdr)}
             </div>
           </div>
