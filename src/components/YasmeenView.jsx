@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  TrendingDown,
   Plus,
   Trash2,
   Edit2,
@@ -298,12 +299,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         </div>
       )}
 
-      {/* Balance Cards Grid */}
-      <div className={`balance-grid ${isChina ? 'grid-4' : 'grid-3'}`}>
+      {/* Unified Balance & Allocation Cards for Yasmeen */}
+      <div className="balance-grid grid-4">
+        {/* Card 1: Sisa Saldo Kas */}
         <div className="balance-card" style={{ borderColor: 'var(--pastel-pink-border)' }}>
           <div>
             <div className="card-header-small">
-              <span style={{ color: '#db2777' }}>Total Uang ({monthLabel})</span>
+              <span style={{ color: '#db2777' }}>Sisa Saldo Kas</span>
               <Wallet size={18} color="#db2777" />
             </div>
             <div className="amount-main" style={{ color: '#db2777' }}>
@@ -316,109 +318,72 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             )}
           </div>
           <div className="card-footer-meta">
-            <span>Saldo Bersih Bulan Ini</span>
-            <span style={{ color: '#db2777', fontWeight: 700 }}>
-              {isChina ? (isViewYuan ? 'China (¥)' : 'China (Rp)') : 'Indonesia'}
+            <span>Total dana: {formatPrimary(yasmeen.totalInflowCny, yasmeen.totalInflowIdr)}</span>
+            <span style={{ color: '#db2777', fontWeight: 700 }}>Aktif</span>
+          </div>
+        </div>
+
+        {/* Card 2: Pengeluaran Bulan Ini */}
+        <div className="balance-card">
+          <div>
+            <div className="card-header-small">
+              <span>Pengeluaran Bulan Ini</span>
+              <TrendingDown size={18} color="#f43f5e" />
+            </div>
+            <div className="amount-main" style={{ color: '#f43f5e' }}>
+              {formatPrimary(yasmeen.totalOutflowCny, yasmeen.totalOutflowIdr)}
+            </div>
+            <div className="amount-sub">
+              {currentMonthTx.filter(t => t.type !== 'Masuk').length} transaksi tercatat
+            </div>
+          </div>
+          <div className="card-footer-meta">
+            <span>Bulan {monthLabel}</span>
+            <span style={{ color: '#f43f5e', fontWeight: 700 }}>Terpakai</span>
+          </div>
+        </div>
+
+        {/* Card 3: Disisihkan ke Pos Belanja (Pagu Pos) */}
+        <div className="balance-card">
+          <div>
+            <div className="card-header-small">
+              <span>Disisihkan ke Pos</span>
+              <Sliders size={18} color="#ea580c" />
+            </div>
+            <div className="amount-main" style={{ color: '#ea580c' }}>
+              {formatPrimary(yasmeen.totalAllBudgetCny, yasmeen.totalAllBudgetIdr)}
+            </div>
+            <div className="amount-sub">
+              Sisa pagu: {formatPrimary(yasmeen.remainingAllBudgetCny, yasmeen.remainingAllBudgetIdr)}
+            </div>
+          </div>
+          <div className="card-footer-meta">
+            <span>Target seluruh pos</span>
+            <span style={{ color: '#ea580c', fontWeight: 700 }}>Pagu</span>
+          </div>
+        </div>
+
+        {/* Card 4: Simpanan Bersih (Tabungan) */}
+        <div className="balance-card">
+          <div>
+            <div className="card-header-small">
+              <span>Simpanan Bersih</span>
+              <PiggyBank size={18} color="#10b981" />
+            </div>
+            <div className="amount-main" style={{ color: '#10b981' }}>
+              {formatPrimary(yasmeen.plannedSavingsCny, yasmeen.plannedSavingsIdr)}
+            </div>
+            <div className="amount-sub">
+              {yasmeen.isOverAllocated ? 'Pagu pos melebihi saldo' : 'Di luar seluruh pos belanja'}
+            </div>
+          </div>
+          <div className="card-footer-meta">
+            <span>Murni ditabung</span>
+            <span style={{ color: yasmeen.isOverAllocated ? '#ef4444' : '#10b981', fontWeight: 700 }}>
+              {yasmeen.isOverAllocated ? 'Defisit Pagu' : 'Aman'}
             </span>
           </div>
         </div>
-
-        <div className="balance-card">
-          <div>
-            <div className="card-header-small">
-              <span>Bisa Dipakai (Aman)</span>
-              <Sparkles size={18} color="#10b981" />
-            </div>
-            <div className="amount-main" style={{ color: '#10b981' }}>
-              {formatPrimary(yasmeen.safeToSpendCny, yasmeen.safeToSpendIdr)}
-            </div>
-            {formatSecondary(yasmeen.safeToSpendCny, yasmeen.safeToSpendIdr) && (
-              <div className="amount-sub">
-                {formatSecondary(yasmeen.safeToSpendCny, yasmeen.safeToSpendIdr)}
-              </div>
-            )}
-          </div>
-          <div className="card-footer-meta">
-            <span>Di luar cadangan</span>
-            <span style={{ color: '#10b981', fontWeight: 700 }}>Aman</span>
-          </div>
-        </div>
-
-        <div className="balance-card">
-          <div>
-            <div className="card-header-small">
-              <span>Dana Cadangan</span>
-              <ShieldCheck size={18} color="#f59e0b" />
-            </div>
-            <div className="amount-main" style={{ color: '#f59e0b' }}>
-              {formatPrimary(yasmeen.reserveCny, yasmeen.reserveIdr)}
-            </div>
-            {formatSecondary(yasmeen.reserveCny, yasmeen.reserveIdr) && (
-              <div className="amount-sub">
-                {formatSecondary(yasmeen.reserveCny, yasmeen.reserveIdr)}
-              </div>
-            )}
-          </div>
-          <div className="card-footer-meta">
-            <span>Disimpan aman</span>
-            <span style={{ color: '#f59e0b', fontWeight: 700 }}>Terkunci</span>
-          </div>
-        </div>
-
-        {/* Stipend Card (Active only during China period <= Jan 2027) */}
-        {isChina ? (
-          <div className="balance-card">
-            <div>
-              <div className="card-header-small">
-                <span>Stipend Kampus</span>
-                <TrendingUp size={18} color="#8b5cf6" />
-              </div>
-              <div className="amount-main" style={{ color: '#8b5cf6' }}>
-                {formatPrimary(user.stipendCny || 1500, (user.stipendCny || 1500) * exchangeRate)}
-              </div>
-              <div className="amount-sub">
-                {formatSecondary(user.stipendCny || 1500, (user.stipendCny || 1500) * exchangeRate)}
-              </div>
-            </div>
-            <div className="card-footer-meta">
-              <span>Status Cair:</span>
-              <button
-                onClick={() => toggleStipend(selectedMonth)}
-                style={{
-                  border: 'none',
-                  background: yasmeen.isStipendCair ? '#ecfdf5' : '#fdf2f8',
-                  color: yasmeen.isStipendCair ? '#059669' : '#db2777',
-                  padding: '0.25rem 0.6rem',
-                  borderRadius: 'var(--radius-full)',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  cursor: 'pointer'
-                }}
-              >
-                {yasmeen.isStipendCair ? '✓ Sudah Cair' : '⏳ Belum Cair'}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="balance-card">
-            <div>
-              <div className="card-header-small">
-                <span>Total Pengeluaran Bulan Ini</span>
-                <TrendingUp size={18} color="#f43f5e" />
-              </div>
-              <div className="amount-main" style={{ color: '#f43f5e' }}>
-                {formatIdr(yasmeen.totalOutflowIdr)}
-              </div>
-              <div className="amount-sub">
-                {currentMonthTx.filter(t => t.type !== 'Masuk').length} transaksi
-              </div>
-            </div>
-            <div className="card-footer-meta">
-              <span>Sudah kembali ke Indonesia</span>
-              <span style={{ color: '#0284c7', fontWeight: 700 }}>100% IDR</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Quick Action Buttons for Yasmeen */}

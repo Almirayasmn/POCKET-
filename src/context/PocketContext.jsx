@@ -790,8 +790,6 @@ export function PocketProvider({ children }) {
       // Cumulative net change for Yasmeen across past months
       let yasmeenCumulativeNetCny = 0;
       pastMonths.forEach(m => {
-        const isStipendCair = Boolean(yasmeen?.stipendByMonth?.[m]);
-        const mStipend = (m <= '2027-01' && isStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
         let mIncome = 0;
         let mOutflow = 0;
         (data?.yasmeenTransactions || []).forEach(tx => {
@@ -800,7 +798,7 @@ export function PocketProvider({ children }) {
             else mOutflow += (tx.amountCny || 0);
           }
         });
-        yasmeenCumulativeNetCny += (mStipend + mIncome - mOutflow);
+        yasmeenCumulativeNetCny += (mIncome - mOutflow);
       });
 
       // Cumulative net change for Adziima across past months
@@ -847,10 +845,7 @@ export function PocketProvider({ children }) {
         return defaultBudget || 0;
       };
 
-      // 1. Yasmeen Monthly Calculations for currentMonth
-      const isCurrentStipendCair = Boolean(yasmeen?.stipendByMonth?.[currentMonth]);
-      const stipendCny = (isYasmeenInChina && isCurrentStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
-
+      // 1. Yasmeen Monthly Calculations for currentMonth (Stipend dicatat manual di Pemasukan)
       let monthIncomeYasmeenCny = 0;
       let monthOutflowYasmeenCny = 0;
 
@@ -862,7 +857,7 @@ export function PocketProvider({ children }) {
         }
       });
 
-      const totalInflowYasmeenCny = startBalanceYasmeenCny + stipendCny + monthIncomeYasmeenCny;
+      const totalInflowYasmeenCny = startBalanceYasmeenCny + monthIncomeYasmeenCny;
       const netMonthYasmeenCny = totalInflowYasmeenCny - monthOutflowYasmeenCny;
       const reserveYasmeenCny = yasmeen?.emergencyReserveCny || 0;
       const safeYasmeenCny = Math.max(0, netMonthYasmeenCny - reserveYasmeenCny);
