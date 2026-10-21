@@ -152,7 +152,7 @@ export const PRESETS_YASMEEN = [
   { title: 'Tiket Pesawat', amount: 1500, category: 'tiket_pesawat', iconName: 'Plane', currency: 'CNY' },
   { title: 'Nasi Ayam Kantin', amount: 12, category: 'makan', iconName: 'Utensils', currency: 'CNY' },
   { title: 'Teh / Minuman', amount: 5, category: 'jajan', iconName: 'CupSoda', currency: 'CNY' },
-  { title: 'Kafe / Nongkrong', amount: 45, category: 'jajan', iconName: 'Coffee', currency: 'CNY' },
+  { title: 'Nongkrong Kafe (Maks. ¥75)', amount: 75, category: 'jajan', iconName: 'Coffee', currency: 'CNY' },
   { title: 'Metro Nanning', amount: 4, category: 'transport', iconName: 'Train', currency: 'CNY' },
   { title: 'Laundry Kampus', amount: 4, category: 'laundry', iconName: 'Shirt', currency: 'CNY' },
   { title: 'Debit BCA / QRIS', amount: 0, category: 'qris_debit_bca', iconName: 'CreditCard', currency: 'IDR' },

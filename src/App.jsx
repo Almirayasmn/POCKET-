@@ -21,6 +21,7 @@ function PocketAppContent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState(null);
   const [modalDefaultType, setModalDefaultType] = useState('Keluar');
+  const [modalInitialData, setModalInitialData] = useState(null);
 
   // Edit Profile & Photo Modal
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -29,9 +30,10 @@ function PocketAppContent() {
   // Multi-Device Cloud Sync Modal
   const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
 
-  const handleOpenAdd = (defaultType = 'Keluar') => {
+  const handleOpenAdd = (defaultType = 'Keluar', initialData = null) => {
     setEditingTx(null);
     setModalDefaultType(defaultType || 'Keluar');
+    setModalInitialData(initialData || null);
     setIsAddModalOpen(true);
   };
 
@@ -107,9 +109,11 @@ function PocketAppContent() {
         onClose={() => {
           setIsAddModalOpen(false);
           setEditingTx(null);
+          setModalInitialData(null);
         }}
         editingTx={editingTx}
         defaultType={modalDefaultType}
+        initialData={modalInitialData}
       />
 
       {/* Edit Profile & Photo Modal */}

@@ -20,7 +20,9 @@ import {
   Download,
   Cloud,
   RefreshCw,
-  Sliders
+  Sliders,
+  CheckCircle2,
+  AlertTriangle
 } from 'lucide-react';
 import ManageCategoriesModal from './ManageCategoriesModal';
 
@@ -106,6 +108,14 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const nongkrongTx = currentMonthTx.filter(t => (t.category === 'nongkrong' || t.category === 'jajan') && t.type !== 'Masuk');
   const nongkrongCount = checkedDays.length > 0 ? checkedDays.length : nongkrongTx.length;
   const remainingSlots = Math.max(0, 2 - nongkrongCount);
+
+  // Per-session nongkrong budget metrics (Pagu maks. ¥75 / sekali nongkrong, target 2x/minggu)
+  const NONGKRONG_MAX_PER_SESSION = 75; // ¥75 per sesi
+  const WEEKLY_NONGKRONG_BUDGET = 150; // 2x * ¥75
+  const totalNongkrongSpentCny = nongkrongTx.reduce((sum, t) => sum + (t.amountCny || 0), 0);
+  const totalNongkrongSpentIdr = nongkrongTx.reduce((sum, t) => sum + (t.amountIdr || 0), 0);
+  const overBudgetTxList = nongkrongTx.filter(t => (t.amountCny || 0) > NONGKRONG_MAX_PER_SESSION);
+  const isOverBudget = overBudgetTxList.length > 0;
 
   // Export to Excel handler
   const handleExportExcel = () => {
@@ -449,18 +459,94 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
         {/* Nongkrong Tracker (Khusus Mulai November 2026) */}
         {selectedMonth >= '2026-11' ? (
-          <div className="pastel-card" style={{ padding: '1.2rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+          <div className="pastel-card" style={{ padding: '1.25rem' }}>
+            {/* Header: Title & Badges */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.8rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Coffee size={18} color="#f59e0b" />
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 800 }}>Nongkrong Kafe</h4>
+                <div style={{ width: 36, height: 36, borderRadius: '10px', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Coffee size={20} color="#d97706" />
+                </div>
+                <div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, color: 'var(--text-main)' }}>
+                    Nongkrong Kafe
+                  </h4>
+                  <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                    Batas Maksimal & Jadwal Mingguan
+                  </div>
+                </div>
               </div>
-              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#b45309', background: '#fef3c7', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)' }}>
-                Target: 2x / minggu
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#92400e', background: '#fef3c7', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', border: '1px solid #fde68a' }}>
+                  ☕ Maks. ¥75 / Sesi
+                </span>
+                <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#ec4899', background: '#fdf2f8', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', border: '1px solid #fbcfe8' }}>
+                  Target: 2x / minggu
+                </span>
+              </div>
+            </div>
+
+            {/* 3 Metric Cards: Pagu Sesi, Pagu Mingguan, Realisasi Terpakai */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '0.9rem' }}>
+              <div style={{ background: 'var(--bg-subtle)', padding: '0.6rem 0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center', border: '1px solid var(--card-border-subtle)' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', fontWeight: 600 }}>Pagu per Sesi</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#d97706', marginTop: '0.15rem' }}>
+                  {formatPrimary(NONGKRONG_MAX_PER_SESSION, NONGKRONG_MAX_PER_SESSION * exchangeRate)}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Maksimal</div>
+              </div>
+
+              <div style={{ background: 'var(--bg-subtle)', padding: '0.6rem 0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center', border: '1px solid var(--card-border-subtle)' }}>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', fontWeight: 600 }}>Pagu Mingguan</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#ec4899', marginTop: '0.15rem' }}>
+                  {formatPrimary(WEEKLY_NONGKRONG_BUDGET, WEEKLY_NONGKRONG_BUDGET * exchangeRate)}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>2 sesi × ¥75</div>
+              </div>
+
+              <div style={{ background: isOverBudget ? '#fef2f2' : '#f0fdf4', padding: '0.6rem 0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center', border: `1px solid ${isOverBudget ? '#fecaca' : '#bbf7d0'}` }}>
+                <div style={{ fontSize: '0.68rem', color: isOverBudget ? '#991b1b' : '#166534', fontWeight: 600 }}>Total Terpakai</div>
+                <div style={{ fontSize: '0.92rem', fontWeight: 800, color: isOverBudget ? '#dc2626' : '#15803d', marginTop: '0.15rem' }}>
+                  {formatPrimary(totalNongkrongSpentCny, totalNongkrongSpentIdr)}
+                </div>
+                <div style={{ fontSize: '0.65rem', color: isOverBudget ? '#b91c1c' : '#16a34a' }}>
+                  {nongkrongTx.length} transaksi
+                </div>
+              </div>
+            </div>
+
+            {/* Status Alert Banner */}
+            {isOverBudget ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff1f2', border: '1px solid #fecdd3', padding: '0.5rem 0.75rem', borderRadius: '8px', marginBottom: '0.85rem' }}>
+                <AlertTriangle size={16} color="#e11d48" style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: '0.74rem', color: '#9f1239', lineHeight: 1.35 }}>
+                  <strong>Perhatian:</strong> Ada sesi nongkrong yang melebihi batas <strong>¥75</strong>. Tetap disiplin yaa agar uang saku cukup!
+                </div>
+              </div>
+            ) : totalNongkrongSpentCny > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '0.5rem 0.75rem', borderRadius: '8px', marginBottom: '0.85rem' }}>
+                <CheckCircle2 size={16} color="#16a34a" style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: '0.74rem', color: '#166534', lineHeight: 1.35 }}>
+                  <strong>Hebat & Disiplin!</strong> Seluruh sesi nongkrong bulan ini masih berada dalam batas aman (≤ ¥75 per sesi).
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fffbeb', border: '1px solid #fde68a', padding: '0.5rem 0.75rem', borderRadius: '8px', marginBottom: '0.85rem' }}>
+                <Coffee size={16} color="#d97706" style={{ flexShrink: 0 }} />
+                <div style={{ fontSize: '0.74rem', color: '#92400e', lineHeight: 1.35 }}>
+                  Tandai hari kamu nongkrong di bawah dan catat nominal pengeluarannya (maksimal ¥75 per sesi).
+                </div>
+              </div>
+            )}
+
+            {/* Days Checklist Strip */}
+            <div style={{ fontSize: '0.76rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.45rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>Pilih Hari Nongkrong Minggu Ini:</span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                {checkedDays.length} diceklis • Sisa: {remainingSlots}x
               </span>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.35rem', marginTop: '0.6rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.35rem', marginBottom: '0.85rem' }}>
               {DAYS_OF_WEEK.map((day) => {
                 const isChecked = checkedDays.includes(day);
                 return (
@@ -506,19 +592,106 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                 );
               })}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', textAlign: 'center' }}>
-              {nongkrongCount} hari diceklis minggu ini (Klik hari untuk ceklis ✓) • Sisa target: {remainingSlots} kali
+
+            {/* Quick Action Button: Catat Pengeluaran Kafe */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: nongkrongTx.length > 0 ? '0.75rem' : 0 }}>
+              <button
+                type="button"
+                onClick={() => onOpenAdd('Keluar', {
+                  title: 'Nongkrong Kafe',
+                  category: 'jajan',
+                  amount: 75,
+                  notes: 'Sesi kafe (Pagu maks. ¥75)'
+                })}
+                style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.45rem',
+                  padding: '0.55rem 0.8rem',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #ec4899 100%)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(236, 72, 153, 0.25)'
+                }}
+              >
+                <Plus size={15} />
+                <span>+ Catat Nongkrong (Pagu Maks. ¥75)</span>
+              </button>
             </div>
+
+            {/* Riwayat Transaksi Nongkrong Terkait */}
+            {nongkrongTx.length > 0 && (
+              <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--card-border-subtle)' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Riwayat Pengeluaran Kafe ({nongkrongTx.length})
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  {nongkrongTx.slice(0, 3).map((tx) => {
+                    const isTxOver = (tx.amountCny || 0) > NONGKRONG_MAX_PER_SESSION;
+                    return (
+                      <div
+                        key={tx.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          background: 'var(--bg-subtle)',
+                          padding: '0.4rem 0.6rem',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                          <span style={{ fontSize: '0.85rem' }}>☕</span>
+                          <div>
+                            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{tx.title || 'Nongkrong Kafe'}</div>
+                            <div style={{ fontSize: '0.66rem', color: 'var(--text-dim)' }}>{formatDateIndo(tx.date)}</div>
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 800, color: isTxOver ? '#dc2626' : 'var(--text-main)' }}>
+                            {formatPrimary(tx.amountCny, tx.amountIdr)}
+                          </div>
+                          <span
+                            style={{
+                              fontSize: '0.62rem',
+                              fontWeight: 700,
+                              padding: '0.1rem 0.35rem',
+                              borderRadius: '4px',
+                              background: isTxOver ? '#fee2e2' : '#dcfce7',
+                              color: isTxOver ? '#b91c1c' : '#15803d'
+                            }}
+                          >
+                            {isTxOver ? `Over +¥${(tx.amountCny || 0) - NONGKRONG_MAX_PER_SESSION}` : `Aman (≤ ¥75)`}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="pastel-card" style={{ padding: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.8rem', background: '#fffbeb', border: '1px solid #fde68a' }}>
             <Coffee size={24} color="#d97706" />
             <div>
-              <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#92400e', margin: '0 0 0.2rem 0' }}>
-                Nongkrong Kafe (Mulai November 2026)
-              </h4>
-              <p style={{ fontSize: '0.78rem', color: '#b45309', margin: 0 }}>
-                Target nongkrong kafe 2x/minggu aktif mulai November 2026 saat tiba di kampus Nanning.
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
+                <h4 style={{ fontSize: '0.92rem', fontWeight: 800, color: '#92400e', margin: 0 }}>
+                  Nongkrong Kafe (Mulai November 2026)
+                </h4>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)' }}>
+                  Pagu: Maks. ¥75 / Sesi
+                </span>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: '#b45309', margin: 0, lineHeight: 1.4 }}>
+                Target nongkrong kafe 2x/minggu dengan pagu maksimal <strong>75 Yuan per sekali nongkrong</strong> (total ¥150/minggu) akan aktif otomatis mulai November 2026 saat tiba di kampus Nanning.
               </p>
             </div>
           </div>

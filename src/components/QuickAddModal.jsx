@@ -11,7 +11,13 @@ import CategoryIcon from './CategoryIcon';
 import confetti from 'canvas-confetti';
 import { X, Plus, Check, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 
-export default function QuickAddModal({ isOpen, onClose, editingTx = null, defaultType = 'Keluar' }) {
+export default function QuickAddModal({
+  isOpen,
+  onClose,
+  editingTx = null,
+  defaultType = 'Keluar',
+  initialData = null
+}) {
   const {
     activeView,
     addTransaction,
@@ -58,17 +64,17 @@ export default function QuickAddModal({ isOpen, onClose, editingTx = null, defau
       } else {
         const today = new Date().toISOString().split('T')[0];
         const initialDate = today.startsWith(selectedMonth || '2026-10') ? today : `${selectedMonth || '2026-10'}-01`;
-        setType(defaultType || 'Keluar');
-        setTitle('');
-        setAmount('');
-        setInputCurrency(isAdziima ? 'IDR' : 'CNY');
-        setPaymentMethod(currentPaymentMethods[0] || (isAdziima ? 'QRIS' : 'WeChat Pay'));
-        setCategory(currentCategories[0]?.id || (isAdziima ? 'makan_harian' : 'makan'));
-        setDate(initialDate);
-        setNotes('');
+        setType(initialData?.type || defaultType || 'Keluar');
+        setTitle(initialData?.title || '');
+        setAmount(initialData?.amount != null ? initialData.amount.toString() : '');
+        setInputCurrency(initialData?.inputCurrency || (isAdziima ? 'IDR' : 'CNY'));
+        setPaymentMethod(initialData?.paymentMethod || currentPaymentMethods[0] || (isAdziima ? 'QRIS' : 'WeChat Pay'));
+        setCategory(initialData?.category || currentCategories[0]?.id || (isAdziima ? 'makan_harian' : 'makan'));
+        setDate(initialData?.date || initialDate);
+        setNotes(initialData?.notes || '');
       }
     }
-  }, [isOpen, editingTx, isAdziima, selectedMonth, defaultType]);
+  }, [isOpen, editingTx, isAdziima, selectedMonth, defaultType, initialData]);
 
   if (!isOpen) return null;
 
