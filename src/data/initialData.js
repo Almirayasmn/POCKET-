@@ -132,18 +132,16 @@ export const DEFAULT_GOLD_SAVINGS = {
 };
 
 export const PAYMENT_METHODS_YASMEEN = [
-  'WeChat Pay',
-  'Alipay',
-  'QRIS',
-  'Debit BCA',
-  'Tunai / Cash',
-  'Kartu Bank China'
+  'Bank Mandiri',
+  'Bank BCA',
+  'E-Wallet',
+  'Tunai / Cash'
 ];
 
 export const PAYMENT_METHODS_ADZIIMA = [
-  'QRIS',
-  'BCA / Transfer Bank',
-  'GoPay / OVO',
+  'BCA',
+  'SeaBank',
+  'E-Wallet',
   'Tunai / Cash'
 ];
 

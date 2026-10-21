@@ -959,12 +959,18 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                       </h4>
                       <div className="tx-meta">
                         <span>{formatDateIndo(tx.date)}</span>
-                        <span>•</span>
-                        <span>{cat.name}</span>
+                        {!isIncome && (
+                          <>
+                            <span>•</span>
+                            <span>{cat.name}</span>
+                          </>
+                        )}
                         {tx.paymentMethod && (
                           <>
                             <span>•</span>
-                            <span>{tx.paymentMethod}</span>
+                            <span style={{ fontWeight: 600, color: isIncome ? '#059669' : 'inherit' }}>
+                              {isIncome ? `Masuk ke ${tx.paymentMethod}` : tx.paymentMethod}
+                            </span>
                           </>
                         )}
                         {tx.notes && (

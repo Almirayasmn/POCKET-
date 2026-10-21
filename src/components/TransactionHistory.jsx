@@ -180,7 +180,9 @@ export default function TransactionHistory({ onOpenAdd }) {
                       {tx.paymentMethod && (
                         <>
                           <span>•</span>
-                          <span className="badge-tag">{tx.paymentMethod}</span>
+                          <span className="badge-tag">
+                            {tx.type === 'Masuk' ? `Masuk ke ${tx.paymentMethod}` : tx.paymentMethod}
+                          </span>
                         </>
                       )}
                       {tx.notes && (

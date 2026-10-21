@@ -58,7 +58,7 @@ export default function QuickAddModal({
         );
         setInputCurrency(isAdziima ? 'IDR' : (editingTx.inputCurrency || 'CNY'));
         setCategory(editingTx.category || (isAdziima ? 'makan_harian' : 'makan'));
-        setPaymentMethod(editingTx.paymentMethod || (isAdziima ? 'QRIS' : 'WeChat Pay'));
+        setPaymentMethod(editingTx.paymentMethod || (isAdziima ? 'BCA' : 'Bank Mandiri'));
         setDate(editingTx.date || new Date().toISOString().split('T')[0]);
         setNotes(editingTx.notes || '');
       } else {
@@ -68,7 +68,7 @@ export default function QuickAddModal({
         setTitle(initialData?.title || '');
         setAmount(initialData?.amount != null ? initialData.amount.toString() : '');
         setInputCurrency(initialData?.inputCurrency || (isAdziima ? 'IDR' : 'CNY'));
-        setPaymentMethod(initialData?.paymentMethod || currentPaymentMethods[0] || (isAdziima ? 'QRIS' : 'WeChat Pay'));
+        setPaymentMethod(initialData?.paymentMethod || currentPaymentMethods[0] || (isAdziima ? 'BCA' : 'Bank Mandiri'));
         setCategory(initialData?.category || currentCategories[0]?.id || (isAdziima ? 'makan_harian' : 'makan'));
         setDate(initialData?.date || initialDate);
         setNotes(initialData?.notes || '');
@@ -93,12 +93,13 @@ export default function QuickAddModal({
       return;
     }
 
-    const finalCat = category || currentCategories[0]?.id || (isAdziima ? 'makan_harian' : 'makan');
-    const finalMethod = paymentMethod || currentPaymentMethods[0] || (isAdziima ? 'QRIS' : 'WeChat Pay');
+    const isIncome = type === 'Masuk';
+    const finalCat = isIncome ? 'pemasukan' : (category || currentCategories[0]?.id || (isAdziima ? 'makan_harian' : 'makan'));
+    const finalMethod = paymentMethod || currentPaymentMethods[0] || (isAdziima ? 'BCA' : 'Bank Mandiri');
     const catObj = currentCategories.find(c => c.id === finalCat);
 
     const payload = {
-      title: title.trim() || catObj?.name || (type === 'Masuk' ? 'Pemasukan' : 'Pengeluaran'),
+      title: title.trim() || (isIncome ? 'Pemasukan' : (catObj?.name || 'Pengeluaran')),
       amount: parseFloat(amount),
       inputCurrency: isAdziima ? 'IDR' : inputCurrency,
       category: finalCat,
@@ -334,26 +335,35 @@ export default function QuickAddModal({
             />
           </div>
 
-          {/* Category Dropdown & Quick Selector */}
-          <div className="form-group">
-            <label className="form-label">Kategori Pos</label>
-            <select
-              className="form-select"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              style={{ fontWeight: 700 }}
-            >
-              {currentCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} {c.budgetCny ? `(Budget: ¥${c.budgetCny})` : c.budgetIdr ? `(Budget: Rp ${c.budgetIdr.toLocaleString('id-ID')})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Category Dropdown (Khusus Pengeluaran saja!) */}
+          {type === 'Keluar' ? (
+            <div className="form-group">
+              <label className="form-label">Kategori Pos Anggaran</label>
+              <select
+                className="form-select"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                style={{ fontWeight: 700 }}
+              >
+                {currentCategories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} {c.budgetCny ? `(Budget: ¥${c.budgetCny})` : c.budgetIdr ? `(Budget: Rp ${c.budgetIdr.toLocaleString('id-ID')})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div style={{ background: '#ecfdf5', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid #a7f3d0', fontSize: '0.78rem', color: '#065f46', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>💰</span>
+              <span>Pemasukan langsung menambah total saldo & uang saku tanpa memotong pos anggaran.</span>
+            </div>
+          )}
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Metode Pembayaran</label>
+              <label className="form-label">
+                {type === 'Masuk' ? 'Masuk ke Rekening / Akun' : 'Bayar Pakai / Rekening'}
+              </label>
               <select
                 className="form-select"
                 value={paymentMethod}
