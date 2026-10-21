@@ -314,17 +314,34 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         </button>
       </div>
 
-      {/* Frugal Advice Banner (Prudent & Hemat) */}
+      {/* Frugal Advice Banner (Prudent & Hemat Berdasarkan Pos Uang Daily) */}
       <div className="frugal-banner">
         <div className="frugal-content">
           <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0284c7', flexShrink: 0 }}>
             <ShieldCheck size={22} />
           </div>
           <div className="frugal-text">
-            <h4>Catatan Hemat Adziima · {monthLabel}</h4>
+            <h4>
+              {adziima.hasDailyBudgetSet ? 'Panduan Jatah Pos Harian (Daily)' : 'Target Belanja Harian (Daily)'} · {monthLabel}
+            </h4>
             <p>
-              Uangmu tersisa aman rata-rata{' '}
-              <strong>{formatIdr(adziima.dailySafeIdr)} / hari</strong>. Prioritaskan kebutuhan pokok, hindari belanja impulsif, dan kelola keuangan secara bijak!
+              {adziima.hasDailyBudgetSet ? (
+                <>
+                  Sisa jatah belanja pos daily:{' '}
+                  <strong>{formatIdr(adziima.dailySafeIdr)} / hari</strong>{' '}
+                  <span style={{ color: '#0369a1' }}>
+                    (dari sisa pagu pos {formatIdr(adziima.remainingDailyBudgetIdr)} untuk {adziima.remainingDays} hari tersisa sampai akhir bulan).
+                  </span>{' '}
+                  Pos terkunci tetap aman sampai gajian lagi!
+                </>
+              ) : (
+                <>
+                  Belum ada target di <strong>Pos Harian (Makan/Kebutuhan)</strong>.{' '}
+                  <span style={{ color: '#0369a1' }}>
+                    Klik tombol <strong>"Atur Pagu"</strong> pada pos Makan Harian di bawah untuk menentukan jatah belanja harianmu!
+                  </span>
+                </>
+              )}
             </p>
           </div>
         </div>

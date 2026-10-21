@@ -977,6 +977,41 @@ export function PocketProvider({ children }) {
       const profitLossIdr = currentAssetValueIdr - totalGoldSpentIdr;
       const profitLossPercent = totalGoldSpentIdr > 0 ? Math.round(((profitLossIdr / totalGoldSpentIdr) * 100) * 10) / 10 : 0;
 
+      // 4. Hitung sisa hari dalam bulan yang dipilih
+      const [curYearStr, curMonthStr] = (currentMonth || '2026-10').split('-');
+      const cYear = parseInt(curYearStr, 10);
+      const cMonth = parseInt(curMonthStr, 10);
+      const totalDaysInCurrentMonth = new Date(cYear, cMonth, 0).getDate();
+      const nowDate = new Date();
+      const isViewingCurrentMonth = (cYear === nowDate.getFullYear() && cMonth === (nowDate.getMonth() + 1));
+      const remainingDays = isViewingCurrentMonth
+        ? Math.max(1, totalDaysInCurrentMonth - nowDate.getDate() + 1)
+        : totalDaysInCurrentMonth;
+
+      // --- Perhitungan Jatah Harian Adziima (Murni dari Pos Daily: Makan, Kebutuhan, Bensin, Ngopi, Rokok) ---
+      const dailyCatIdsAdziima = ['makan_harian', 'belanja_kebutuhan', 'bensin_transport', 'ngopi_santai', 'rokok'];
+      const dailyCatsAdziima = activeAdziimaCats.filter(c => dailyCatIdsAdziima.includes(c.id));
+      const totalDailyBudgetAdziima = dailyCatsAdziima.reduce((sum, c) => sum + (c.budgetIdr || 0), 0);
+      const totalDailySpentAdziima = dailyCatsAdziima.reduce((sum, c) => sum + (adziimaSpending[c.id]?.totalIdr || 0), 0);
+      const remainingDailyBudgetAdziima = Math.max(0, totalDailyBudgetAdziima - totalDailySpentAdziima);
+
+      const hasDailyBudgetAdziima = totalDailyBudgetAdziima > 0;
+      const dailySafeAdziimaIdr = hasDailyBudgetAdziima
+        ? Math.round(remainingDailyBudgetAdziima / remainingDays)
+        : 0;
+
+      // --- Perhitungan Jatah Harian Yasmeen (Murni dari Pos Daily: Makan, Jajan, Kebutuhan Harian, Belanja Lain) ---
+      const dailyCatIdsYasmeen = ['makan', 'jajan', 'kebutuhan_harian', 'belanja_lain'];
+      const dailyCatsYasmeen = activeCategories.filter(c => dailyCatIdsYasmeen.includes(c.id));
+      const totalDailyBudgetYasmeenCny = dailyCatsYasmeen.reduce((sum, c) => sum + (c.budgetCny || 0), 0);
+      const totalDailySpentYasmeenCny = dailyCatsYasmeen.reduce((sum, c) => sum + (yasmeenSpending[c.id]?.totalCny || 0), 0);
+      const remainingDailyBudgetYasmeenCny = Math.max(0, totalDailyBudgetYasmeenCny - totalDailySpentYasmeenCny);
+
+      const hasDailyBudgetYasmeen = totalDailyBudgetYasmeenCny > 0;
+      const dailySafeYasmeenCny = hasDailyBudgetYasmeen
+        ? Math.round((remainingDailyBudgetYasmeenCny / remainingDays) * 10) / 10
+        : 0;
+
       return {
         rate,
         isYasmeenInChina,
@@ -1001,8 +1036,12 @@ export function PocketProvider({ children }) {
           reserveIdr: reserveYasmeenCny * rate,
           safeToSpendCny: safeYasmeenCny,
           safeToSpendIdr: safeYasmeenCny * rate,
-          dailySafeCny: Math.max(0, safeYasmeenCny / 30),
-          dailySafeIdr: Math.max(0, (safeYasmeenCny * rate) / 30),
+          remainingDays,
+          hasDailyBudgetSet: hasDailyBudgetYasmeen,
+          remainingDailyBudgetCny: remainingDailyBudgetYasmeenCny,
+          totalDailyBudgetCny: totalDailyBudgetYasmeenCny,
+          dailySafeCny: dailySafeYasmeenCny,
+          dailySafeIdr: dailySafeYasmeenCny * rate,
           spending: yasmeenSpending,
           categories: activeCategories || [],
           nongkrongDays: data?.nongkrongChecklist?.[currentMonth] || []
@@ -1016,7 +1055,11 @@ export function PocketProvider({ children }) {
           totalBalanceIdr: netMonthAdziimaIdr,
           reserveIdr: reserveAdziimaIdr,
           safeToSpendIdr: safeAdziimaIdr,
-          dailySafeIdr: Math.max(0, safeAdziimaIdr / 30),
+          remainingDays,
+          hasDailyBudgetSet: hasDailyBudgetAdziima,
+          remainingDailyBudgetIdr: remainingDailyBudgetAdziima,
+          totalDailyBudgetIdr: totalDailyBudgetAdziima,
+          dailySafeIdr: dailySafeAdziimaIdr,
           spending: adziimaSpending,
           categories: activeAdziimaCats || []
         },

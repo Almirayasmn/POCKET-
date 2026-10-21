@@ -443,17 +443,28 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
             <Sparkles size={18} color="#db2777" />
             <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#9d174d' }}>
-              Panduan Jajan {monthLabel}
+              Panduan Jatah Belanja & Makan {monthLabel}
             </h4>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#831843', lineHeight: 1.5 }}>
-            Sisa batas jajan harian:{' '}
-            <strong>
-              {formatPrimary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr)} / hari
-            </strong>{' '}
-            {formatSecondary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr) && (
-              <span>({formatSecondary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr)})</span>
-            )}. Terkendali dan terencana agar uang saku selalu cukup!
+          <p style={{ fontSize: '0.85rem', color: '#831843', lineHeight: 1.5, margin: 0 }}>
+            {yasmeen.hasDailyBudgetSet ? (
+              <>
+                Sisa jatah pos daily:{' '}
+                <strong>
+                  {formatPrimary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr)} / hari
+                </strong>{' '}
+                {formatSecondary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr) && (
+                  <span>({formatSecondary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr)})</span>
+                )}{' '}
+                <span style={{ fontSize: '0.78rem', color: '#9d174d' }}>
+                  (untuk {yasmeen.remainingDays} hari tersisa dari pos Makan, Jajan & Kebutuhan).
+                </span>
+              </>
+            ) : (
+              <>
+                Belum ada target pada pos Makan / Kebutuhan Harian. Tentukan pagu di pos bawah agar jatah harianmu terkontrol!
+              </>
+            )}
           </p>
         </div>
 
