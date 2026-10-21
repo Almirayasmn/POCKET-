@@ -260,8 +260,8 @@ export default function BalanceCards({ onOpenSettings, onOpenAdd, onOpenSetMoney
               <TrendingUp size={20} color="#8b5cf6" />
             </div>
             {renderAmount(
-              users.yasmeen?.stipendCny || 1500,
-              (users.yasmeen?.stipendCny || 1500) * exchangeRate
+              users.yasmeen?.stipendCny || 1000,
+              (users.yasmeen?.stipendCny || 1000) * exchangeRate
             )}
           </div>
           <div className="card-footer-meta">

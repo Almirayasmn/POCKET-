@@ -11,7 +11,7 @@ export default function EditBalanceModal({ isOpen, onClose }) {
   // Yasmeen Form
   const [yasmeenName, setYasmeenName] = useState(users.yasmeen?.name || 'Yasmeen');
   const [yasmeenInitialFundIdr, setYasmeenInitialFundIdr] = useState((users.yasmeen?.initialFundIdr || 10000000).toString());
-  const [yasmeenStipendCny, setYasmeenStipendCny] = useState((users.yasmeen?.stipendCny || 1500).toString());
+  const [yasmeenStipendCny, setYasmeenStipendCny] = useState((users.yasmeen?.stipendCny || 1000).toString());
   const [yasmeenReserveCny, setYasmeenReserveCny] = useState((users.yasmeen?.emergencyReserveCny || 1000).toString());
 
   // Cowoku Form

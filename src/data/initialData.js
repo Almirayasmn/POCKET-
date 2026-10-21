@@ -43,7 +43,7 @@ export const DEFAULT_USERS = {
     themeColor: '#f472b6',
     initialFundIdr: 10000000, // Rp 10.000.000
     initialFundCny: 3636.36,   // ¥3.636,36
-    stipendCny: 1500,          // ¥1.500 per bulan
+    stipendCny: 1000,          // ¥1.000 per bulan
     stipendReceived: false,
     otherIncomeCny: 0,
     emergencyReserveCny: 1000, // ¥1.000 cadangan (Rp 2.750.000)

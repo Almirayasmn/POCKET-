@@ -118,7 +118,8 @@ export function PocketProvider({ children }) {
             yasmeen: {
               ...parsed.users.yasmeen,
               name: (!parsed.users.yasmeen?.name || parsed.users.yasmeen?.name === 'Yasmeen') ? 'Yasmeen Almira' : parsed.users.yasmeen.name,
-              bio: (parsed.users.yasmeen?.bio || '').includes('GXPC') ? '' : (parsed.users.yasmeen?.bio || '')
+              bio: (parsed.users.yasmeen?.bio || '').includes('GXPC') ? '' : (parsed.users.yasmeen?.bio || ''),
+              stipendCny: (parsed.users.yasmeen?.stipendCny === 1500 || !parsed.users.yasmeen?.stipendCny) ? 1000 : parsed.users.yasmeen.stipendCny
             },
             adziima: {
               ...parsed.users.adziima,
@@ -1123,8 +1124,8 @@ export function PocketProvider({ children }) {
           isChina: true,
           initialCny: 3636.36,
           initialIdr: 10000000,
-          stipendCny: 1500,
-          stipendIdr: 4125000,
+          stipendCny: 1000,
+          stipendIdr: 2750000,
           totalInflowCny: 3636.36,
           totalInflowIdr: 10000000,
           totalOutflowCny: 0,
