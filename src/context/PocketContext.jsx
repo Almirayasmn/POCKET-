@@ -328,13 +328,11 @@ export function PocketProvider({ children }) {
   };
 
   const toggleStipend = (targetMonth = null) => {
-    const month = targetMonth || selectedMonth || '2026-10';
+    const month = targetMonth || selectedMonth || '2026-11';
     setData(prev => {
       const yasmeen = prev.users?.yasmeen || DEFAULT_USERS.yasmeen;
       const stipendByMonth = { ...(yasmeen.stipendByMonth || {}) };
-      const currentVal = stipendByMonth[month] !== undefined
-        ? Boolean(stipendByMonth[month])
-        : (month === '2026-10' ? false : (month === '2026-11' ? Boolean(yasmeen.stipendReceived) : false));
+      const currentVal = Boolean(stipendByMonth[month]);
       const nextVal = !currentVal;
       stipendByMonth[month] = nextVal;
 
@@ -344,10 +342,27 @@ export function PocketProvider({ children }) {
           ...prev.users,
           yasmeen: {
             ...yasmeen,
-            stipendByMonth,
-            stipendReceived: nextVal
+            stipendByMonth
           }
         }
+      };
+    });
+  };
+
+  const toggleNongkrongDay = (day, targetMonth = null) => {
+    const month = targetMonth || selectedMonth || '2026-11';
+    setData(prev => {
+      const nongkrongChecklist = { ...(prev.nongkrongChecklist || {}) };
+      const currentDays = new Set(nongkrongChecklist[month] || []);
+      if (currentDays.has(day)) {
+        currentDays.delete(day);
+      } else {
+        currentDays.add(day);
+      }
+      nongkrongChecklist[month] = Array.from(currentDays);
+      return {
+        ...prev,
+        nongkrongChecklist
       };
     });
   };
@@ -709,8 +724,9 @@ export function PocketProvider({ children }) {
       const monthYasmeenTx = (data?.yasmeenTransactions || []).filter(tx => (tx?.date || '').startsWith(currentMonth));
       const monthAdziimaTx = (data?.adziimaTransactions || []).filter(tx => (tx?.date || '').startsWith(currentMonth));
 
-      // 1. Rolling Monthly Balance calculation starting from Oktober 2026 ('2026-10')
-      const startBaselineMonth = '2026-10';
+      // Yasmeen baseline starts in November 2026 ('2026-11'), Adziima baseline starts in October 2026 ('2026-10')
+      const startBaselineYasmeen = '2026-11';
+      const startBaselineAdziima = '2026-10';
       const baseInitialYasmeenCny = (yasmeen?.initialFundCny !== undefined && yasmeen?.initialFundCny !== null)
         ? parseFloat(yasmeen.initialFundCny)
         : ((parseFloat(yasmeen?.initialFundIdr) || 10000000) / rate);
@@ -734,14 +750,13 @@ export function PocketProvider({ children }) {
         return list;
       };
 
-      const pastMonths = currentMonth > startBaselineMonth ? getMonthsListBetween(startBaselineMonth, currentMonth) : [];
+      const pastMonthsYasmeen = currentMonth > startBaselineYasmeen ? getMonthsListBetween(startBaselineYasmeen, currentMonth) : [];
+      const pastMonthsAdziima = currentMonth > startBaselineAdziima ? getMonthsListBetween(startBaselineAdziima, currentMonth) : [];
 
       // Cumulative net change for Yasmeen across past months
       let yasmeenCumulativeNetCny = 0;
-      pastMonths.forEach(m => {
-        const isStipendCair = yasmeen?.stipendByMonth?.[m] !== undefined
-          ? Boolean(yasmeen.stipendByMonth[m])
-          : (m === '2026-10' ? false : (m === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false));
+      pastMonthsYasmeen.forEach(m => {
+        const isStipendCair = Boolean(yasmeen?.stipendByMonth?.[m]);
         const mStipend = (m <= '2027-01' && isStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
         let mIncome = 0;
         let mOutflow = 0;
@@ -756,7 +771,7 @@ export function PocketProvider({ children }) {
 
       // Cumulative net change for Adziima across past months
       let adziimaCumulativeNetIdr = 0;
-      pastMonths.forEach(m => {
+      pastMonthsAdziima.forEach(m => {
         let mIncome = 0;
         let mOutflow = 0;
         (data?.adziimaTransactions || []).forEach(tx => {
@@ -769,7 +784,7 @@ export function PocketProvider({ children }) {
       });
 
       // Starting balance of the selected month
-      const startBalanceYasmeenCny = baseInitialYasmeenCny + yasmeenCumulativeNetCny;
+      const startBalanceYasmeenCny = currentMonth < startBaselineYasmeen ? 0 : (baseInitialYasmeenCny + yasmeenCumulativeNetCny);
       const startBalanceAdziimaIdr = baseInitialAdziimaIdr + adziimaCumulativeNetIdr;
 
       // Helper to resolve inherited budget for a category in a given month
@@ -781,9 +796,9 @@ export function PocketProvider({ children }) {
         }
 
         // Special rule for Yasmeen's kebutuhan_awal:
-        // Oktober has initial cost of Rp 500.000 (¥182). Future months default to ¥0 / Rp 0
+        // November has initial cost of Rp 500.000 (¥182). Future months default to ¥0 / Rp 0
         if (userId === 'yasmeen' && catId === 'kebutuhan_awal') {
-          return currentMonth === '2026-10' ? 182 : 0;
+          return currentMonth === '2026-11' ? 182 : 0;
         }
 
         // 2. Look back through earlier months in chronological order
@@ -799,9 +814,7 @@ export function PocketProvider({ children }) {
       };
 
       // 1. Yasmeen Monthly Calculations for currentMonth
-      const isCurrentStipendCair = yasmeen?.stipendByMonth?.[currentMonth] !== undefined
-        ? Boolean(yasmeen.stipendByMonth[currentMonth])
-        : (currentMonth === '2026-10' ? false : (currentMonth === '2026-11' ? Boolean(yasmeen?.stipendReceived) : false));
+      const isCurrentStipendCair = Boolean(yasmeen?.stipendByMonth?.[currentMonth]);
       const stipendCny = (isYasmeenInChina && isCurrentStipendCair) ? (yasmeen?.stipendCny || 1500) : 0;
 
       let monthIncomeYasmeenCny = 0;
@@ -957,7 +970,8 @@ export function PocketProvider({ children }) {
           dailySafeCny: Math.max(0, safeYasmeenCny / 30),
           dailySafeIdr: Math.max(0, (safeYasmeenCny * rate) / 30),
           spending: yasmeenSpending,
-          categories: activeCategories || []
+          categories: activeCategories || [],
+          nongkrongDays: data?.nongkrongChecklist?.[currentMonth] || []
         },
         adziima: {
           monthTx: monthAdziimaTx,
@@ -1070,6 +1084,7 @@ export function PocketProvider({ children }) {
         updateUser,
         setTotalMoney,
         toggleStipend,
+        toggleNongkrongDay,
         addTransaction,
         updateTransaction,
         deleteTransaction,

@@ -15,8 +15,9 @@ export const YASMEEN_CATEGORIES = [
   { id: 'belanja_lain', name: 'Belanja lain', iconName: 'ShoppingBag', budgetCny: 70, color: '#f472b6', note: 'Keperluan harian' },
   { id: 'toiletries', name: 'Toiletries', iconName: 'Luggage', budgetCny: 0, color: '#a855f7', note: 'Peralatan mandi' },
   { id: 'asrama', name: 'Asrama', iconName: 'Zap', budgetCny: 0, color: '#6366f1', note: 'Keperluan asrama' },
-  { id: 'kebutuhan_awal', name: 'Kebutuhan awal', iconName: 'Luggage', budgetCny: 182, color: '#fb923c', note: 'Biaya awal Okt: Rp 500rb (¥182)' },
+  { id: 'kebutuhan_awal', name: 'Kebutuhan awal', iconName: 'Luggage', budgetCny: 182, color: '#fb923c', note: 'Biaya awal Nov: Rp 500rb (¥182)' },
   { id: 'tiket_pesawat', name: 'Tiket Pesawat', iconName: 'Plane', budgetCny: 0, color: '#0ea5e9', note: 'Penerbangan Indo ⇄ China' },
+  { id: 'qris_debit_bca', name: 'QRIS / Debit BCA', iconName: 'CreditCard', budgetCny: 0, color: '#38bdf8', note: 'Transaksi via QRIS / BCA' },
 ];
 
 // Adziima Categories (Indonesia - Rupiah Rp, Hemat & Rapi)
@@ -65,7 +66,7 @@ export const DEFAULT_USERS = {
 export const SAMPLE_YASMEEN_TRANSACTIONS = [
   {
     id: 'tx-y1',
-    date: '2026-10-20',
+    date: '2026-11-01',
     category: 'makan',
     title: 'Nasi ayam',
     amountCny: 12,
@@ -78,7 +79,7 @@ export const SAMPLE_YASMEEN_TRANSACTIONS = [
   },
   {
     id: 'tx-y2',
-    date: '2026-10-20',
+    date: '2026-11-01',
     category: 'jajan',
     title: 'Teh',
     amountCny: 5,
@@ -91,7 +92,7 @@ export const SAMPLE_YASMEEN_TRANSACTIONS = [
   },
   {
     id: 'tx-y3',
-    date: '2026-10-20',
+    date: '2026-11-02',
     category: 'jajan',
     title: 'Kafe bersama Najma',
     amountCny: 45,
@@ -133,6 +134,8 @@ export const DEFAULT_GOLD_SAVINGS = {
 export const PAYMENT_METHODS_YASMEEN = [
   'WeChat Pay',
   'Alipay',
+  'QRIS',
+  'Debit BCA',
   'Tunai / Cash',
   'Kartu Bank China'
 ];
@@ -152,6 +155,7 @@ export const PRESETS_YASMEEN = [
   { title: 'Kafe / Nongkrong', amount: 45, category: 'jajan', iconName: 'Coffee', currency: 'CNY' },
   { title: 'Metro Nanning', amount: 4, category: 'transport', iconName: 'Train', currency: 'CNY' },
   { title: 'Laundry Kampus', amount: 4, category: 'laundry', iconName: 'Shirt', currency: 'CNY' },
+  { title: 'Debit BCA / QRIS', amount: 0, category: 'qris_debit_bca', iconName: 'CreditCard', currency: 'IDR' },
 ];
 
 export const PRESETS_ADZIIMA = [

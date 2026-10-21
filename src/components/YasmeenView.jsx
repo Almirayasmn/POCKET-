@@ -34,14 +34,23 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     toggleStipend,
     updateCategoryBudget,
     setTotalMoney,
+    toggleNongkrongDay,
     exchangeRate,
     users,
     selectedMonth,
+    setSelectedMonth,
     yasmeenCurrencyView,
     setYasmeenCurrencyView,
     isCloudConnected,
     isCloudSyncing
   } = usePocket();
+
+  // Yasmeen begins tracking in China starting November 2026
+  React.useEffect(() => {
+    if (selectedMonth < '2026-11') {
+      setSelectedMonth('2026-11');
+    }
+  }, []);
 
   const { yasmeen } = calculations;
   const user = users.yasmeen || {};
@@ -99,10 +108,11 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     setIsEditingModal(false);
   };
 
-  // Nongkrong count in this month
-  const nongkrongTx = currentMonthTx.filter(t => t.category === 'nongkrong' && t.type !== 'Masuk');
-  const nongkrongCount = nongkrongTx.length;
-  const remainingSlots = Math.max(0, 2 - (nongkrongCount % 2));
+  // Nongkrong count in this month (checklist & transactions)
+  const checkedDays = yasmeen.nongkrongDays || [];
+  const nongkrongTx = currentMonthTx.filter(t => (t.category === 'nongkrong' || t.category === 'jajan') && t.type !== 'Masuk');
+  const nongkrongCount = checkedDays.length > 0 ? checkedDays.length : nongkrongTx.length;
+  const remainingSlots = Math.max(0, 2 - nongkrongCount);
 
   // Export to Excel handler
   const handleExportExcel = () => {
@@ -456,26 +466,54 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             </span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.3rem', marginTop: '0.6rem' }}>
-            {DAYS_OF_WEEK.map((day, idx) => (
-              <div
-                key={day}
-                style={{
-                  flex: 1,
-                  textAlign: 'center',
-                  padding: '0.4rem 0.15rem',
-                  borderRadius: 'var(--radius-sm)',
-                  background: idx < nongkrongCount ? '#fdf2f8' : 'var(--bg-subtle)',
-                  border: '1px solid var(--card-border-subtle)'
-                }}
-              >
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)' }}>{day}</div>
-                <div style={{ fontSize: '0.85rem' }}>{idx < nongkrongCount ? '☕' : '⚪'}</div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.35rem', marginTop: '0.6rem' }}>
+            {DAYS_OF_WEEK.map((day) => {
+              const isChecked = checkedDays.includes(day);
+              return (
+                <div
+                  key={day}
+                  onClick={() => toggleNongkrongDay(day, selectedMonth)}
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    padding: '0.45rem 0.15rem',
+                    borderRadius: 'var(--radius-sm)',
+                    background: isChecked ? '#fdf2f8' : 'var(--bg-subtle)',
+                    border: isChecked ? '1.5px solid #f472b6' : '1px solid var(--card-border-subtle)',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={`Klik untuk ceklis / unceklis hari ${day}`}
+                >
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, color: isChecked ? '#db2777' : 'var(--text-dim)', marginBottom: '0.25rem' }}>
+                    {day}
+                  </div>
+                  <div
+                    style={{
+                      width: 22,
+                      height: 22,
+                      margin: '0 auto',
+                      borderRadius: '6px',
+                      background: isChecked ? '#f472b6' : '#ffffff',
+                      border: isChecked ? 'none' : '1.5px solid #cbd5e1',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.82rem',
+                      fontWeight: 900,
+                      boxShadow: isChecked ? '0 2px 6px rgba(244, 114, 182, 0.35)' : 'none'
+                    }}
+                  >
+                    {isChecked ? '✓' : ''}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem', textAlign: 'center' }}>
-            Bulan {monthLabel}: {nongkrongCount} kali • Sisa slot minggu ini: {remainingSlots} kali
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', textAlign: 'center' }}>
+            {nongkrongCount} hari diceklis minggu ini (Klik hari untuk ceklis ✓) • Sisa target: {remainingSlots} kali
           </div>
         </div>
       </div>
@@ -503,13 +541,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   Prinsip Keuangan: Pengeluaran Mandiri Sesuai Stipend (¥1.500 / bln)
                 </h4>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9d174d', background: '#fdf2f8', border: '1px solid #fbcfe8', padding: '0.2rem 0.65rem', borderRadius: 'var(--radius-full)' }}>
-                  {selectedMonth === '2026-10' ? 'Okt: + Kebutuhan Awal Rp 500rb' : 'Rutin: 100% Sesuai Stipend'}
+                  {selectedMonth === '2026-11' ? 'Nov: + Kebutuhan Awal Rp 500rb' : 'Rutin: 100% Sesuai Stipend'}
                 </span>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#831843', lineHeight: 1.55 }}>
                 Meskipun modal awal ada <strong>Rp 10.000.000</strong> (¥3.636,36), uang ini dijaga utuh sebagai tabungan aman. Pengeluaran bulanan dialokasikan pas dari stipend kampus <strong>¥1.500 / bulan</strong> (total alokasi pos rutin: <strong>¥1.470</strong>).
-                {selectedMonth === '2026-10'
-                  ? ' Khusus Oktober terdapat pos Kebutuhan Awal sebesar Rp 500.000 (¥182) untuk persiapan tiba di China.'
+                {selectedMonth === '2026-11'
+                  ? ' Khusus November terdapat pos Kebutuhan Awal sebesar Rp 500.000 (¥182) untuk persiapan tiba di China.'
                   : ' Untuk bulan ini dan selanjutnya, pos Kebutuhan Awal otomatis Rp 0 (sudah tidak diperlukan).'}
               </p>
             </div>
