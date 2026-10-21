@@ -95,9 +95,6 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             </div>
 
             <div className="profile-name">{users.yasmeen?.name || 'Yasmeen'}</div>
-            <div className="profile-tag tag-pink">
-              Nanning, China · {isYasmeenIdr ? 'Rupiah (Rp)' : 'Yuan (¥)'}
-            </div>
             {Boolean(users.yasmeen?.bio) && (
               <p className="profile-desc">{users.yasmeen.bio}</p>
             )}
@@ -155,9 +152,6 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
             </div>
 
             <div className="profile-name">{users.adziima?.name || 'Adziima'}</div>
-            <div className="profile-tag tag-blue">
-              Indonesia · Rupiah (Rp)
-            </div>
             {Boolean(users.adziima?.bio) && (
               <p className="profile-desc">{users.adziima.bio}</p>
             )}

@@ -16,6 +16,7 @@ import {
   pushCloudData,
   subscribeToCloudChanges
 } from '../services/cloudSync';
+import { fetchLiveGoldPrices } from '../services/goldPriceService';
 
 const STORAGE_KEY = 'pocket_duo_storage_v10';
 
@@ -102,6 +103,8 @@ export function PocketProvider({ children }) {
       localStorage.setItem('pocket_device_yasmeen_currency', curr);
     } catch (e) {}
   };
+
+  const [isFetchingGoldPrice, setIsFetchingGoldPrice] = useState(false);
 
   const [data, setData] = useState(() => {
     try {
@@ -709,6 +712,37 @@ export function PocketProvider({ children }) {
     }));
   };
 
+  const refreshLiveGoldPrices = async (force = false) => {
+    setIsFetchingGoldPrice(true);
+    try {
+      const res = await fetchLiveGoldPrices();
+      if (res && res.sellPrice) {
+        updateGaleri24Prices({
+          sell: res.sellPrice,
+          buyback: res.buybackPrice,
+          table: res.table,
+          dateLabel: res.dateLabel
+        });
+        return { success: true, ...res };
+      }
+      return { success: false };
+    } catch (err) {
+      console.warn('Auto refresh gold price failed:', err);
+      return { success: false, error: err.message };
+    } finally {
+      setIsFetchingGoldPrice(false);
+    }
+  };
+
+  // Automatically fetch fresh Galeri 24 prices on app mount
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const lastDate = data?.goldSavings?.lastUpdated;
+    if (!lastDate || lastDate !== today) {
+      refreshLiveGoldPrices();
+    }
+  }, []);
+
   // Bulletproof Calculations per selectedMonth
   const calculations = useMemo(() => {
     try {
@@ -1095,6 +1129,8 @@ export function PocketProvider({ children }) {
         updateGoldPrice,
         updateGoldTarget,
         updateGaleri24Prices,
+        refreshLiveGoldPrices,
+        isFetchingGoldPrice,
         setGoldValuationMode,
         setYasmeenCurrencyView,
         firebaseDbUrl,

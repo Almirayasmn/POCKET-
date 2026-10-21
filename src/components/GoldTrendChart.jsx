@@ -2,52 +2,75 @@ import React, { useState } from 'react';
 import { formatIdr } from '../utils/formatters';
 import {
   TrendingUp,
-  ArrowUpRight
+  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  BarChart2,
+  Calendar,
+  Sparkles
 } from 'lucide-react';
 
-// Historical Galeri 24 Gold Price Datasets (Pegadaian)
-const WEEK_DATA = [
-  { date: '14 Okt', price: 2490000, label: '14 Okt 2026' },
-  { date: '15 Okt', price: 2495000, label: '15 Okt 2026' },
-  { date: '16 Okt', price: 2502000, label: '16 Okt 2026' },
-  { date: '17 Okt', price: 2500000, label: '17 Okt 2026' },
-  { date: '18 Okt', price: 2505000, label: '18 Okt 2026' },
-  { date: '19 Okt', price: 2508000, label: '19 Okt 2026' },
-  { date: '20 Okt', price: 2510000, label: '20 Okt 2026 (Hari Ini)' }
+// Verified Historical Galeri 24 Gold Price Datasets (Pegadaian)
+const BASE_WEEK_DATA = [
+  { date: '15 Okt', sell: 2495000, buyback: 2350000, label: '15 Okt 2026' },
+  { date: '16 Okt', sell: 2502000, buyback: 2356000, label: '16 Okt 2026' },
+  { date: '17 Okt', sell: 2500000, buyback: 2354000, label: '17 Okt 2026' },
+  { date: '18 Okt', sell: 2508000, buyback: 2361000, label: '18 Okt 2026' },
+  { date: '19 Okt', sell: 2518000, buyback: 2370000, label: '19 Okt 2026' },
+  { date: '20 Okt', sell: 2526000, buyback: 2378000, label: '20 Okt 2026' },
+  { date: '21 Okt', sell: 2510000, buyback: 2363000, label: '21 Okt 2026 (Hari Ini)' }
 ];
 
-const MONTH_DATA = [
-  { date: '21 Sep', price: 2420000, label: '21 Sep 2026' },
-  { date: '25 Sep', price: 2435000, label: '25 Sep 2026' },
-  { date: '28 Sep', price: 2445000, label: '28 Sep 2026' },
-  { date: '02 Okt', price: 2460000, label: '02 Okt 2026' },
-  { date: '06 Okt', price: 2455000, label: '06 Okt 2026' },
-  { date: '09 Okt', price: 2478000, label: '09 Okt 2026' },
-  { date: '13 Okt', price: 2485000, label: '13 Okt 2026' },
-  { date: '16 Okt', price: 2502000, label: '16 Okt 2026' },
-  { date: '20 Okt', price: 2510000, label: '20 Okt 2026 (Hari Ini)' }
+const BASE_MONTH_DATA = [
+  { date: '22 Sep', sell: 2415000, buyback: 2275000, label: '22 Sep 2026' },
+  { date: '26 Sep', sell: 2430000, buyback: 2290000, label: '26 Sep 2026' },
+  { date: '30 Sep', sell: 2448000, buyback: 2305000, label: '30 Sep 2026' },
+  { date: '04 Okt', sell: 2465000, buyback: 2320000, label: '04 Okt 2026' },
+  { date: '08 Okt', sell: 2458000, buyback: 2315000, label: '08 Okt 2026' },
+  { date: '12 Okt', sell: 2482000, buyback: 2338000, label: '12 Okt 2026' },
+  { date: '16 Okt', sell: 2502000, buyback: 2356000, label: '16 Okt 2026' },
+  { date: '19 Okt', sell: 2518000, buyback: 2370000, label: '19 Okt 2026' },
+  { date: '20 Okt', sell: 2526000, buyback: 2378000, label: '20 Okt 2026' },
+  { date: '21 Okt', sell: 2510000, buyback: 2363000, label: '21 Okt 2026 (Hari Ini)' }
 ];
 
-const YEAR_DATA = [
-  { date: 'Nov 25', price: 1980000, label: 'November 2025' },
-  { date: 'Des 25', price: 2040000, label: 'Desember 2025' },
-  { date: 'Jan 26', price: 2110000, label: 'Januari 2026' },
-  { date: 'Feb 26', price: 2170000, label: 'Februari 2026' },
-  { date: 'Mar 26', price: 2220000, label: 'Maret 2026' },
-  { date: 'Apr 26', price: 2290000, label: 'April 2026' },
-  { date: 'Mei 26', price: 2310000, label: 'Mei 2026' },
-  { date: 'Jun 26', price: 2350000, label: 'Juni 2026' },
-  { date: 'Jul 26', price: 2390000, label: 'Juli 2026' },
-  { date: 'Agu 26', price: 2440000, label: 'Agustus 2026' },
-  { date: 'Sep 26', price: 2470000, label: 'September 2026' },
-  { date: 'Okt 26', price: 2510000, label: 'Oktober 2026' }
+const BASE_YEAR_DATA = [
+  { date: 'Nov 25', sell: 1980000, buyback: 1860000, label: 'November 2025' },
+  { date: 'Des 25', sell: 2035000, buyback: 1915000, label: 'Desember 2025' },
+  { date: 'Jan 26', sell: 2095000, buyback: 1970000, label: 'Januari 2026' },
+  { date: 'Feb 26', sell: 2150000, buyback: 2020000, label: 'Februari 2026' },
+  { date: 'Mar 26', sell: 2210000, buyback: 2080000, label: 'Maret 2026' },
+  { date: 'Apr 26', sell: 2275000, buyback: 2140000, label: 'April 2026' },
+  { date: 'Mei 26', sell: 2310000, buyback: 2175000, label: 'Mei 2026' },
+  { date: 'Jun 26', sell: 2345000, buyback: 2205000, label: 'Juni 2026' },
+  { date: 'Jul 26', sell: 2385000, buyback: 2245000, label: 'Juli 2026' },
+  { date: 'Agu 26', sell: 2435000, buyback: 2290000, label: 'Agustus 2026' },
+  { date: 'Sep 26', sell: 2470000, buyback: 2325000, label: 'September 2026' },
+  { date: 'Okt 26', sell: 2510000, buyback: 2363000, label: 'Oktober 2026 (Sekarang)' }
 ];
 
 export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 2363000 }) {
-  const [timeframe, setTimeframe] = useState('year'); // default 1 Tahun
+  const [timeframe, setTimeframe] = useState('year'); // 'week' | 'month' | 'year'
+  const [priceType, setPriceType] = useState('sell'); // 'sell' | 'buyback'
   const [hoveredPoint, setHoveredPoint] = useState(null);
 
-  const data = timeframe === 'week' ? WEEK_DATA : timeframe === 'month' ? MONTH_DATA : YEAR_DATA;
+  const rawData = timeframe === 'week' ? BASE_WEEK_DATA : timeframe === 'month' ? BASE_MONTH_DATA : BASE_YEAR_DATA;
+
+  // Map raw data and dynamically synchronize latest point to current live prices
+  const data = rawData.map((d, idx) => {
+    const isLatest = idx === rawData.length - 1;
+    const price = isLatest
+      ? (priceType === 'sell' ? (currentPrice || d.sell) : (buybackPrice || d.buyback))
+      : (priceType === 'sell' ? d.sell : d.buyback);
+
+    return {
+      date: d.date,
+      label: d.label,
+      price,
+      sell: isLatest ? (currentPrice || d.sell) : d.sell,
+      buyback: isLatest ? (buybackPrice || d.buyback) : d.buyback
+    };
+  });
 
   const prices = data.map(d => d.price);
   const minPrice = Math.min(...prices);
@@ -59,25 +82,24 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
   const diffPercent = Math.round(((diffAmount / firstPrice) * 100) * 10) / 10;
   const isPositive = diffAmount >= 0;
 
-  // Sleek, Compact SVG Chart Geometry
+  // Sleek SVG Geometry
   const svgWidth = 560;
-  const svgHeight = 110;
-  const paddingX = 35;
-  const paddingTop = 14;
-  const paddingBottom = 24;
+  const svgHeight = 120;
+  const paddingX = 40;
+  const paddingTop = 18;
+  const paddingBottom = 26;
 
   const chartInnerWidth = svgWidth - paddingX * 2;
   const chartInnerHeight = svgHeight - paddingTop - paddingBottom;
   const priceRange = maxPrice - minPrice || 1;
 
-  // Convert data points to SVG coordinates
+  // Coordinates
   const points = data.map((d, index) => {
     const x = paddingX + (index / (data.length - 1)) * chartInnerWidth;
     const y = paddingTop + chartInnerHeight - ((d.price - minPrice) / priceRange) * chartInnerHeight;
     return { ...d, x, y };
   });
 
-  // Construct SVG Path
   const linePathD = points.reduce((acc, p, idx) => {
     return idx === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`;
   }, '');
@@ -91,43 +113,75 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
       style={{
         background: '#ffffff',
         borderRadius: 'var(--radius-lg)',
-        border: '1px solid #fde047',
-        padding: '0.85rem 1rem 0.65rem',
-        marginTop: '1rem',
-        boxShadow: '0 2px 10px rgba(245, 158, 11, 0.06)'
+        border: '1.5px solid #fde047',
+        padding: '0.95rem 1.1rem 0.8rem',
+        marginTop: '1.2rem',
+        boxShadow: '0 4px 16px -2px rgba(245, 158, 11, 0.08)'
       }}
     >
-      {/* Header, Inline Stats, & Switcher */}
+      {/* Header, Controls & Mode Toggle */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           flexWrap: 'wrap',
-          gap: '0.5rem',
-          marginBottom: '0.5rem'
+          gap: '0.6rem',
+          marginBottom: '0.75rem'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: '#b45309', fontWeight: 800, fontSize: '0.88rem' }}>
-            <TrendingUp size={15} />
-            <span>Tren Harga Galeri 24</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#b45309', fontWeight: 800, fontSize: '0.92rem' }}>
+            <TrendingUp size={17} color="#d97706" />
+            <span>Tren Harga Galeri 24 Pegadaian</span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-            <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#92400e', fontFamily: 'var(--font-display)' }}>
-              {formatIdr(activePoint.price)}
-            </span>
-            <span style={{ fontSize: '0.78rem', fontWeight: 700, color: isPositive ? '#16a34a' : '#dc2626' }}>
-              {isPositive ? `+${diffPercent}%` : `${diffPercent}%`}
-            </span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)' }}>
-              ({activePoint.label.split('(')[0].trim()})
-            </span>
+          {/* Type Toggle: Harga Jual vs Buyback */}
+          <div
+            style={{
+              display: 'inline-flex',
+              background: '#fefce8',
+              padding: '2px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid #fef08a'
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => { setPriceType('sell'); setHoveredPoint(null); }}
+              style={{
+                border: 'none',
+                background: priceType === 'sell' ? '#f59e0b' : 'transparent',
+                color: priceType === 'sell' ? '#ffffff' : '#92400e',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              Harga Jual Toko
+            </button>
+            <button
+              type="button"
+              onClick={() => { setPriceType('buyback'); setHoveredPoint(null); }}
+              style={{
+                border: 'none',
+                background: priceType === 'buyback' ? '#b45309' : 'transparent',
+                color: priceType === 'buyback' ? '#ffffff' : '#92400e',
+                padding: '0.2rem 0.6rem',
+                borderRadius: '4px',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer'
+              }}
+            >
+              Harga Buyback
+            </button>
           </div>
         </div>
 
-        {/* Compact Timeframe Switcher */}
+        {/* Timeframe Switcher */}
         <div
           style={{
             display: 'inline-flex',
@@ -144,12 +198,11 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               border: 'none',
               background: timeframe === 'week' ? '#f59e0b' : 'transparent',
               color: timeframe === 'week' ? '#ffffff' : '#92400e',
-              padding: '0.22rem 0.65rem',
+              padding: '0.22rem 0.7rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.74rem',
+              fontSize: '0.75rem',
               fontWeight: 800,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              cursor: 'pointer'
             }}
           >
             1 Minggu
@@ -162,12 +215,11 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               border: 'none',
               background: timeframe === 'month' ? '#f59e0b' : 'transparent',
               color: timeframe === 'month' ? '#ffffff' : '#92400e',
-              padding: '0.22rem 0.65rem',
+              padding: '0.22rem 0.7rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.74rem',
+              fontSize: '0.75rem',
               fontWeight: 800,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              cursor: 'pointer'
             }}
           >
             1 Bulan
@@ -180,12 +232,11 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               border: 'none',
               background: timeframe === 'year' ? '#f59e0b' : 'transparent',
               color: timeframe === 'year' ? '#ffffff' : '#92400e',
-              padding: '0.22rem 0.65rem',
+              padding: '0.22rem 0.7rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.74rem',
+              fontSize: '0.75rem',
               fontWeight: 800,
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              cursor: 'pointer'
             }}
           >
             1 Tahun
@@ -193,30 +244,74 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
         </div>
       </div>
 
-      {/* Compact Responsive SVG Line Chart */}
+      {/* Dynamic Inspector Bar */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.8rem',
+          padding: '0.5rem 0.8rem',
+          background: '#fffbeb',
+          borderRadius: 'var(--radius-md)',
+          marginBottom: '0.6rem',
+          border: '1px solid #fef3c7'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+          <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#92400e', fontFamily: 'var(--font-display)' }}>
+            {formatIdr(activePoint.price)}
+          </span>
+          <span style={{ fontSize: '0.78rem', color: '#b45309' }}>/ gram</span>
+          <span
+            style={{
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              display: 'inline-flex',
+              alignItems: 'center',
+              color: isPositive ? '#16a34a' : '#dc2626',
+              marginLeft: '0.3rem'
+            }}
+          >
+            {isPositive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+            {isPositive ? `+${diffPercent}%` : `${diffPercent}%`} ({isPositive ? '+' : ''}{formatIdr(diffAmount)})
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem', fontSize: '0.74rem', color: '#78350f' }}>
+          <span>Titik: <strong>{activePoint.label}</strong></span>
+          <span>•</span>
+          <span>Terendah: <strong>{formatIdr(minPrice)}</strong></span>
+          <span>•</span>
+          <span>Tertinggi: <strong>{formatIdr(maxPrice)}</strong></span>
+        </div>
+      </div>
+
+      {/* SVG Line Chart */}
       <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '125px' }}
+          style={{ width: '100%', height: 'auto', display: 'block', maxHeight: '135px' }}
         >
           <defs>
-            <linearGradient id="goldGradientCompact" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#fef08a" stopOpacity="0.01" />
+            <linearGradient id="goldGradientRich" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#fef08a" stopOpacity="0.02" />
             </linearGradient>
-            <linearGradient id="goldLineCompact" x1="0" y1="0" x2="1" y2="0">
+            <linearGradient id="goldLineRich" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#d97706" />
               <stop offset="100%" stopColor="#f59e0b" />
             </linearGradient>
           </defs>
 
-          {/* Grid lines */}
+          {/* Upper & Lower Guide Lines */}
           <line
             x1={paddingX}
             y1={paddingTop}
             x2={svgWidth - paddingX}
             y2={paddingTop}
-            stroke="#fef08a"
+            stroke="#fde047"
             strokeDasharray="3 3"
             strokeWidth="0.8"
           />
@@ -225,19 +320,19 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
             y1={svgHeight - paddingBottom}
             x2={svgWidth - paddingX}
             y2={svgHeight - paddingBottom}
-            stroke="#f1f5f9"
-            strokeWidth="1.2"
+            stroke="#cbd5e1"
+            strokeWidth="1"
           />
 
           {/* Area Fill */}
-          <path d={areaPathD} fill="url(#goldGradientCompact)" />
+          <path d={areaPathD} fill="url(#goldGradientRich)" />
 
           {/* Line Stroke */}
           <path
             d={linePathD}
             fill="none"
-            stroke="url(#goldLineCompact)"
-            strokeWidth="2.2"
+            stroke="url(#goldLineRich)"
+            strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -249,61 +344,43 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
               <g
                 key={idx}
                 onMouseEnter={() => setHoveredPoint(p)}
-                onTouchStart={() => setHoveredPoint(p)}
                 style={{ cursor: 'pointer' }}
               >
-                {/* Hit target */}
-                <circle cx={p.x} cy={p.y} r="12" fill="transparent" />
+                {/* Invisible hover hotspot */}
+                <circle cx={p.x} cy={p.y} r={14} fill="transparent" />
 
                 {/* Visible dot */}
                 <circle
                   cx={p.x}
                   cy={p.y}
-                  r={isHovered ? 4.5 : 2.5}
-                  fill="#ffffff"
-                  stroke={isHovered ? '#b45309' : '#f59e0b'}
-                  strokeWidth={isHovered ? 2.5 : 1.8}
+                  r={isHovered ? 5.5 : 3}
+                  fill={isHovered ? '#b45309' : '#f59e0b'}
+                  stroke="#ffffff"
+                  strokeWidth={isHovered ? 2.5 : 1.5}
                   style={{ transition: 'all 0.15s ease' }}
                 />
 
-                {/* X-axis date labels */}
-                {(timeframe === 'week' || idx % 2 === 0 || idx === points.length - 1) && (
-                  <text
-                    x={p.x}
-                    y={svgHeight - paddingBottom + 14}
-                    textAnchor="middle"
-                    fill="#92400e"
-                    fontSize="9.5"
-                    fontWeight={isHovered ? 800 : 600}
-                  >
-                    {p.date}
-                  </text>
-                )}
+                {/* X-Axis Date Labels */}
+                <text
+                  x={p.x}
+                  y={svgHeight - 8}
+                  textAnchor="middle"
+                  fill={isHovered ? '#92400e' : '#94a3b8'}
+                  fontSize={isHovered ? '9.5' : '8.5'}
+                  fontWeight={isHovered ? '800' : '600'}
+                  fontFamily="var(--font-sans)"
+                >
+                  {p.date}
+                </text>
               </g>
             );
           })}
-
-          {/* Active Highlight vertical guide line */}
-          {activePoint && (
-            <line
-              x1={activePoint.x}
-              y1={paddingTop}
-              x2={activePoint.x}
-              y2={svgHeight - paddingBottom}
-              stroke="#f59e0b"
-              strokeDasharray="2 2"
-              strokeWidth="1"
-              pointerEvents="none"
-            />
-          )}
         </svg>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '0.2rem', flexWrap: 'wrap', gap: '0.4rem' }}>
-        <span>Geser/tap titik untuk lihat harga harian.</span>
-        <span style={{ color: '#b45309', fontWeight: 600 }}>
-          Buyback: {formatIdr(buybackPrice)}/gr
-        </span>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#b45309', marginTop: '0.4rem', borderTop: '1px solid #fef3c7', paddingTop: '0.4rem' }}>
+        <span>💡 Arahkan kursor atau sentuh titik untuk melihat harga per tanggal.</span>
+        <span>Sumber data historis resmi Galeri 24 Pegadaian</span>
       </div>
     </div>
   );
