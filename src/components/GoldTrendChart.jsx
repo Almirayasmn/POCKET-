@@ -7,7 +7,8 @@ import {
   ArrowDownRight,
   BarChart2,
   Calendar,
-  Sparkles
+  Sparkles,
+  ExternalLink
 } from 'lucide-react';
 
 // Verified Historical Galeri 24 Gold Price Datasets (Pegadaian)
@@ -378,9 +379,20 @@ export default function GoldTrendChart({ currentPrice = 2510000, buybackPrice = 
         </svg>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#b45309', marginTop: '0.4rem', borderTop: '1px solid #fef3c7', paddingTop: '0.4rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#b45309', marginTop: '0.4rem', borderTop: '1px solid #fef3c7', paddingTop: '0.4rem', flexWrap: 'wrap', gap: '0.4rem' }}>
         <span>💡 Arahkan kursor atau sentuh titik untuk melihat harga per tanggal.</span>
-        <span>Sumber data historis resmi Galeri 24 Pegadaian</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <a
+            href="https://galeri24.co.id/harga-emas"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#92400e', fontWeight: 700, textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}
+            title="Buka portal harga resmi Galeri 24 Pegadaian"
+          >
+            <span>galeri24.co.id/harga-emas</span>
+            <ExternalLink size={12} />
+          </a>
+        </div>
       </div>
     </div>
   );
