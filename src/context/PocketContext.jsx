@@ -14,11 +14,32 @@ import {
   saveFirebaseUrl,
   fetchCloudData,
   pushCloudData,
-  subscribeToCloudChanges
+  pushCloudSubpath,
+  subscribeToCloudChanges,
+  mergeFullState
 } from '../services/cloudSync';
 import { fetchLiveGoldPrices } from '../services/goldPriceService';
+import { getLocalDateString } from '../utils/formatters';
 
 const STORAGE_KEY = 'pocket_duo_storage_v10';
+
+// Helper function to get list of months between startBaseline and targetMonth
+export function getMonthsListBetween(startM, targetM) {
+  const list = [];
+  let [y, m] = startM.split('-').map(Number);
+  const [targetY, targetMNum] = targetM.split('-').map(Number);
+
+  while (y < targetY || (y === targetY && m < targetMNum)) {
+    const mStr = m < 10 ? `0${m}` : `${m}`;
+    list.push(`${y}-${mStr}`);
+    m++;
+    if (m > 12) {
+      m = 1;
+      y++;
+    }
+  }
+  return list;
+}
 
 // Helper to resolve categories for a given month with fallback inheritance
 export function resolveCategories(catsState, userId, targetMonth) {
@@ -76,11 +97,14 @@ export function PocketProvider({ children }) {
         return saved;
       }
     } catch (e) {}
-    return '2026-10';
+    const curMonth = getLocalDateString().slice(0, 7);
+    return curMonth >= '2026-10' ? curMonth : '2026-10';
   });
 
   const setSelectedMonth = (month) => {
-    const val = (month && month >= '2026-10') ? month : '2026-10';
+    const curMonth = getLocalDateString().slice(0, 7);
+    const fallback = curMonth >= '2026-10' ? curMonth : '2026-10';
+    const val = (month && month >= '2026-10') ? month : fallback;
     setSelectedMonthState(val);
     try {
       localStorage.setItem('pocket_device_selected_month', val);
@@ -196,14 +220,22 @@ export function PocketProvider({ children }) {
     fetchCloudData(firebaseDbUrl)
       .then(remote => {
         if (!isMounted) return;
-        if (remote && remote.users?.yasmeen && remote.users?.adziima) {
+        if (remote && (remote.users || remote.yasmeenTransactions || remote.adziimaTransactions)) {
           isRemoteUpdatingRef.current = true;
           const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
-          setData(prev => ({
-            ...prev,
-            ...cleanRemote
-          }));
-          setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+          setData(prev => {
+            const merged = mergeFullState(prev, cleanRemote);
+            // If local had new transactions that cloud didn't have, push merged to cloud
+            const prevYasLen = (prev.yasmeenTransactions || []).length;
+            const remYasLen = (cleanRemote.yasmeenTransactions || []).length;
+            const prevAdzLen = (prev.adziimaTransactions || []).length;
+            const remAdzLen = (cleanRemote.adziimaTransactions || []).length;
+            if (merged.yasmeenTransactions.length > remYasLen || merged.adziimaTransactions.length > remAdzLen) {
+              pushCloudData(firebaseDbUrl, merged).catch(() => {});
+            }
+            return merged;
+          });
+          setTimeout(() => { isRemoteUpdatingRef.current = false; }, 350);
           setIsCloudConnected(true);
         } else {
           // Cloud is empty, seed it with current local data
@@ -224,14 +256,11 @@ export function PocketProvider({ children }) {
       firebaseDbUrl,
       (remote) => {
         if (!isMounted || !remote) return;
-        if (remote.users?.yasmeen && remote.users?.adziima) {
+        if (remote.users || remote.yasmeenTransactions || remote.adziimaTransactions) {
           isRemoteUpdatingRef.current = true;
           const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
-          setData(prev => ({
-            ...prev,
-            ...cleanRemote
-          }));
-          setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+          setData(prev => mergeFullState(prev, cleanRemote));
+          setTimeout(() => { isRemoteUpdatingRef.current = false; }, 350);
           setIsCloudConnected(true);
         }
       },
@@ -268,11 +297,12 @@ export function PocketProvider({ children }) {
     if (remote && remote.users) {
       isRemoteUpdatingRef.current = true;
       const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
-      setData(prev => ({
-        ...prev,
-        ...cleanRemote
-      }));
-      setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+      setData(prev => {
+        const merged = mergeFullState(prev, cleanRemote);
+        pushCloudData(clean, merged).catch(() => {});
+        return merged;
+      });
+      setTimeout(() => { isRemoteUpdatingRef.current = false; }, 350);
     } else {
       await pushCloudData(clean, data);
     }
@@ -285,11 +315,12 @@ export function PocketProvider({ children }) {
     if (remote && remote.users) {
       isRemoteUpdatingRef.current = true;
       const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
-      setData(prev => ({
-        ...prev,
-        ...cleanRemote
-      }));
-      setTimeout(() => { isRemoteUpdatingRef.current = false; }, 250);
+      setData(prev => {
+        const merged = mergeFullState(prev, cleanRemote);
+        pushCloudData(firebaseDbUrl, merged).catch(() => {});
+        return merged;
+      });
+      setTimeout(() => { isRemoteUpdatingRef.current = false; }, 350);
       setIsCloudConnected(true);
     }
   };
@@ -318,18 +349,71 @@ export function PocketProvider({ children }) {
     }));
   };
 
-  // Set initial total money
-  const setTotalMoney = (userId, amount) => {
+  // Set initial or current total money
+  const setTotalMoney = (userId, amount, mode = 'current_balance') => {
     const num = parseFloat(amount) || 0;
     const rate = data.exchangeRate || DEFAULT_EXCHANGE_RATE;
+    const currentMonth = selectedMonth || getLocalDateString().slice(0, 7);
 
-    if (userId === 'adziima') {
-      updateUser('adziima', { initialFundIdr: num });
+    if (mode === 'current_balance') {
+      // Calculate what initialFund needs to be so that current totalBalance becomes exactly `num`
+      if (userId === 'adziima') {
+        const pastMonths = currentMonth > '2026-10' ? getMonthsListBetween('2026-10', currentMonth) : [];
+        let pastNet = 0;
+        pastMonths.forEach(m => {
+          (data.adziimaTransactions || []).forEach(tx => {
+            if ((tx?.date || '').startsWith(m)) {
+              if (tx.type === 'Masuk') pastNet += (tx.amountIdr || 0);
+              else pastNet -= (tx.amountIdr || 0);
+            }
+          });
+        });
+        let curIncome = 0;
+        let curOutflow = 0;
+        (data.adziimaTransactions || []).forEach(tx => {
+          if ((tx?.date || '').startsWith(currentMonth)) {
+            if (tx.type === 'Masuk') curIncome += (tx.amountIdr || 0);
+            else curOutflow += (tx.amountIdr || 0);
+          }
+        });
+        const baseInitial = num - pastNet - curIncome + curOutflow;
+        updateUser('adziima', { initialFundIdr: Math.round(baseInitial) });
+      } else {
+        const pastMonths = currentMonth > '2026-10' ? getMonthsListBetween('2026-10', currentMonth) : [];
+        let pastNetCny = 0;
+        pastMonths.forEach(m => {
+          (data.yasmeenTransactions || []).forEach(tx => {
+            if ((tx?.date || '').startsWith(m)) {
+              if (tx.type === 'Masuk') pastNetCny += (tx.amountCny || 0);
+              else pastNetCny -= (tx.amountCny || 0);
+            }
+          });
+        });
+        let curIncomeCny = 0;
+        let curOutflowCny = 0;
+        (data.yasmeenTransactions || []).forEach(tx => {
+          if ((tx?.date || '').startsWith(currentMonth)) {
+            if (tx.type === 'Masuk') curIncomeCny += (tx.amountCny || 0);
+            else curOutflowCny += (tx.amountCny || 0);
+          }
+        });
+        const targetCny = num / rate;
+        const baseInitialCny = targetCny - pastNetCny - curIncomeCny + curOutflowCny;
+        updateUser('yasmeen', {
+          initialFundIdr: Math.round(baseInitialCny * rate),
+          initialFundCny: Math.round(baseInitialCny * 100) / 100
+        });
+      }
     } else {
-      updateUser('yasmeen', {
-        initialFundIdr: num,
-        initialFundCny: Math.round((num / rate) * 100) / 100
-      });
+      // mode === 'initial_fund'
+      if (userId === 'adziima') {
+        updateUser('adziima', { initialFundIdr: num });
+      } else {
+        updateUser('yasmeen', {
+          initialFundIdr: num,
+          initialFundCny: Math.round((num / rate) * 100) / 100
+        });
+      }
     }
   };
 
@@ -397,7 +481,7 @@ export function PocketProvider({ children }) {
 
     const newTx = {
       id: `tx-${userId}-${Date.now()}`,
-      date: tx.date || new Date().toISOString().split('T')[0],
+      date: tx.date || getLocalDateString(),
       category: tx.category,
       title: tx.title || 'Transaksi',
       type: tx.type || 'Keluar',
@@ -408,10 +492,25 @@ export function PocketProvider({ children }) {
       notes: tx.notes || ''
     };
 
-    setData(prev => ({
-      ...prev,
-      [key]: [newTx, ...(prev[key] || [])]
-    }));
+    const nextList = [newTx, ...(data[key] || [])];
+    const nextData = {
+      ...data,
+      [key]: nextList
+    };
+
+    setData(nextData);
+
+    // Persist immediately to localStorage
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+    } catch (e) {}
+
+    // Instantly push specific transaction array to cloud
+    if (firebaseDbUrl) {
+      pushCloudSubpath(firebaseDbUrl, key, nextList).catch(err => {
+        console.warn('Subpath push failed, fallback to debounced full push:', err);
+      });
+    }
   };
 
   // Edit existing transaction
@@ -419,32 +518,55 @@ export function PocketProvider({ children }) {
     const rate = data.exchangeRate || DEFAULT_EXCHANGE_RATE;
     const key = userId === 'adziima' ? 'adziimaTransactions' : 'yasmeenTransactions';
 
-    setData(prev => ({
-      ...prev,
-      [key]: (prev[key] || []).map(tx => {
-        if (tx.id !== id) return tx;
-        const merged = { ...tx, ...updatedFields };
+    const nextList = (data[key] || []).map(tx => {
+      if (tx.id !== id) return tx;
+      const merged = { ...tx, ...updatedFields };
 
-        if (updatedFields.amount !== undefined) {
-          if (userId === 'adziima' || merged.inputCurrency === 'IDR') {
-            merged.amountIdr = parseFloat(updatedFields.amount) || 0;
-            merged.amountCny = Math.round((merged.amountIdr / rate) * 100) / 100;
-          } else {
-            merged.amountCny = parseFloat(updatedFields.amount) || 0;
-            merged.amountIdr = Math.round(merged.amountCny * rate);
-          }
+      if (updatedFields.amount !== undefined) {
+        if (userId === 'adziima' || merged.inputCurrency === 'IDR') {
+          merged.amountIdr = parseFloat(updatedFields.amount) || 0;
+          merged.amountCny = Math.round((merged.amountIdr / rate) * 100) / 100;
+        } else {
+          merged.amountCny = parseFloat(updatedFields.amount) || 0;
+          merged.amountIdr = Math.round(merged.amountCny * rate);
         }
-        return merged;
-      })
-    }));
+      }
+      return merged;
+    });
+
+    const nextData = {
+      ...data,
+      [key]: nextList
+    };
+
+    setData(nextData);
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+    } catch (e) {}
+
+    if (firebaseDbUrl) {
+      pushCloudSubpath(firebaseDbUrl, key, nextList).catch(() => {});
+    }
   };
 
   const deleteTransaction = (userId, id) => {
     const key = userId === 'adziima' ? 'adziimaTransactions' : 'yasmeenTransactions';
-    setData(prev => ({
-      ...prev,
-      [key]: (prev[key] || []).filter(tx => tx.id !== id)
-    }));
+    const nextList = (data[key] || []).filter(tx => tx.id !== id);
+    const nextData = {
+      ...data,
+      [key]: nextList
+    };
+
+    setData(nextData);
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+    } catch (e) {}
+
+    if (firebaseDbUrl) {
+      pushCloudSubpath(firebaseDbUrl, key, nextList).catch(() => {});
+    }
   };
 
   // Helper to get categories for a given month
@@ -767,24 +889,6 @@ export function PocketProvider({ children }) {
         ? parseFloat(yasmeen.initialFundCny)
         : ((parseFloat(yasmeen?.initialFundIdr) || 10000000) / rate);
       const baseInitialAdziimaIdr = parseFloat(adziima?.initialFundIdr) || 0;
-
-      // Helper function to get list of months between startBaseline and currentMonth
-      const getMonthsListBetween = (startM, targetM) => {
-        const list = [];
-        let [y, m] = startM.split('-').map(Number);
-        const [targetY, targetMNum] = targetM.split('-').map(Number);
-
-        while (y < targetY || (y === targetY && m < targetMNum)) {
-          const mStr = m < 10 ? `0${m}` : `${m}`;
-          list.push(`${y}-${mStr}`);
-          m++;
-          if (m > 12) {
-            m = 1;
-            y++;
-          }
-        }
-        return list;
-      };
 
       const pastMonths = currentMonth > startBaselineMonth ? getMonthsListBetween(startBaselineMonth, currentMonth) : [];
 

@@ -349,10 +349,10 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
                 TOTAL UANG AKTIF
               </div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.38rem', fontWeight: 900, color: '#0284c7', marginTop: '0.15rem' }}>
-                {adziima.initialIdr > 0 ? formatIdr(adziima.totalBalanceIdr) : 'Atur Duit Sendiri'}
+                {(users.adziima?.initialFundIdr > 0 || (adziima.monthTx && adziima.monthTx.length > 0)) ? formatIdr(adziima.totalBalanceIdr) : 'Atur Duit Sendiri'}
               </div>
               <div style={{ fontSize: '0.76rem', color: '#0284c7', marginTop: '0.2rem', fontWeight: 700 }}>
-                {adziima.initialIdr > 0 ? 'Tersedia & Terkendali' : 'Klik untuk mulai'}
+                {(users.adziima?.initialFundIdr > 0 || (adziima.monthTx && adziima.monthTx.length > 0)) ? 'Tersedia & Terkendali' : 'Klik untuk mulai'}
               </div>
             </div>
 

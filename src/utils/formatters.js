@@ -47,6 +47,13 @@ export function formatDateIndo(dateStr) {
   return dateStr;
 }
 
+export function getLocalDateString(d = new Date()) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export const MONTH_OPTIONS = [
   { value: '2026-10', label: 'Oktober 2026' },
   { value: '2026-11', label: 'November 2026 (Nanning)' },

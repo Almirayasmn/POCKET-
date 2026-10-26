@@ -75,6 +75,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [tempBudget, setTempBudget] = useState('');
   const [isEditingModal, setIsEditingModal] = useState(false);
   const [modalInput, setModalInput] = useState('');
+  const [balanceMode, setBalanceMode] = useState('current_balance');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
   const [isManageCatOpen, setIsManageCatOpen] = useState(false);
@@ -104,7 +105,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   const handleSaveModal = (e) => {
     e.preventDefault();
-    setTotalMoney('yasmeen', modalInput);
+    setTotalMoney('yasmeen', modalInput, balanceMode);
     setIsEditingModal(false);
   };
 
@@ -167,7 +168,8 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         isChina={isChina}
         onOpenEditProfile={onOpenEditProfile}
         onOpenBalanceModal={() => {
-          setModalInput((user.initialFundIdr || 10000000).toString());
+          setModalInput(Math.round(yasmeen.totalBalanceIdr).toString());
+          setBalanceMode('current_balance');
           setIsEditingModal(true);
         }}
         onOpenCloudModal={onOpenCloudModal}
@@ -227,14 +229,61 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       {/* Modal Edit Saldo */}
       {isEditingModal && (
         <div className="modal-overlay" onClick={() => setIsEditingModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
             <div className="modal-header">
-              <h3>Atur Modal Awal Yasmeen</h3>
+              <h3>Atur Saldo & Uang Yasmeen</h3>
               <button className="modal-close-btn" onClick={() => setIsEditingModal(false)}>✕</button>
             </div>
             <form onSubmit={handleSaveModal}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label className="form-label" style={{ marginBottom: '0.4rem', display: 'block' }}>Pilih yang Ingin Kamu Atur:</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('current_balance')}
+                    style={{
+                      padding: '0.55rem 0.5rem',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      border: balanceMode === 'current_balance' ? '2px solid #db2777' : '1px solid #cbd5e1',
+                      background: balanceMode === 'current_balance' ? '#fdf2f8' : '#f8fafc',
+                      color: balanceMode === 'current_balance' ? '#9d174d' : '#64748b',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      lineHeight: 1.25
+                    }}
+                  >
+                    <div>Saldo Kas Sekarang</div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Uang Riil Saat Ini)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('initial_fund')}
+                    style={{
+                      padding: '0.55rem 0.5rem',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      border: balanceMode === 'initial_fund' ? '2px solid #db2777' : '1px solid #cbd5e1',
+                      background: balanceMode === 'initial_fund' ? '#fdf2f8' : '#f8fafc',
+                      color: balanceMode === 'initial_fund' ? '#9d174d' : '#64748b',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      lineHeight: 1.25
+                    }}
+                  >
+                    <div>Modal Awal Bulan</div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Sebelum Belanja)</div>
+                  </button>
+                </div>
+              </div>
+
               <div className="form-group">
-                <label className="form-label">Modal Awal Yasmeen (Rp IDR) *</label>
+                <label className="form-label">
+                  {balanceMode === 'current_balance' ? 'Uang Kas / Rekening Yasmeen Saat Ini (Rp IDR) *' : 'Modal Awal Yasmeen di Awal Bulan (Rp IDR) *'}
+                </label>
                 <input
                   type="number"
                   className="form-input"
@@ -244,10 +293,24 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   autoFocus
                   required
                 />
-                <div style={{ fontSize: '0.8rem', color: '#db2777', marginTop: '0.3rem' }}>
-                  Setara: {formatCny((parseFloat(modalInput) || 0) / exchangeRate)}
+                <div style={{ fontSize: '0.8rem', color: '#db2777', marginTop: '0.35rem' }}>
+                  Setara: <strong>{formatCny((parseFloat(modalInput) || 0) / exchangeRate)}</strong> (Kurs Rp {exchangeRate?.toLocaleString('id-ID')})
                 </div>
               </div>
+
+              {/* Informational preview note */}
+              <div style={{ padding: '0.75rem', background: '#fdf2f8', borderRadius: '8px', border: '1px solid #fbcfe8', fontSize: '0.78rem', color: '#9d174d', marginBottom: '1.2rem', lineHeight: 1.4 }}>
+                {balanceMode === 'current_balance' ? (
+                  <>
+                    💡 <strong>Sisa Saldo Kas</strong> kamu akan langsung menjadi <strong>{formatPrimary((parseFloat(modalInput) || 0) / exchangeRate, parseFloat(modalInput) || 0)}</strong>. Seluruh riwayat {currentMonthTx.length} transaksi bulan {monthLabel} tetap aman tersimpan tanpa hilang!
+                  </>
+                ) : (
+                  <>
+                    💡 Nominal ini dijadikan patokan modal awal bulan. Saldo kas saat ini akan dihitung dari modal ini dikurangi pengeluaran bulan {monthLabel}.
+                  </>
+                )}
+              </div>
+
               <button type="submit" className="submit-btn pink">
                 Simpan Saldo
               </button>

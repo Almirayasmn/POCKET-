@@ -51,6 +51,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   const [isEditingMoney, setIsEditingMoney] = useState(false);
   const [moneyInput, setMoneyInput] = useState('');
+  const [balanceMode, setBalanceMode] = useState('current_balance');
   const [editingCatId, setEditingCatId] = useState(null);
   const [catBudgetInput, setCatBudgetInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,7 +62,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   const handleSaveMoney = (e) => {
     e.preventDefault();
-    setTotalMoney('adziima', moneyInput);
+    setTotalMoney('adziima', moneyInput, balanceMode);
     setIsEditingMoney(false);
   };
 
@@ -118,7 +119,8 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         isYasmeen={false}
         onOpenEditProfile={onOpenEditProfile}
         onOpenBalanceModal={() => {
-          setMoneyInput(adziima.initialIdr.toString());
+          setMoneyInput(Math.round(adziima.totalBalanceIdr).toString());
+          setBalanceMode('current_balance');
           setIsEditingMoney(true);
         }}
         onOpenCloudModal={onOpenCloudModal}
@@ -150,13 +152,14 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <button
             onClick={() => {
               setMoneyInput('');
+              setBalanceMode('current_balance');
               setIsEditingMoney(true);
             }}
             className="btn-enter-profile btn-enter-blue"
             style={{ maxWidth: '260px', margin: '0 auto' }}
           >
             <Plus size={16} />
-            <span>Isi Saldo Awal Saya</span>
+            <span>Isi Saldo Saya Sekarang</span>
           </button>
         </div>
       )}
@@ -164,31 +167,92 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       {/* Modal Editor for Total Money */}
       {isEditingMoney && (
         <div className="modal-overlay" onClick={() => setIsEditingMoney(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
             <div className="modal-header">
-              <h3>Atur Total Uang Pribadi Adziima</h3>
+              <h3>Atur Saldo & Uang Adziima</h3>
               <button className="modal-close-btn" onClick={() => setIsEditingMoney(false)}>✕</button>
             </div>
             <form onSubmit={handleSaveMoney}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label className="form-label" style={{ marginBottom: '0.4rem', display: 'block' }}>Pilih yang Ingin Kamu Atur:</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('current_balance')}
+                    style={{
+                      padding: '0.55rem 0.5rem',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      border: balanceMode === 'current_balance' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                      background: balanceMode === 'current_balance' ? '#e0f2fe' : '#f8fafc',
+                      color: balanceMode === 'current_balance' ? '#0369a1' : '#64748b',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      lineHeight: 1.25
+                    }}
+                  >
+                    <div>Saldo Kas Sekarang</div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Uang Riil Saat Ini)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('initial_fund')}
+                    style={{
+                      padding: '0.55rem 0.5rem',
+                      borderRadius: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      border: balanceMode === 'initial_fund' ? '2px solid #0284c7' : '1px solid #cbd5e1',
+                      background: balanceMode === 'initial_fund' ? '#e0f2fe' : '#f8fafc',
+                      color: balanceMode === 'initial_fund' ? '#0369a1' : '#64748b',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      lineHeight: 1.25
+                    }}
+                  >
+                    <div>Modal Awal Bulan</div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Sebelum Belanja)</div>
+                  </button>
+                </div>
+              </div>
+
               <div className="form-group">
-                <label className="form-label">Total Uang / Saldo yang Dipegang Saat Ini (Rp) *</label>
+                <label className="form-label">
+                  {balanceMode === 'current_balance' ? 'Uang Kas / Rekening yang Kamu Pegang Saat Ini (Rp) *' : 'Modal Awal Adziima di Awal Bulan (Rp) *'}
+                </label>
                 <input
                   type="number"
                   className="form-input"
                   style={{ fontSize: '1.2rem', fontWeight: 800 }}
-                  placeholder="Contoh: 5000000"
+                  placeholder="Contoh: 2700000"
                   value={moneyInput}
                   onChange={(e) => setMoneyInput(e.target.value)}
                   autoFocus
                   required
                 />
-                <div style={{ fontSize: '0.8rem', color: '#0284c7', marginTop: '0.3rem' }}>
-                  Terbaca: {formatIdr(parseFloat(moneyInput) || 0)}
+                <div style={{ fontSize: '0.8rem', color: '#0284c7', marginTop: '0.35rem' }}>
+                  Terbaca: <strong>{formatIdr(parseFloat(moneyInput) || 0)}</strong>
                 </div>
               </div>
+
+              {/* Informational preview note */}
+              <div style={{ padding: '0.75rem', background: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', fontSize: '0.78rem', color: '#0369a1', marginBottom: '1.2rem', lineHeight: 1.4 }}>
+                {balanceMode === 'current_balance' ? (
+                  <>
+                    💡 <strong>Sisa Saldo Kas</strong> kamu akan langsung menjadi <strong>{formatIdr(parseFloat(moneyInput) || 0)}</strong>. Seluruh riwayat {currentMonthTx.length} transaksi pengeluaran dan pemasukan bulan {monthLabel} tetap tersimpan rapi tanpa hilang!
+                  </>
+                ) : (
+                  <>
+                    💡 Nominal ini dijadikan patokan modal awal bulan. Saldo kas saat ini akan dihitung dari modal ini dikurangi pengeluaran bulan {monthLabel}.
+                  </>
+                )}
+              </div>
+
               <button type="submit" className="submit-btn blue">
                 <Check size={18} />
-                <span>Simpan Total Uang</span>
+                <span>Simpan Saldo</span>
               </button>
             </form>
           </div>

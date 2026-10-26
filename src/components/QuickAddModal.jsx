@@ -6,7 +6,7 @@ import {
   PAYMENT_METHODS_YASMEEN,
   PAYMENT_METHODS_ADZIIMA
 } from '../data/initialData';
-import { formatCny, formatIdr } from '../utils/formatters';
+import { formatCny, formatIdr, getLocalDateString } from '../utils/formatters';
 import CategoryIcon from './CategoryIcon';
 import confetti from 'canvas-confetti';
 import { X, Plus, Check, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
@@ -40,14 +40,12 @@ export default function QuickAddModal({
   const [inputCurrency, setInputCurrency] = useState(isAdziima ? 'IDR' : 'CNY');
   const [category, setCategory] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
-  const [date, setDate] = useState(() => {
-    const today = new Date().toISOString().split('T')[0];
-    return today.startsWith(selectedMonth || '2026-10') ? today : `${selectedMonth || '2026-10'}-01`;
-  });
+  const [date, setDate] = useState(() => getLocalDateString());
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (isOpen) {
+      const today = getLocalDateString();
       if (editingTx) {
         setType(editingTx.type || 'Keluar');
         setTitle(editingTx.title || '');
@@ -59,18 +57,16 @@ export default function QuickAddModal({
         setInputCurrency(isAdziima ? 'IDR' : (editingTx.inputCurrency || 'CNY'));
         setCategory(editingTx.category || (isAdziima ? 'makan_harian' : 'makan'));
         setPaymentMethod(editingTx.paymentMethod || (isAdziima ? 'BCA' : 'Bank Mandiri'));
-        setDate(editingTx.date || new Date().toISOString().split('T')[0]);
+        setDate(editingTx.date || today);
         setNotes(editingTx.notes || '');
       } else {
-        const today = new Date().toISOString().split('T')[0];
-        const initialDate = today.startsWith(selectedMonth || '2026-10') ? today : `${selectedMonth || '2026-10'}-01`;
         setType(initialData?.type || defaultType || 'Keluar');
         setTitle(initialData?.title || '');
         setAmount(initialData?.amount != null ? initialData.amount.toString() : '');
         setInputCurrency(initialData?.inputCurrency || (isAdziima ? 'IDR' : 'CNY'));
         setPaymentMethod(initialData?.paymentMethod || currentPaymentMethods[0] || (isAdziima ? 'BCA' : 'Bank Mandiri'));
         setCategory(initialData?.category || currentCategories[0]?.id || (isAdziima ? 'makan_harian' : 'makan'));
-        setDate(initialData?.date || initialDate);
+        setDate(initialData?.date || today);
         setNotes(initialData?.notes || '');
       }
     }
@@ -105,7 +101,7 @@ export default function QuickAddModal({
       category: finalCat,
       type,
       paymentMethod: finalMethod,
-      date: date || `${selectedMonth}-01`,
+      date: date || getLocalDateString(),
       notes: notes.trim()
     };
 
