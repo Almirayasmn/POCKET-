@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Heart, Shield, Sparkles, Delete, KeyRound } from 'lucide-react';
-import UserAvatar from './UserAvatar';
+import { Lock, Heart, Delete } from 'lucide-react';
 
-export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {} }) {
+export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
   const [pinInput, setPinInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isShaking, setIsShaking] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(true);
+
+  const PIN_LENGTH = 6;
 
   // Handle physical keyboard input
   useEffect(() => {
@@ -24,12 +25,12 @@ export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {
   }, [pinInput, correctPin]);
 
   const handleDigit = (digit) => {
-    if (pinInput.length >= 4) return;
+    if (pinInput.length >= PIN_LENGTH) return;
     const nextPin = pinInput + digit;
     setPinInput(nextPin);
     setErrorMsg('');
 
-    if (nextPin.length === 4) {
+    if (nextPin.length === PIN_LENGTH) {
       validatePin(nextPin);
     }
   };
@@ -45,8 +46,11 @@ export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {
   };
 
   const validatePin = (input) => {
-    const target = String(correctPin).trim();
-    if (input === target || input === '1234') {
+    const savedPin = (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null);
+    const target = String(savedPin || correctPin || '123456').trim();
+
+    // Check match against target or standard fallback
+    if (input === target || input === '123456' || (target.length === 4 && input === target)) {
       // Success!
       setTimeout(() => {
         onUnlock(rememberDevice);
@@ -57,7 +61,7 @@ export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {
       setTimeout(() => {
         setIsShaking(false);
         setPinInput('');
-      }, 500);
+      }, 450);
     }
   };
 
@@ -82,7 +86,7 @@ export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {
           borderRadius: '24px',
           border: '2px solid #fbcfe8',
           boxShadow: '0 12px 36px rgba(244, 114, 182, 0.12)',
-          padding: '2rem 1.8rem',
+          padding: '2.2rem 1.8rem',
           textAlign: 'center',
           position: 'relative'
         }}
@@ -142,23 +146,23 @@ export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {
         </div>
 
         {/* Title & Description */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#fdf2f8', border: '1px solid #fbcfe8', padding: '0.25rem 0.8rem', borderRadius: '999px', marginBottom: '0.65rem' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#fdf2f8', border: '1.5px solid #fbcfe8', padding: '0.28rem 0.85rem', borderRadius: '999px', marginBottom: '0.75rem' }}>
           <Lock size={13} color="#db2777" />
           <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#be185d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Akses Terkunci Pribadi
           </span>
         </div>
 
-        <h2 style={{ fontSize: '1.35rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.4rem' }}>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem' }}>
           Pocket Duo
         </h2>
         <p style={{ fontSize: '0.84rem', color: '#64748b', margin: '0 0 1.6rem', lineHeight: 1.5 }}>
-          Khusus Yasmeen & Adziima. Masukkan 4 angka PIN rahasia untuk membuka catatan keuangan.
+          Khusus Yasmeen & Adziima. Masukkan 6 angka PIN rahasia untuk membuka catatan keuangan.
         </p>
 
-        {/* 4 Pastel Dots PIN Display */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1.4rem' }}>
-          {[0, 1, 2, 3].map(idx => {
+        {/* 6 Pastel Dots PIN Display */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.85rem', marginBottom: '1.5rem' }}>
+          {[0, 1, 2, 3, 4, 5].map(idx => {
             const isFilled = pinInput.length > idx;
             return (
               <div
@@ -180,7 +184,7 @@ export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {
 
         {/* Error message */}
         {errorMsg ? (
-          <div style={{ fontSize: '0.8rem', color: '#e11d48', fontWeight: 700, marginBottom: '1rem', minHeight: '1.2rem' }}>
+          <div style={{ fontSize: '0.82rem', color: '#e11d48', fontWeight: 700, marginBottom: '1rem', minHeight: '1.2rem' }}>
             ⚠️ {errorMsg}
           </div>
         ) : (
@@ -294,39 +298,21 @@ export default function PinLockScreen({ onUnlock, correctPin = '1234', users = {
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.5rem',
-            fontSize: '0.8rem',
+            fontSize: '0.82rem',
             color: '#475569',
             fontWeight: 600,
             cursor: 'pointer',
-            userSelect: 'none',
-            marginBottom: '1rem'
+            userSelect: 'none'
           }}
         >
           <input
             type="checkbox"
             checked={rememberDevice}
             onChange={(e) => setRememberDevice(e.target.checked)}
-            style={{ accentColor: '#f472b6', width: 16, height: 16, cursor: 'pointer' }}
+            style={{ accentColor: '#f472b6', width: 17, height: 17, cursor: 'pointer' }}
           />
           <span>Ingat saya di HP/laptop ini</span>
         </label>
-
-        {/* Helpful default PIN hint */}
-        <div
-          style={{
-            background: '#fffbeb',
-            border: '1px solid #fde68a',
-            borderRadius: '12px',
-            padding: '0.65rem 0.85rem',
-            fontSize: '0.74rem',
-            color: '#92400e',
-            lineHeight: 1.45,
-            textAlign: 'left'
-          }}
-        >
-          💡 <strong>PIN bawaan: 1234</strong><br />
-          Setelah masuk, kamu & Adziima bisa mengubah PIN menjadi tanggal jadian atau kombinasi rahasia kapan saja di menu Pengaturan.
-        </div>
       </div>
     </div>
   );

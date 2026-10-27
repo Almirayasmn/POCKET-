@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { usePocket } from '../context/PocketContext';
-import { X, KeyRound, Check, ShieldCheck, Lock } from 'lucide-react';
+import { X, KeyRound, Check } from 'lucide-react';
 
 export default function ChangePinModal({ isOpen, onClose }) {
   const { securityPin, updateSecurityPin } = usePocket();
@@ -17,16 +17,21 @@ export default function ChangePinModal({ isOpen, onClose }) {
     setErrorMsg('');
     setSuccessMsg('');
 
-    const targetCurrent = String(securityPin || '1234').trim();
+    const savedPin = (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null);
+    const targetCurrent = String(savedPin || securityPin || '123456').trim();
 
-    // If current PIN is required
-    if (currentPinInput.trim() !== targetCurrent && currentPinInput.trim() !== '1234') {
+    // Verify current PIN (allow current PIN or 1234/123456 fallback)
+    if (
+      currentPinInput.trim() !== targetCurrent &&
+      currentPinInput.trim() !== '123456' &&
+      currentPinInput.trim() !== '1234'
+    ) {
       setErrorMsg('PIN saat ini tidak sesuai!');
       return;
     }
 
-    if (!newPin || newPin.length < 4 || newPin.length > 6 || !/^\d+$/.test(newPin)) {
-      setErrorMsg('PIN baru harus berupa 4 hingga 6 digit angka!');
+    if (!newPin || newPin.length !== 6 || !/^\d{6}$/.test(newPin)) {
+      setErrorMsg('PIN baru harus terdiri dari 6 digit angka!');
       return;
     }
 
@@ -35,22 +40,26 @@ export default function ChangePinModal({ isOpen, onClose }) {
       return;
     }
 
+    try {
+      localStorage.setItem('pocket_duo_security_pin', newPin);
+    } catch (e) {}
+
     updateSecurityPin(newPin);
-    setSuccessMsg('PIN berhasil diperbarui! Sinkron ke kedua HP.');
+    setSuccessMsg('PIN 6-digit berhasil disimpan!');
     setTimeout(() => {
       onClose();
       setCurrentPinInput('');
       setNewPin('');
       setConfirmPin('');
       setSuccessMsg('');
-    }, 1200);
+    }, 1000);
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal-container"
-        style={{ maxWidth: '420px', padding: '1.8rem 1.6rem' }}
+        style={{ maxWidth: '400px', padding: '1.8rem 1.6rem' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -76,7 +85,7 @@ export default function ChangePinModal({ isOpen, onClose }) {
                 Ubah PIN Keamanan
               </h3>
               <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0 }}>
-                PIN bersama untuk Yasmeen & Adziima
+                PIN 6-digit untuk Yasmeen & Adziima
               </p>
             </div>
           </div>
@@ -144,7 +153,7 @@ export default function ChangePinModal({ isOpen, onClose }) {
               maxLength={6}
               value={currentPinInput}
               onChange={(e) => setCurrentPinInput(e.target.value)}
-              placeholder="Masukkan PIN lama (bawaan: 1234)"
+              placeholder="Ketik PIN saat ini"
               style={{
                 width: '100%',
                 padding: '0.75rem 0.9rem',
@@ -159,7 +168,7 @@ export default function ChangePinModal({ isOpen, onClose }) {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#475569', marginBottom: '0.35rem' }}>
-              PIN Baru (4-6 Digit Angka)
+              PIN Baru (6 Digit Angka)
             </label>
             <input
               type="password"
@@ -167,7 +176,7 @@ export default function ChangePinModal({ isOpen, onClose }) {
               maxLength={6}
               value={newPin}
               onChange={(e) => setNewPin(e.target.value)}
-              placeholder="Contoh: tanggal jadian / angka rahasia"
+              placeholder="Contoh: 6 digit tanggal/angka"
               style={{
                 width: '100%',
                 padding: '0.75rem 0.9rem',
@@ -182,7 +191,7 @@ export default function ChangePinModal({ isOpen, onClose }) {
 
           <div>
             <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 800, color: '#475569', marginBottom: '0.35rem' }}>
-              Ulangi PIN Baru
+              Ulangi PIN Baru (6 Digit Angka)
             </label>
             <input
               type="password"

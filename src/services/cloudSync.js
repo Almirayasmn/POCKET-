@@ -181,9 +181,12 @@ export function mergeFullState(local, remote) {
     ...(remote.nongkrongChecklist || {})
   };
 
+  const securityPin = remote?.securityPin || local?.securityPin || (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || '123456';
+
   return {
     ...local,
     ...remote,
+    securityPin,
     users: mergedUsers,
     yasmeenTransactions,
     adziimaTransactions,

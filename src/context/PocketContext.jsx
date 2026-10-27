@@ -180,7 +180,7 @@ export function PocketProvider({ children }) {
           return {
             ...parsed,
             users,
-            securityPin: parsed.securityPin || '1234',
+            securityPin: (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || parsed.securityPin || '123456',
             adziimaCategories: parsed.adziimaCategories || ADZIIMA_CATEGORIES,
             yasmeenCategories: parsed.yasmeenCategories || YASMEEN_CATEGORIES,
             monthlyCategories: parsed.monthlyCategories || { yasmeen: {}, adziima: {} },
@@ -206,7 +206,7 @@ export function PocketProvider({ children }) {
       console.error('Failed to load from localStorage:', e);
     }
     return {
-      securityPin: '1234',
+      securityPin: (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || '123456',
       exchangeRate: DEFAULT_EXCHANGE_RATE,
       users: DEFAULT_USERS,
       yasmeenCategories: YASMEEN_CATEGORIES,
@@ -366,10 +366,16 @@ export function PocketProvider({ children }) {
   const updateSecurityPin = (newPin) => {
     const clean = String(newPin).trim();
     if (!clean) return;
+    try {
+      localStorage.setItem('pocket_duo_security_pin', clean);
+    } catch (e) {}
     setData(prev => ({
       ...prev,
       securityPin: clean
     }));
+    if (firebaseDbUrl) {
+      pushCloudSubpath(firebaseDbUrl, 'securityPin', clean).catch(() => {});
+    }
   };
 
   // Update user profile or funds
@@ -1356,7 +1362,7 @@ export function PocketProvider({ children }) {
         isAppUnlocked,
         unlockApp,
         lockApp,
-        securityPin: data?.securityPin || '1234',
+        securityPin: (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || data?.securityPin || '123456',
         updateSecurityPin
       }}
     >
