@@ -7,14 +7,9 @@ import {
   Coins,
   Heart,
   Settings,
-  ShieldCheck,
   Cloud,
   RefreshCw,
   Sparkles,
-  TrendingUp,
-  Wallet,
-  Compass,
-  Plus,
   Lock,
   KeyRound
 } from 'lucide-react';
@@ -22,7 +17,6 @@ import {
 export default function LandingPage({
   onOpenEditProfile,
   onOpenCloudModal,
-  onOpenAdd,
   onOpenChangePin,
   onLockApp
 }) {
@@ -320,38 +314,8 @@ export default function LandingPage({
         </div>
       </div>
 
-      {/* Quick Action Strip */}
-      <div className="quick-action-strip">
-        <button
-          className="btn-quick-pill pink"
-          onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'yasmeen' })}
-          title="Catat pengeluaran Yasmeen langsung"
-        >
-          <Plus size={15} color="#db2777" />
-          <span>Catat Yasmeen (¥)</span>
-        </button>
-
-        <button
-          className="btn-quick-pill blue"
-          onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'adziima' })}
-          title="Catat pengeluaran Adziima langsung"
-        >
-          <Plus size={15} color="#0284c7" />
-          <span>Catat Adziima (Rp)</span>
-        </button>
-
-        <button
-          className="btn-quick-pill gold"
-          onClick={() => setActiveView('gold')}
-          title="Buka atau tambah keping emas"
-        >
-          <Coins size={15} color="#b45309" />
-          <span>Tabungan Emas ({goldGrams} gr)</span>
-        </button>
-      </div>
-
       {/* 3 Interactive Cards: Yasmeen, Adziima, & Aset Emas Berdua */}
-      <div className="profile-select-grid" style={{ marginTop: '2rem' }}>
+      <div className="profile-select-grid" style={{ marginTop: '1.5rem' }}>
         {/* Card 1: Yasmeen */}
         <div className="profile-select-card pink">
           <div>
@@ -430,7 +394,7 @@ export default function LandingPage({
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.45rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 className="btn-enter-profile btn-enter-pink"
                 onClick={() => setActiveView('yasmeen')}
@@ -451,14 +415,6 @@ export default function LandingPage({
                 <Settings size={16} />
               </button>
             </div>
-
-            <button
-              className="btn-card-quick-add pink"
-              onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'yasmeen' })}
-            >
-              <Plus size={14} />
-              <span>+ Catat Pengeluaran Yasmeen</span>
-            </button>
           </div>
         </div>
 
@@ -540,7 +496,7 @@ export default function LandingPage({
               )}
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.45rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 className="btn-enter-profile btn-enter-blue"
                 onClick={() => setActiveView('adziima')}
@@ -561,14 +517,6 @@ export default function LandingPage({
                 <Settings size={16} />
               </button>
             </div>
-
-            <button
-              className="btn-card-quick-add blue"
-              onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'adziima' })}
-            >
-              <Plus size={14} />
-              <span>+ Catat Pengeluaran Adziima</span>
-            </button>
           </div>
         </div>
 
@@ -653,7 +601,7 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.45rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 className="btn-enter-profile btn-enter-gold"
                 onClick={() => setActiveView('gold')}
@@ -663,14 +611,6 @@ export default function LandingPage({
                 <ArrowRight size={16} />
               </button>
             </div>
-
-            <button
-              className="btn-card-quick-add gold"
-              onClick={() => setActiveView('gold')}
-            >
-              <Coins size={14} />
-              <span>+ Beli / Catat Keping Emas</span>
-            </button>
           </div>
         </div>
       </div>
