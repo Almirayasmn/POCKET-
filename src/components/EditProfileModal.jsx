@@ -190,7 +190,7 @@ export default function EditProfileModal({ isOpen, onClose, targetUserId = 'yasm
               className="form-input"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Contoh: Mahasiswi Nanning / Pekerja Hemat Jakarta"
+              placeholder="Bio singkat (opsional)"
             />
           </div>
 

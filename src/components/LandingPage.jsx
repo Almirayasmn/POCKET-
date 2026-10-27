@@ -15,11 +15,6 @@ import {
   Wallet,
   Compass,
   Plus,
-  Plane,
-  Target,
-  Award,
-  CheckCircle2,
-  Calendar,
   Lock,
   KeyRound
 } from 'lucide-react';
@@ -71,7 +66,7 @@ export default function LandingPage({
           <div className="landing-couple-pill">
             <Heart size={15} color="#ec4899" fill="#ec4899" style={{ animation: 'pulseHeart 2.5s infinite' }} />
             <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#be185d', letterSpacing: '0.01em' }}>
-              Pocket Duo · Yasmeen Almira (🇨🇳) & Muhammad Mulkan Adziima (🇮🇩)
+              Pocket Duo · Yasmeen Almira & Muhammad Mulkan Adziima
             </span>
           </div>
 
@@ -393,13 +388,11 @@ export default function LandingPage({
             </div>
 
             <div className="profile-name">{users.yasmeen?.name || 'Yasmeen Almira'}</div>
-            <div className="profile-tag tag-pink">
-              <span>🇨🇳 Chengdu, China · Mahasiswi</span>
-            </div>
-
-            <p className="profile-desc">
-              {users.yasmeen?.bio || 'Pengeluaran kuliah mandiri pas sesuai stipend bulanan kampus ¥1.500.'}
-            </p>
+            {users.yasmeen?.bio && (
+              <p className="profile-desc" style={{ marginBottom: '1rem' }}>
+                {users.yasmeen.bio}
+              </p>
+            )}
           </div>
 
           <div>
@@ -505,13 +498,11 @@ export default function LandingPage({
             </div>
 
             <div className="profile-name">{users.adziima?.name || 'Muhammad Mulkan Adziima'}</div>
-            <div className="profile-tag tag-blue">
-              <span>🇮🇩 Indonesia · Terencana</span>
-            </div>
-
-            <p className="profile-desc">
-              {users.adziima?.bio || 'Pencatatan harian disiplin dengan pembagian pagu pos terencana.'}
-            </p>
+            {users.adziima?.bio && (
+              <p className="profile-desc" style={{ marginBottom: '1rem' }}>
+                {users.adziima.bio}
+              </p>
+            )}
           </div>
 
           <div>
@@ -628,10 +619,6 @@ export default function LandingPage({
             <div className="profile-tag tag-gold">
               <span>Galeri 24 · Emas Batangan 24K</span>
             </div>
-
-            <p className="profile-desc">
-              Investasi fisik logam mulia Galeri 24 dengan nilai bergerak mengikuti harga pasar live.
-            </p>
           </div>
 
           <div>
@@ -688,124 +675,10 @@ export default function LandingPage({
         </div>
       </div>
 
-      {/* Shared Goals & Milestones Section - Pure Solid Pastel */}
-      <div className="goals-milestone-section">
-        <div className="goals-section-header">
-          <div className="goals-section-title">
-            <Target size={22} color="#db2777" />
-            <span>Target & Rencana Finansial Berdua</span>
-          </div>
-          <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 600 }}>
-            Fokus masa depan bersama
-          </span>
-        </div>
-
-        <div className="goals-grid">
-          {/* Goal 1: Target Emas 25g */}
-          <div className="goal-card gold-theme" onClick={() => setActiveView('gold')} style={{ cursor: 'pointer' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#fef08a', padding: '0.25rem 0.7rem', borderRadius: 'var(--radius-full)', border: '1px solid #fde047' }}>
-                  <Award size={14} color="#b45309" />
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#92400e', textTransform: 'uppercase' }}>
-                    Aset Perlindungan
-                  </span>
-                </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#b45309' }}>
-                  {goldProgress}% Selesai
-                </span>
-              </div>
-
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Tabungan Emas Fisik 25 Gram
-              </h3>
-              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, marginBottom: '0.85rem' }}>
-                Koleksi keping Galeri 24 sebagai fondasi simpanan anti-inflasi dan masa depan bersama.
-              </p>
-            </div>
-
-            <div>
-              <div style={{ width: '100%', height: 8, background: '#fef3c7', borderRadius: 99, overflow: 'hidden', marginBottom: '0.5rem' }}>
-                <div
-                  style={{
-                    height: '100%',
-                    width: `${goldProgress}%`,
-                    background: '#f59e0b',
-                    borderRadius: 99
-                  }}
-                />
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, color: '#78350f' }}>
-                <span>Terkumpul: <strong>{goldGrams} gr</strong></span>
-                <span>Target: <strong>{targetGrams} gr</strong></span>
-              </div>
-            </div>
-          </div>
-
-          {/* Goal 2: Celengan Temu & Liburan LDR */}
-          <div className="goal-card travel-theme">
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#fce7f3', padding: '0.25rem 0.7rem', borderRadius: 'var(--radius-full)', border: '1px solid #fbcfe8' }}>
-                  <Plane size={14} color="#db2777" />
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#9d174d', textTransform: 'uppercase' }}>
-                    Reuni & Liburan
-                  </span>
-                </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#db2777' }}>
-                  ✈️ LDR Goal
-                </span>
-              </div>
-
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Tiket Temu Chengdu 🇨🇳 ✈️ Jakarta 🇮🇩
-              </h3>
-              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, marginBottom: '0.85rem' }}>
-                Alokasi dana untuk tiket pesawat liburan semester dan temu kangen tanpa mengganggu dana darurat.
-              </p>
-            </div>
-
-            <div style={{ background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1.5px solid #fbcfe8', fontSize: '0.75rem', color: '#9d174d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <Heart size={14} color="#ec4899" fill="#ec4899" />
-              <span>Simpan teratur dari sisa stipend & gaji bulanan</span>
-            </div>
-          </div>
-
-          {/* Goal 3: Komitmen Finansial Sehat */}
-          <div className="goal-card habit-theme">
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', padding: '0.25rem 0.7rem', borderRadius: 'var(--radius-full)', border: '1.5px solid #bae6fd' }}>
-                  <ShieldCheck size={14} color="#0284c7" />
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
-                    Kebugaran Finansial
-                  </span>
-                </div>
-                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0284c7' }}>
-                  100% Transparan
-                </span>
-              </div>
-
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.35rem' }}>
-                Disiplin Catat Harian & Evaluasi
-              </h3>
-              <p style={{ fontSize: '0.82rem', color: '#475569', lineHeight: 1.5, marginBottom: '0.85rem' }}>
-                Catat setiap jajan harian, makan di luar, dan transport agar keuangan berdua tetap sehat dan terkontrol.
-              </p>
-            </div>
-
-            <div style={{ background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1.5px solid #bae6fd', fontSize: '0.75rem', color: '#0369a1', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <CheckCircle2 size={14} color="#0284c7" />
-              <span>Sinkronkan cloud rutin saat berganti hari</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Live Market & System Ticker Bar */}
       <div className="landing-ticker-bar">
         <div className="ticker-pill-item">
-          <span style={{ fontSize: '1.1rem' }}>🇨🇳</span>
+          <span style={{ fontSize: '1.1rem' }}>💱</span>
           <span>Kurs Acuan: <strong style={{ color: '#be185d' }}>1 CNY = Rp {exchangeRate?.toLocaleString('id-ID') || '2.750'}</strong></span>
         </div>
         <span style={{ opacity: 0.3 }}>•</span>
