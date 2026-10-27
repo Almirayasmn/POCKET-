@@ -49,18 +49,18 @@ export default function LandingPage({
   const goldKeping = gold?.totalKeping || 0;
   const targetGrams = gold?.targetGrams || 25;
   const goldProgress = targetGrams > 0 ? Math.min(100, Math.round((goldGrams / targetGrams) * 100)) : 0;
-  const goldPricePerGram = gold?.pricePerGram || 2409000;
-  const goldBuybackPerGram = gold?.buybackPerGram || 2324000;
+  const goldPricePerGram = gold?.pricePerGram || 2510000;
+  const goldBuybackPerGram = gold?.buybackPerGram || 2363000;
 
   return (
     <div style={{ padding: '0.5rem 0 3.5rem', position: 'relative' }}>
       {/* Hero Header */}
       <div className="landing-hero" style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.65rem', flexWrap: 'wrap', marginBottom: '1.15rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
           <div className="landing-couple-pill">
-            <Heart size={15} color="#ec4899" fill="#ec4899" style={{ animation: 'pulseHeart 2.5s infinite' }} />
-            <span style={{ fontSize: '0.84rem', fontWeight: 800, color: '#be185d', letterSpacing: '0.01em' }}>
-              Pocket Duo · Yasmeen Almira & Muhammad Mulkan Adziima
+            <Heart size={14} color="#ec4899" fill="#ec4899" style={{ animation: 'pulseHeart 2.5s infinite' }} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#be185d', letterSpacing: '0.01em' }}>
+              Pocket Duo · Yasmeen & Adziima
             </span>
           </div>
 
@@ -69,13 +69,13 @@ export default function LandingPage({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.45rem',
+              gap: '0.35rem',
               background: isCloudConnected ? '#f0fdf4' : '#ffffff',
               border: isCloudConnected ? '1.5px solid #86efac' : '1.5px dashed #cbd5e1',
               color: isCloudConnected ? '#166534' : '#64748b',
-              padding: '0.42rem 0.95rem',
+              padding: '0.38rem 0.75rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               fontWeight: 800,
               cursor: 'pointer',
               boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
@@ -83,20 +83,16 @@ export default function LandingPage({
             }}
             title="Status sinkronisasi cloud antar HP"
           >
-            {isCloudSyncing ? (
-              <RefreshCw size={13} className="animate-spin" color="#16a34a" />
-            ) : (
-              <span
-                style={{
-                  width: 9,
-                  height: 9,
-                  borderRadius: '50%',
-                  background: isCloudConnected ? '#22c55e' : '#f59e0b',
-                  display: 'inline-block'
-                }}
-              />
-            )}
-            <span>{isCloudConnected ? 'Cloud Terhubung' : 'Sinkronkan HP'}</span>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: isCloudConnected ? '#22c55e' : '#f59e0b',
+                display: 'inline-block'
+              }}
+            />
+            <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
           </button>
 
           {/* Quick PIN Security Buttons */}
@@ -105,13 +101,13 @@ export default function LandingPage({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem',
+              gap: '0.35rem',
               background: '#ffffff',
               border: '1.5px solid #fbcfe8',
               color: '#be185d',
-              padding: '0.42rem 0.85rem',
+              padding: '0.38rem 0.75rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               fontWeight: 800,
               cursor: 'pointer',
               boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
@@ -119,8 +115,8 @@ export default function LandingPage({
             }}
             title="Ubah PIN keamanan bersama"
           >
-            <KeyRound size={13} color="#db2777" />
-            <span>PIN Rahasia</span>
+            <KeyRound size={12} color="#db2777" />
+            <span>PIN</span>
           </button>
 
           <button
@@ -128,13 +124,13 @@ export default function LandingPage({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.4rem',
+              gap: '0.35rem',
               background: '#ffffff',
               border: '1.5px solid #e2e8f0',
               color: '#64748b',
-              padding: '0.42rem 0.85rem',
+              padding: '0.38rem 0.75rem',
               borderRadius: 'var(--radius-full)',
-              fontSize: '0.78rem',
+              fontSize: '0.74rem',
               fontWeight: 800,
               cursor: 'pointer',
               boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
@@ -142,7 +138,7 @@ export default function LandingPage({
             }}
             title="Kunci catatan keuangan sekarang"
           >
-            <Lock size={13} color="#64748b" />
+            <Lock size={12} color="#64748b" />
             <span>Kunci</span>
           </button>
         </div>
@@ -181,7 +177,7 @@ export default function LandingPage({
           <div
             style={{
               fontFamily: 'var(--font-display)',
-              fontSize: '2.65rem',
+              fontSize: 'clamp(1.85rem, 6.2vw, 2.65rem)',
               fontWeight: 900,
               color: '#0f172a',
               lineHeight: 1.15,
@@ -191,7 +187,7 @@ export default function LandingPage({
           >
             {formatIdr(totalJointWealthIdr)}
           </div>
-          <div style={{ fontSize: '0.86rem', color: '#64748b', marginTop: '0.35rem', textAlign: 'center', maxWidth: '640px', fontWeight: 500 }}>
+          <div style={{ fontSize: '0.84rem', color: '#64748b', marginTop: '0.35rem', textAlign: 'center', maxWidth: '640px', fontWeight: 500 }}>
             Gabungan tabungan aktif Yasmeen, Adziima, serta nilai pasar emas batangan Galeri 24
           </div>
         </div>
@@ -233,8 +229,9 @@ export default function LandingPage({
         </div>
 
         {/* Breakdown chips with solid pastel borders */}
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+        <div className="wealth-chips-row">
           <div
+            className="wealth-chip-item"
             onClick={() => setActiveView('yasmeen')}
             style={{
               background: '#fdf2f8',
@@ -261,6 +258,7 @@ export default function LandingPage({
           </div>
 
           <div
+            className="wealth-chip-item"
             onClick={() => setActiveView('adziima')}
             style={{
               background: '#f0f9ff',
@@ -287,6 +285,7 @@ export default function LandingPage({
           </div>
 
           <div
+            className="wealth-chip-item"
             onClick={() => setActiveView('gold')}
             style={{
               background: '#fefce8',
@@ -618,28 +617,28 @@ export default function LandingPage({
       {/* Live Market & System Ticker Bar */}
       <div className="landing-ticker-bar">
         <div className="ticker-pill-item">
-          <span style={{ fontSize: '1.1rem' }}>💱</span>
-          <span>Kurs Acuan: <strong style={{ color: '#be185d' }}>1 CNY = Rp {exchangeRate?.toLocaleString('id-ID') || '2.750'}</strong></span>
+          <span className="ticker-icon">💱</span>
+          <span>Kurs: <strong style={{ color: '#be185d' }}>1 CNY = Rp {exchangeRate?.toLocaleString('id-ID') || '2.750'}</strong></span>
         </div>
-        <span style={{ opacity: 0.3 }}>•</span>
+        <span className="ticker-dot-divider">•</span>
         <div className="ticker-pill-item">
-          <span style={{ fontSize: '1.1rem' }}>🏆</span>
-          <span>Emas Pegadaian Beli: <strong style={{ color: '#b45309' }}>Rp {Math.round(goldPricePerGram / 100).toLocaleString('id-ID')}/0,01 gr</strong> ({formatIdr(goldPricePerGram)}/gr)</span>
+          <span className="ticker-icon">🏆</span>
+          <span>Galeri 24: <strong style={{ color: '#b45309' }}>{formatIdr(goldPricePerGram)}/gr</strong></span>
         </div>
-        <span style={{ opacity: 0.3 }}>•</span>
+        <span className="ticker-dot-divider">•</span>
         <div className="ticker-pill-item">
-          <span style={{ fontSize: '1.1rem' }}>🔄</span>
-          <span>Buyback: <strong style={{ color: '#0369a1' }}>Rp {Math.round(goldBuybackPerGram / 100).toLocaleString('id-ID')}/0,01 gr</strong> ({formatIdr(goldBuybackPerGram)}/gr)</span>
+          <span className="ticker-icon">🔄</span>
+          <span>Buyback: <strong style={{ color: '#0369a1' }}>{formatIdr(goldBuybackPerGram)}/gr</strong></span>
         </div>
-        <span style={{ opacity: 0.3 }}>•</span>
+        <span className="ticker-dot-divider">•</span>
         <div
           className="ticker-pill-item"
           onClick={onOpenCloudModal}
           style={{ cursor: 'pointer' }}
           title="Klik untuk cek status cloud"
         >
-          <span style={{ fontSize: '1.1rem' }}>☁️</span>
-          <span>Cloud Sync: <strong style={{ color: isCloudConnected ? '#15803d' : '#d97706' }}>{isCloudConnected ? 'Tersambung (Aktif)' : 'Siap'}</strong></span>
+          <span className="ticker-icon">☁️</span>
+          <span>Cloud: <strong style={{ color: isCloudConnected ? '#15803d' : '#d97706' }}>{isCloudConnected ? 'Aktif' : 'Siap'}</strong></span>
         </div>
       </div>
     </div>

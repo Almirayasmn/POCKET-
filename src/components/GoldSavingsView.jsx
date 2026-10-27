@@ -437,26 +437,26 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#ecfdf5', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', border: '1px solid #a7f3d0' }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#047857' }}>Live sahabat.pegadaian.co.id</span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#047857' }}>Live galeri24.co.id</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#78350f' }}>
-            Acuan: <strong>{gold.lastUpdatedLabel}</strong>
+            Acuan: <strong>{gold.lastUpdatedLabel || 'Galeri 24 Pegadaian'}</strong>
           </div>
           <span style={{ color: '#d97706' }}>•</span>
           <div style={{ fontSize: '0.78rem', color: '#b45309' }}>
-            Harga Beli: <strong>Rp {(gold.pricePer001g || 24090).toLocaleString('id-ID')}/0,01 gr</strong> ({formatIdr(gold.pricePerGram)}/gr)
+            Harga Jual: <strong>{formatIdr(gold.pricePerGram)}</strong> / gr
           </div>
           <span style={{ color: '#d97706' }}>•</span>
           <div style={{ fontSize: '0.78rem', color: '#059669' }}>
-            Buyback: <strong>Rp {(gold.buybackPer001g || 23240).toLocaleString('id-ID')}/0,01 gr</strong> ({formatIdr(gold.buybackPerGram)}/gr)
+            Buyback: <strong>{formatIdr(gold.buybackPerGram)}</strong> / gr
           </div>
           <a
-            href="https://sahabat.pegadaian.co.id/harga-emas"
+            href="https://galeri24.co.id/harga-emas"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: '0.78rem', color: '#059669', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', textDecoration: 'underline', fontWeight: 700 }}
+            style={{ fontSize: '0.78rem', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', textDecoration: 'underline', fontWeight: 700 }}
           >
-            <span>Cek Web Pegadaian</span>
+            <span>Cek Web Resmi</span>
             <ExternalLink size={12} />
           </a>
         </div>
@@ -652,10 +652,10 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
 
       {/* Official Pegadaian Live Interactive Trend Chart (Sesuai web Pegadaian pada screenshot) */}
       <PegadaianGoldChart
-        history={gold.history}
-        currentSellPricePer001g={gold.pricePer001g || 24090}
-        currentBuybackPricePer001g={gold.buybackPer001g || 23240}
-        lastUpdatedLabel={gold.lastUpdatedLabel}
+        history={gold.pegadaianHistory}
+        currentSellPricePer001g={gold.pegadaianPrice001g || 24090}
+        currentBuybackPricePer001g={gold.pegadaianBuyback001g || 23240}
+        lastUpdatedLabel={gold.pegadaianDateLabel || 'Sel, 27 Okt 2026'}
         onRefresh={handleAutoFetch}
         isRefreshing={isFetchingGoldPrice}
       />

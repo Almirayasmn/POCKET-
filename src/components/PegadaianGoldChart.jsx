@@ -13,7 +13,7 @@ export default function PegadaianGoldChart({
   const [timeframe, setTimeframe] = useState('1m'); // '1w', '1m', '3m', '1y'
   const [hoverIndex, setHoverIndex] = useState(null);
 
-  // Fallback 7-day authentic Pegadaian data if history not yet fetched
+  // Fallback 7-day authentic Pegadaian data if history not yet loaded
   const baselineHistory = useMemo(() => [
     { date: '2026-10-21', sellPer001g: 24340, buybackPer001g: 23480 },
     { date: '2026-10-22', sellPer001g: 24300, buybackPer001g: 23440 },
@@ -28,19 +28,9 @@ export default function PegadaianGoldChart({
 
   // Filter or scale data points based on selected timeframe
   const chartPoints = useMemo(() => {
-    // Sort chronological (oldest to newest)
     const sorted = [...rawData].sort((a, b) => new Date(a.date) - new Date(b.date));
-
-    if (timeframe === '1w') {
-      return sorted.slice(-7);
-    }
-    if (timeframe === '1m') {
-      return sorted.slice(-30);
-    }
-    if (timeframe === '3m') {
-      return sorted;
-    }
-    // 1 year
+    if (timeframe === '1w') return sorted.slice(-7);
+    if (timeframe === '1m') return sorted.slice(-30);
     return sorted;
   }, [rawData, timeframe]);
 
@@ -49,16 +39,16 @@ export default function PegadaianGoldChart({
   const minVal = Math.min(...values);
   const maxVal = Math.max(...values);
   const valRange = (maxVal - minVal) || 1;
-  const paddingVal = valRange * 0.15; // add 15% top/bottom headroom
+  const paddingVal = valRange * 0.18;
 
   const chartMin = minVal - paddingVal;
   const chartMax = maxVal + paddingVal;
   const chartRange = chartMax - chartMin;
 
-  const svgWidth = 600;
-  const svgHeight = 220;
-  const padX = 30;
-  const padY = 25;
+  const svgWidth = 520;
+  const svgHeight = 115;
+  const padX = 24;
+  const padY = 16;
   const plotWidth = svgWidth - (padX * 2);
   const plotHeight = svgHeight - (padY * 2);
 
@@ -118,23 +108,24 @@ export default function PegadaianGoldChart({
   return (
     <div
       style={{
+        maxWidth: '640px',
+        margin: '1.2rem auto 0',
         background: '#ffffff',
-        borderRadius: '20px',
+        borderRadius: '16px',
         border: '1.5px solid #d1fae5',
-        boxShadow: '0 8px 24px rgba(16, 185, 129, 0.08)',
-        padding: '1.4rem 1.4rem 1.2rem',
-        marginTop: '1.25rem',
+        boxShadow: '0 4px 16px rgba(16, 185, 129, 0.06)',
+        padding: '0.9rem 1.1rem 0.75rem',
         position: 'relative'
       }}
     >
-      {/* Header & Source Badge */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+      {/* Header & Source Badge (Compact) */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.65rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
           <div
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: '10px',
+              width: 26,
+              height: 26,
+              borderRadius: '7px',
               background: '#ecfdf5',
               display: 'flex',
               alignItems: 'center',
@@ -143,19 +134,19 @@ export default function PegadaianGoldChart({
               border: '1px solid #a7f3d0'
             }}
           >
-            <TrendingUp size={20} />
+            <TrendingUp size={14} />
           </div>
           <div>
-            <h3 style={{ margin: 0, fontSize: '1.12rem', fontWeight: 800, color: '#064e3b' }}>
-              Grafik Harga Tabungan Emas
-            </h3>
-            <p style={{ margin: 0, fontSize: '0.75rem', color: '#6ee7b7', fontWeight: 600 }}>
-              PT Pegadaian (Persero) · Resmi Terkini
-            </p>
+            <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#064e3b', lineHeight: 1.2 }}>
+              Grafik Tren Tabungan Emas
+            </h4>
+            <span style={{ fontSize: '0.68rem', color: '#10b981', fontWeight: 600 }}>
+              Live sahabat.pegadaian.co.id
+            </span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
           {onRefresh && (
             <button
               onClick={onRefresh}
@@ -163,20 +154,20 @@ export default function PegadaianGoldChart({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '0.35rem',
-                fontSize: '0.75rem',
+                gap: '0.3rem',
+                fontSize: '0.7rem',
                 fontWeight: 700,
                 color: '#047857',
                 background: '#ecfdf5',
                 border: '1px solid #a7f3d0',
-                borderRadius: '8px',
-                padding: '0.35rem 0.7rem',
+                borderRadius: '6px',
+                padding: '0.25rem 0.55rem',
                 cursor: 'pointer'
               }}
-              title="Perbarui data harga hari ini dari Pegadaian"
+              title="Perbarui grafik hari ini dari Pegadaian"
             >
-              <RefreshCw size={13} className={isRefreshing ? 'animate-spin' : ''} />
-              <span>{isRefreshing ? 'Menarik...' : 'Update Hari Ini'}</span>
+              <RefreshCw size={11} className={isRefreshing ? 'animate-spin' : ''} />
+              <span>{isRefreshing ? 'Sync...' : 'Update'}</span>
             </button>
           )}
 
@@ -187,30 +178,29 @@ export default function PegadaianGoldChart({
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '0.3rem',
-              fontSize: '0.75rem',
+              gap: '0.25rem',
+              fontSize: '0.7rem',
               color: '#059669',
               background: '#f0fdf4',
               border: '1px solid #bbf7d0',
-              padding: '0.35rem 0.65rem',
-              borderRadius: '8px',
+              padding: '0.25rem 0.5rem',
+              borderRadius: '6px',
               textDecoration: 'none',
               fontWeight: 700
             }}
           >
-            <span>Web Pegadaian</span>
-            <ExternalLink size={12} />
+            <span>Web Resmi</span>
+            <ExternalLink size={10} />
           </a>
         </div>
       </div>
 
-      {/* Tabs: Harga Beli vs Harga Jual (Exact Pegadaian Style) */}
+      {/* Tabs: Harga Beli vs Harga Jual (Compact) */}
       <div
         style={{
           display: 'flex',
-          borderBottom: '2px solid #e2e8f0',
-          marginBottom: '1rem',
-          position: 'relative'
+          borderBottom: '1.5px solid #e2e8f0',
+          marginBottom: '0.65rem'
         }}
       >
         <button
@@ -218,15 +208,15 @@ export default function PegadaianGoldChart({
           onClick={() => setChartType('beli')}
           style={{
             flex: 1,
-            padding: '0.65rem 0.5rem',
+            padding: '0.35rem 0.4rem',
             background: 'transparent',
             border: 'none',
-            fontSize: '0.88rem',
+            fontSize: '0.78rem',
             fontWeight: 800,
             cursor: 'pointer',
             color: chartType === 'beli' ? '#059669' : '#64748b',
-            borderBottom: chartType === 'beli' ? '3px solid #10b981' : '3px solid transparent',
-            marginBottom: '-2px',
+            borderBottom: chartType === 'beli' ? '2.5px solid #10b981' : '2.5px solid transparent',
+            marginBottom: '-1.5px',
             transition: 'all 0.15s ease'
           }}
         >
@@ -237,15 +227,15 @@ export default function PegadaianGoldChart({
           onClick={() => setChartType('jual')}
           style={{
             flex: 1,
-            padding: '0.65rem 0.5rem',
+            padding: '0.35rem 0.4rem',
             background: 'transparent',
             border: 'none',
-            fontSize: '0.88rem',
+            fontSize: '0.78rem',
             fontWeight: 800,
             cursor: 'pointer',
             color: chartType === 'jual' ? '#059669' : '#64748b',
-            borderBottom: chartType === 'jual' ? '3px solid #10b981' : '3px solid transparent',
-            marginBottom: '-2px',
+            borderBottom: chartType === 'jual' ? '2.5px solid #10b981' : '2.5px solid transparent',
+            marginBottom: '-1.5px',
             transition: 'all 0.15s ease'
           }}
         >
@@ -253,7 +243,7 @@ export default function PegadaianGoldChart({
         </button>
       </div>
 
-      {/* Dynamic Date & Price Banner (Exact Pegadaian Style) */}
+      {/* Dynamic Date & Price Banner (Compact Ribbon) */}
       <div
         style={{
           display: 'flex',
@@ -261,51 +251,51 @@ export default function PegadaianGoldChart({
           justifyContent: 'space-between',
           background: '#f0fdf4',
           border: '1px solid #bbf7d0',
-          borderRadius: '12px',
-          padding: '0.75rem 1.1rem',
-          marginBottom: '1rem'
+          borderRadius: '9px',
+          padding: '0.45rem 0.75rem',
+          marginBottom: '0.65rem'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.88rem', fontWeight: 700, color: '#064e3b' }}>
-          <Calendar size={15} color="#059669" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', fontWeight: 700, color: '#064e3b' }}>
+          <Calendar size={13} color="#059669" />
           <span>{formatShortDate(activeCoord?.pt?.date) || lastUpdatedLabel}</span>
         </div>
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '1.15rem', fontWeight: 900, color: '#064e3b', letterSpacing: '-0.3px' }}>
+          <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#064e3b' }}>
             Rp {Number(activeCoord?.val || 24090).toLocaleString('id-ID')}/0,01 gr
-          </div>
-          <div style={{ fontSize: '0.72rem', color: '#059669', fontWeight: 700 }}>
-            = Rp {(Number(activeCoord?.val || 24090) * 100).toLocaleString('id-ID')} / gram
-          </div>
+          </span>
+          <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 700, marginLeft: '0.4rem' }}>
+            (Rp {(Number(activeCoord?.val || 24090) * 100).toLocaleString('id-ID')}/gr)
+          </span>
         </div>
       </div>
 
-      {/* Responsive SVG Chart */}
+      {/* Compact SVG Chart */}
       <div style={{ position: 'relative', width: '100%', userSelect: 'none' }}>
         <svg
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
+          style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible', maxHeight: '115px' }}
           onMouseLeave={() => setHoverIndex(null)}
         >
           <defs>
-            <linearGradient id="pegadaianGreenGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
-              <stop offset="60%" stopColor="#34d399" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="#6ee7b7" stopOpacity="0.02" />
+            <linearGradient id="pegadaianGreenGradMini" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
+              <stop offset="70%" stopColor="#34d399" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#6ee7b7" stopOpacity="0.01" />
             </linearGradient>
-            <filter id="pegadaianDotGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#059669" floodOpacity="0.35" />
+            <filter id="pegadaianDotGlowMini" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#059669" floodOpacity="0.3" />
             </filter>
           </defs>
 
           {/* Background Gridlines */}
-          <line x1={padX} y1={padY} x2={svgWidth - padX} y2={padY} stroke="#f1f5f9" strokeDasharray="4 4" strokeWidth="1" />
-          <line x1={padX} y1={padY + plotHeight * 0.5} x2={svgWidth - padX} y2={padY + plotHeight * 0.5} stroke="#f1f5f9" strokeDasharray="4 4" strokeWidth="1" />
-          <line x1={padX} y1={padY + plotHeight} x2={svgWidth - padX} y2={padY + plotHeight} stroke="#e2e8f0" strokeWidth="1.2" />
+          <line x1={padX} y1={padY} x2={svgWidth - padX} y2={padY} stroke="#f1f5f9" strokeDasharray="3 3" strokeWidth="1" />
+          <line x1={padX} y1={padY + plotHeight * 0.5} x2={svgWidth - padX} y2={padY + plotHeight * 0.5} stroke="#f1f5f9" strokeDasharray="3 3" strokeWidth="1" />
+          <line x1={padX} y1={padY + plotHeight} x2={svgWidth - padX} y2={padY + plotHeight} stroke="#e2e8f0" strokeWidth="1" />
 
           {/* Area Fill */}
           {areaPath && (
-            <path d={areaPath} fill="url(#pegadaianGreenGrad)" />
+            <path d={areaPath} fill="url(#pegadaianGreenGradMini)" />
           )}
 
           {/* Line Path */}
@@ -314,7 +304,7 @@ export default function PegadaianGoldChart({
               d={linePath}
               fill="none"
               stroke="#10b981"
-              strokeWidth="3.2"
+              strokeWidth="2.6"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -328,8 +318,8 @@ export default function PegadaianGoldChart({
               x2={activeCoord.x}
               y2={padY + plotHeight}
               stroke="#059669"
-              strokeDasharray="3 3"
-              strokeWidth="1.5"
+              strokeDasharray="2 2"
+              strokeWidth="1.2"
               opacity="0.6"
             />
           )}
@@ -340,16 +330,16 @@ export default function PegadaianGoldChart({
               <circle
                 cx={activeCoord.x}
                 cy={activeCoord.y}
-                r="7"
+                r="5.5"
                 fill="#ffffff"
                 stroke="#059669"
-                strokeWidth="3.5"
-                filter="url(#pegadaianDotGlow)"
+                strokeWidth="2.8"
+                filter="url(#pegadaianDotGlowMini)"
               />
               <circle
                 cx={activeCoord.x}
                 cy={activeCoord.y}
-                r="2.5"
+                r="2"
                 fill="#059669"
               />
             </g>
@@ -374,13 +364,13 @@ export default function PegadaianGoldChart({
           })}
         </svg>
 
-        {/* X-Axis Date Labels */}
+        {/* X-Axis Date Labels (Compact) */}
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
-            padding: '0.4rem 1.2rem 0',
-            fontSize: '0.74rem',
+            padding: '0.25rem 0.6rem 0',
+            fontSize: '0.68rem',
             fontWeight: 700,
             color: '#64748b'
           }}
@@ -402,13 +392,13 @@ export default function PegadaianGoldChart({
         </div>
       </div>
 
-      {/* Timeframe Buttons (Exact Pegadaian Style: 1 Minggu, 1 Bulan, 3 Bulan, 1 Tahun) */}
+      {/* Timeframe Buttons (Compact Pills) */}
       <div
         style={{
           display: 'flex',
-          gap: '0.5rem',
-          marginTop: '1.25rem',
-          paddingTop: '0.85rem',
+          gap: '0.4rem',
+          marginTop: '0.75rem',
+          paddingTop: '0.55rem',
           borderTop: '1px solid #f1f5f9'
         }}
       >
@@ -429,13 +419,13 @@ export default function PegadaianGoldChart({
               }}
               style={{
                 flex: 1,
-                padding: '0.5rem 0.4rem',
-                borderRadius: '10px',
+                padding: '0.35rem 0.3rem',
+                borderRadius: '7px',
                 border: isActive ? '1.5px solid #10b981' : '1px solid #e2e8f0',
                 background: isActive ? '#ecfdf5' : '#ffffff',
                 color: isActive ? '#065f46' : '#64748b',
                 fontWeight: isActive ? 800 : 600,
-                fontSize: '0.78rem',
+                fontSize: '0.72rem',
                 cursor: 'pointer',
                 transition: 'all 0.15s ease'
               }}

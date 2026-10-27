@@ -119,18 +119,27 @@ export const GALERI24_DEFAULT_PRICE_TABLE = [
 ];
 
 export const DEFAULT_GOLD_SAVINGS = {
-  brand: 'Pegadaian (Tabungan Emas & Galeri 24)',
-  pricePerGramIdr: 2409000,
-  buybackPerGramIdr: 2324000,
-  pricePer001g: 24090,
-  buybackPer001g: 23240,
+  brand: 'Galeri 24 (Pegadaian)',
+  pricePerGramIdr: 2510000,
+  buybackPerGramIdr: 2363000,
   valuationMode: 'sell', // 'sell' or 'buyback'
   lastUpdated: '2026-10-27',
-  lastUpdatedLabel: 'Sel, 27 Okt 2026 (Pegadaian Resmi)',
-  sourceUrl: 'https://sahabat.pegadaian.co.id/harga-emas',
+  lastUpdatedLabel: 'Acuan Resmi Galeri 24',
+  sourceUrl: 'https://galeri24.co.id/harga-emas',
   priceTable: GALERI24_DEFAULT_PRICE_TABLE,
   targetGrams: 25,
-  transactions: []
+  transactions: [],
+  pegadaianLastPrice001g: 24090,
+  pegadaianLastBuyback001g: 23240,
+  pegadaianHistory: [
+    { date: '2026-10-21', sellPer001g: 24340, buybackPer001g: 23480 },
+    { date: '2026-10-22', sellPer001g: 24300, buybackPer001g: 23440 },
+    { date: '2026-10-23', sellPer001g: 24090, buybackPer001g: 23240 },
+    { date: '2026-10-24', sellPer001g: 23990, buybackPer001g: 23150 },
+    { date: '2026-10-25', sellPer001g: 23990, buybackPer001g: 23150 },
+    { date: '2026-10-26', sellPer001g: 23990, buybackPer001g: 23150 },
+    { date: '2026-10-27', sellPer001g: 24090, buybackPer001g: 23240 }
+  ]
 };
 
 export const PAYMENT_METHODS_YASMEEN = [

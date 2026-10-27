@@ -846,21 +846,31 @@ export function PocketProvider({ children }) {
     }));
   };
 
-  const updateGaleri24Prices = ({ sell, buyback, table, dateLabel, history, pricePer001g, buybackPer001g, source, brand }) => {
+  const updateGaleri24Prices = ({ sell, buyback, table, dateLabel }) => {
     setData(prev => ({
       ...prev,
       goldSavings: {
         ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
-        brand: brand || prev.goldSavings?.brand || 'Pegadaian (Tabungan Emas & Galeri 24)',
-        pricePerGramIdr: parseFloat(sell) || prev.goldSavings?.pricePerGramIdr || 2409000,
-        buybackPerGramIdr: parseFloat(buyback) || prev.goldSavings?.buybackPerGramIdr || 2324000,
-        pricePer001g: parseFloat(pricePer001g) || Math.round((parseFloat(sell) || 2409000) / 100),
-        buybackPer001g: parseFloat(buybackPer001g) || Math.round((parseFloat(buyback) || 2324000) / 100),
-        history: (history && history.length > 0) ? history : (prev.goldSavings?.history || null),
+        brand: 'Galeri 24 (Pegadaian)',
+        pricePerGramIdr: parseFloat(sell) || prev.goldSavings?.pricePerGramIdr || 2510000,
+        buybackPerGramIdr: parseFloat(buyback) || prev.goldSavings?.buybackPerGramIdr || 2363000,
         priceTable: table || prev.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
         lastUpdated: new Date().toISOString().split('T')[0],
-        lastUpdatedLabel: dateLabel || 'Hari Ini (Pegadaian Resmi)',
-        sourceUrl: source || 'https://sahabat.pegadaian.co.id/harga-emas'
+        lastUpdatedLabel: dateLabel || 'Acuan Resmi Galeri 24',
+        sourceUrl: 'https://galeri24.co.id/harga-emas'
+      }
+    }));
+  };
+
+  const updatePegadaianChartHistory = ({ history, pricePer001g, buybackPer001g, dateLabel }) => {
+    setData(prev => ({
+      ...prev,
+      goldSavings: {
+        ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
+        pegadaianHistory: (history && history.length > 0) ? history : (prev.goldSavings?.pegadaianHistory || DEFAULT_GOLD_SAVINGS.pegadaianHistory),
+        pegadaianLastPrice001g: parseFloat(pricePer001g) || prev.goldSavings?.pegadaianLastPrice001g || 24090,
+        pegadaianLastBuyback001g: parseFloat(buybackPer001g) || prev.goldSavings?.pegadaianLastBuyback001g || 23240,
+        pegadaianLastDateLabel: dateLabel || 'Sel, 27 Okt 2026'
       }
     }));
   };
@@ -889,34 +899,29 @@ export function PocketProvider({ children }) {
     setIsFetchingGoldPrice(true);
     try {
       const res = await fetchLiveGoldPrices();
-      if (res && res.sellPrice) {
-        updateGaleri24Prices({
-          sell: res.sellPrice,
-          buyback: res.buybackPrice,
+      if (res && res.history) {
+        updatePegadaianChartHistory({
+          history: res.history,
           pricePer001g: res.sellPricePer001g,
           buybackPer001g: res.buybackPricePer001g,
-          history: res.history,
-          table: res.table,
-          dateLabel: res.dateLabel,
-          source: res.source,
-          brand: res.brand
+          dateLabel: res.dateLabel
         });
         return { success: true, ...res };
       }
       return { success: false };
     } catch (err) {
-      console.warn('Auto refresh gold price failed:', err);
+      console.warn('Auto refresh Pegadaian chart history failed:', err);
       return { success: false, error: err.message };
     } finally {
       setIsFetchingGoldPrice(false);
     }
   };
 
-  // Automatically fetch fresh Pegadaian prices on app mount if day changed or no history
+  // Automatically fetch fresh Pegadaian chart history on app mount
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     const lastDate = data?.goldSavings?.lastUpdated;
-    const hasHistory = Array.isArray(data?.goldSavings?.history) && data.goldSavings.history.length > 0;
+    const hasHistory = Array.isArray(data?.goldSavings?.pegadaianHistory) && data.goldSavings.pegadaianHistory.length > 0;
     if (!lastDate || lastDate !== today || !hasHistory) {
       refreshLiveGoldPrices();
     }
@@ -1261,15 +1266,16 @@ export function PocketProvider({ children }) {
           adziimaContributedValueIdr,
           pricePerGram,
           buybackPerGram,
-          pricePer001g: data?.goldSavings?.pricePer001g || Math.round(pricePerGram / 100),
-          buybackPer001g: data?.goldSavings?.buybackPer001g || Math.round(buybackPerGram / 100),
-          history: data?.goldSavings?.history || null,
-          brand: data?.goldSavings?.brand || 'Pegadaian (Tabungan Emas & Galeri 24)',
-          sourceUrl: data?.goldSavings?.sourceUrl || 'https://sahabat.pegadaian.co.id/harga-emas',
+          pegadaianHistory: data?.goldSavings?.pegadaianHistory || DEFAULT_GOLD_SAVINGS.pegadaianHistory,
+          pegadaianPrice001g: data?.goldSavings?.pegadaianLastPrice001g || 24090,
+          pegadaianBuyback001g: data?.goldSavings?.pegadaianLastBuyback001g || 23240,
+          pegadaianDateLabel: data?.goldSavings?.pegadaianLastDateLabel || 'Sel, 27 Okt 2026',
+          brand: 'Galeri 24 (Pegadaian)',
+          sourceUrl: 'https://galeri24.co.id/harga-emas',
           activeValuationPrice,
           valuationMode,
           lastUpdated: data?.goldSavings?.lastUpdated || DEFAULT_GOLD_SAVINGS.lastUpdated,
-          lastUpdatedLabel: data?.goldSavings?.lastUpdatedLabel || DEFAULT_GOLD_SAVINGS.lastUpdatedLabel,
+          lastUpdatedLabel: data?.goldSavings?.lastUpdatedLabel || 'Acuan Resmi Galeri 24',
           priceTable: data?.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
           profitLossIdr,
           profitLossPercent,
