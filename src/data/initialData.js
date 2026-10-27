@@ -119,13 +119,15 @@ export const GALERI24_DEFAULT_PRICE_TABLE = [
 ];
 
 export const DEFAULT_GOLD_SAVINGS = {
-  brand: 'Galeri 24 (Pegadaian)',
-  pricePerGramIdr: 2510000,
-  buybackPerGramIdr: 2363000,
+  brand: 'Pegadaian (Tabungan Emas & Galeri 24)',
+  pricePerGramIdr: 2409000,
+  buybackPerGramIdr: 2324000,
+  pricePer001g: 24090,
+  buybackPer001g: 23240,
   valuationMode: 'sell', // 'sell' or 'buyback'
-  lastUpdated: '2026-10-20',
-  lastUpdatedLabel: 'Selasa, 20 Oktober 2026',
-  sourceUrl: 'https://galeri24.co.id/harga-emas',
+  lastUpdated: '2026-10-27',
+  lastUpdatedLabel: 'Sel, 27 Okt 2026 (Pegadaian Resmi)',
+  sourceUrl: 'https://sahabat.pegadaian.co.id/harga-emas',
   priceTable: GALERI24_DEFAULT_PRICE_TABLE,
   targetGrams: 25,
   transactions: []

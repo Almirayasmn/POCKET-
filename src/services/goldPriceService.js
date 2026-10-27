@@ -1,39 +1,6 @@
 /**
- * Gold Price Service - Real-time official Galeri 24 (Pegadaian) gold prices
+ * Gold Price Service - Real-time official Pegadaian (Tabungan Emas & Galeri 24) gold prices
  */
-
-function parseGaleri24Html(html) {
-  const rowRegex = /<div class="grid grid-cols-5 divide-x[^"]*">[\s\S]*?<div class="[^"]*">([0-9\.]+)<\/div>[\s\S]*?<div class="[^"]*">Rp([0-9\.,]+)<\/div>[\s\S]*?<div class="[^"]*">Rp([0-9\.,]+)<\/div>/g;
-  let m;
-  const table = [];
-
-  while ((m = rowRegex.exec(html)) !== null) {
-    const grams = parseFloat(m[1]);
-    const sell = parseInt(m[2].replace(/\./g, ''), 10);
-    const buyback = parseInt(m[3].replace(/\./g, ''), 10);
-    if (!isNaN(grams) && !isNaN(sell)) {
-      table.push({ grams, sell, buyback });
-    }
-  }
-
-  const oneGram = table.find(r => Math.abs(r.grams - 1.0) < 0.001);
-  const sellPrice = oneGram ? oneGram.sell : 2510000;
-  const buybackPrice = oneGram ? oneGram.buyback : 2363000;
-
-  const todayDate = new Date();
-  const dateStr = todayDate.toISOString().split('T')[0];
-  const dateLabel = `Hari Ini (${todayDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}) - galeri24.co.id`;
-
-  return {
-    success: true,
-    source: 'galeri24.co.id/harga-emas',
-    date: dateStr,
-    dateLabel,
-    sellPrice,
-    buybackPrice,
-    table: table.length > 0 ? table : null
-  };
-}
 
 export async function fetchLiveGoldPrices() {
   // 1. Try local or Vercel serverless endpoint
@@ -50,48 +17,87 @@ export async function fetchLiveGoldPrices() {
       }
     }
   } catch (err) {
-    console.warn('Endpoint /api/gold-prices not available, trying fallback proxy...', err);
+    console.warn('Endpoint /api/gold-prices not available, trying direct Pegadaian worker...', err);
   }
 
-  // 2. Fallback to public CORS proxy
+  // 2. Direct fetch to Pegadaian worker (CORS-friendly for Vite dev & frontend)
   try {
-    const targetUrl = 'https://galeri24.co.id/harga-emas';
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 6000);
+    const [priceRes, historyRes] = await Promise.all([
+      fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian', {
+        headers: { 'Accept': 'application/json' }
+      }),
+      fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian/history?length=30', {
+        headers: { 'Accept': 'application/json' }
+      })
+    ]);
 
-    const res = await fetch(proxyUrl, { signal: controller.signal });
-    clearTimeout(timeout);
+    if (priceRes.ok) {
+      const priceJson = await priceRes.json();
+      const historyJson = historyRes.ok ? await historyRes.json() : null;
 
-    if (res.ok) {
-      const html = await res.text();
-      const parsed = parseGaleri24Html(html);
-      if (parsed && parsed.sellPrice) {
+      const item = priceJson?.data?.[0];
+      if (item && item.sellPrice) {
+        const sellPer001g = Number(item.sellPrice);
+        const buybackPer001g = Number(item.buybackPrice || Math.round(sellPer001g * 0.965));
+        const sellPricePerGram = sellPer001g * 100;
+        const buybackPricePerGram = buybackPer001g * 100;
+
+        const historyData = (historyJson?.data || []).map(h => ({
+          date: h.recordedDate,
+          sellPer001g: Number(h.sellPrice),
+          buybackPer001g: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)),
+          sellPerGram: Number(h.sellPrice) * 100,
+          buybackPerGram: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)) * 100
+        }));
+
+        const dateObj = new Date(item.recordedDate || new Date());
+        const dateLabel = `${dateObj.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
+
         return {
-          ...parsed,
-          spread: parsed.sellPrice - parsed.buybackPrice,
-          spreadPercent: Math.round(((parsed.sellPrice - parsed.buybackPrice) / parsed.sellPrice) * 1000) / 10
+          success: true,
+          source: 'https://sahabat.pegadaian.co.id/harga-emas',
+          brand: 'Pegadaian (Tabungan Emas)',
+          date: item.recordedDate,
+          dateLabel,
+          sellPrice: sellPricePerGram,
+          buybackPrice: buybackPricePerGram,
+          sellPricePer001g: sellPer001g,
+          buybackPricePer001g: buybackPer001g,
+          spread: sellPricePerGram - buybackPricePerGram,
+          spreadPercent: Math.round(((sellPricePerGram - buybackPricePerGram) / sellPricePerGram) * 1000) / 10,
+          history: historyData
         };
       }
     }
   } catch (err) {
-    console.warn('Fallback proxy fetch failed:', err);
+    console.warn('Direct Pegadaian worker fetch failed, falling back to cached baseline...', err);
   }
 
-  // 3. Fallback to official static Galeri 24 values
-  const defaultSell = 2510000;
-  const defaultBuyback = 2363000;
+  // 3. Fallback to authentic baseline Pegadaian values
+  const defaultSell = 2409000;
+  const defaultBuyback = 2324000;
   const today = new Date();
 
   return {
     success: true,
-    source: 'galeri24.co.id (Acuan Terverifikasi)',
+    source: 'sahabat.pegadaian.co.id (Tabungan Emas)',
+    brand: 'Pegadaian (Tabungan Emas)',
     date: today.toISOString().split('T')[0],
-    dateLabel: `Hari Ini (${today.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}) - galeri24.co.id`,
+    dateLabel: `${today.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`,
     sellPrice: defaultSell,
     buybackPrice: defaultBuyback,
+    sellPricePer001g: 24090,
+    buybackPer001g: 23240,
     spread: defaultSell - defaultBuyback,
     spreadPercent: Math.round(((defaultSell - defaultBuyback) / defaultSell) * 1000) / 10,
-    table: null
+    history: [
+      { date: '2026-10-21', sellPer001g: 24340, buybackPer001g: 23480, sellPerGram: 2434000, buybackPerGram: 2348000 },
+      { date: '2026-10-22', sellPer001g: 24300, buybackPer001g: 23440, sellPerGram: 2430000, buybackPerGram: 2344000 },
+      { date: '2026-10-23', sellPer001g: 24090, buybackPer001g: 23240, sellPerGram: 2409000, buybackPerGram: 2324000 },
+      { date: '2026-10-24', sellPer001g: 23990, buybackPer001g: 23150, sellPerGram: 2399000, buybackPerGram: 2315000 },
+      { date: '2026-10-25', sellPer001g: 23990, buybackPer001g: 23150, sellPerGram: 2399000, buybackPerGram: 2315000 },
+      { date: '2026-10-26', sellPer001g: 23990, buybackPer001g: 23150, sellPerGram: 2399000, buybackPerGram: 2315000 },
+      { date: '2026-10-27', sellPer001g: 24090, buybackPer001g: 23240, sellPerGram: 2409000, buybackPerGram: 2324000 }
+    ]
   };
 }

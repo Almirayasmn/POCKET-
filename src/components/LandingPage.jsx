@@ -49,8 +49,8 @@ export default function LandingPage({
   const goldKeping = gold?.totalKeping || 0;
   const targetGrams = gold?.targetGrams || 25;
   const goldProgress = targetGrams > 0 ? Math.min(100, Math.round((goldGrams / targetGrams) * 100)) : 0;
-  const goldPricePerGram = gold?.pricePerGram || 2510000;
-  const goldBuybackPerGram = gold?.buybackPerGram || 2363000;
+  const goldPricePerGram = gold?.pricePerGram || 2409000;
+  const goldBuybackPerGram = gold?.buybackPerGram || 2324000;
 
   return (
     <div style={{ padding: '0.5rem 0 3.5rem', position: 'relative' }}>
@@ -624,12 +624,12 @@ export default function LandingPage({
         <span style={{ opacity: 0.3 }}>•</span>
         <div className="ticker-pill-item">
           <span style={{ fontSize: '1.1rem' }}>🏆</span>
-          <span>Emas Galeri 24 Jual: <strong style={{ color: '#b45309' }}>{formatIdr(goldPricePerGram)} / gr</strong></span>
+          <span>Emas Pegadaian Beli: <strong style={{ color: '#b45309' }}>Rp {Math.round(goldPricePerGram / 100).toLocaleString('id-ID')}/0,01 gr</strong> ({formatIdr(goldPricePerGram)}/gr)</span>
         </div>
         <span style={{ opacity: 0.3 }}>•</span>
         <div className="ticker-pill-item">
           <span style={{ fontSize: '1.1rem' }}>🔄</span>
-          <span>Buyback: <strong style={{ color: '#0369a1' }}>{formatIdr(goldBuybackPerGram)} / gr</strong></span>
+          <span>Buyback: <strong style={{ color: '#0369a1' }}>Rp {Math.round(goldBuybackPerGram / 100).toLocaleString('id-ID')}/0,01 gr</strong> ({formatIdr(goldBuybackPerGram)}/gr)</span>
         </div>
         <span style={{ opacity: 0.3 }}>•</span>
         <div
