@@ -19,10 +19,10 @@ export function exportMonthToExcel({
     day: 'numeric'
   });
 
-  // Helper formatting for values
+  // Helper formatting for values with explicit space between currency and amount
   const formatVal = (v) =>
     isChinaPeriod
-      ? `¥${Number(v || 0).toFixed(2)}`
+      ? `¥ ${Number(v || 0).toFixed(2)}`
       : `Rp ${Math.round(Number(v || 0)).toLocaleString('id-ID')}`;
 
   // 1. Generate Category Budget vs Actual Evaluation Rows (8-column aligned)
@@ -49,15 +49,15 @@ export function exportMonthToExcel({
 
     catRowsHtml += `
       <tr style="background-color: ${rowBg};">
-        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 8px;">${idx + 1}</td>
+        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 6px;">${idx + 1}</td>
         <td colspan="2" style="font-weight: bold; border: 1px solid #cbd5e1; color: #831843; padding: 7px 10px;">${cat.name}</td>
-        <td style="text-align: right; font-weight: bold; border: 1px solid #cbd5e1; color: #0369a1; padding: 7px 10px;">${formatVal(budgetVal)}</td>
-        <td style="text-align: right; font-weight: bold; border: 1px solid #cbd5e1; color: #be185d; padding: 7px 10px;">${formatVal(spentVal)}</td>
-        <td style="text-align: right; font-weight: bold; border: 1px solid #cbd5e1; color: ${remainingVal >= 0 ? '#15803d' : '#b91c1c'}; padding: 7px 10px;">
+        <td style="text-align: right; font-weight: bold; border: 1px solid #cbd5e1; color: #0369a1; padding: 7px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(budgetVal)}</td>
+        <td style="text-align: right; font-weight: bold; border: 1px solid #cbd5e1; color: #be185d; padding: 7px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(spentVal)}</td>
+        <td style="text-align: right; font-weight: bold; border: 1px solid #cbd5e1; color: ${remainingVal >= 0 ? '#15803d' : '#b91c1c'}; padding: 7px 8px; white-space: nowrap; mso-number-format:'\\@';">
           ${formatVal(remainingVal)}
         </td>
-        <td style="text-align: center; border: 1px solid #cbd5e1; font-weight: bold; padding: 7px 8px;">${percentUsed}%</td>
-        <td style="text-align: center; font-weight: bold; border: 1px solid #cbd5e1; color: ${statusColor}; background-color: ${statusBg}; padding: 7px 8px;">${statusLabel}</td>
+        <td style="text-align: center; border: 1px solid #cbd5e1; font-weight: bold; padding: 7px 6px;">${percentUsed}%</td>
+        <td style="text-align: center; font-weight: bold; border: 1px solid #cbd5e1; color: ${statusColor}; background-color: ${statusBg}; padding: 7px 6px;">${statusLabel}</td>
       </tr>
     `;
   });
@@ -71,20 +71,20 @@ export function exportMonthToExcel({
     const isIncome = tx.type === 'Masuk';
     const typeLabel = isIncome ? 'Pemasukan' : 'Pengeluaran';
     const amountStr = isChinaPeriod
-      ? `¥${(tx.amountCny || 0).toFixed(2)} (Rp ${Math.round(tx.amountIdr || 0).toLocaleString('id-ID')})`
+      ? `¥ ${(tx.amountCny || 0).toFixed(2)} (Rp ${Math.round(tx.amountIdr || 0).toLocaleString('id-ID')})`
       : `Rp ${Math.round(tx.amountIdr || 0).toLocaleString('id-ID')}`;
     const rowBg = idx % 2 === 0 ? '#ffffff' : '#f0f9ff'; // alternating soft pastel blue
 
     txRowsHtml += `
       <tr style="background-color: ${rowBg};">
-        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 8px; mso-number-format:'\\@';">${idx + 1}</td>
-        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 8px; mso-number-format:'yyyy\\-mm\\-dd';">${tx.date || '-'}</td>
+        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 6px; mso-number-format:'\\@';">${idx + 1}</td>
+        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 6px; mso-number-format:'yyyy\\-mm\\-dd';">${tx.date || '-'}</td>
         <td style="border: 1px solid #cbd5e1; padding: 7px 10px; font-weight: 500;">${tx.title || '-'}</td>
         <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${cat}</td>
-        <td style="text-align: center; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#e11d48'}; background-color: ${isIncome ? '#dcfce7' : '#ffe4e6'}; padding: 7px 8px;">
+        <td style="text-align: center; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#e11d48'}; background-color: ${isIncome ? '#dcfce7' : '#ffe4e6'}; padding: 7px 6px;">
           ${typeLabel}
         </td>
-        <td style="text-align: right; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#be185d'}; padding: 7px 10px;">
+        <td style="text-align: right; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#be185d'}; padding: 7px 8px; white-space: nowrap; mso-number-format:'\\@';">
           ${amountStr}
         </td>
         <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${tx.paymentMethod || '-'}</td>
@@ -120,16 +120,16 @@ export function exportMonthToExcel({
     </head>
     <body>
       <table style="width: 100%; border-collapse: collapse;">
-        <!-- UNIFIED 8-COLUMN LAYOUT -->
+        <!-- UNIFIED 8-COLUMN LAYOUT WITH GENEROUS NUMERIC WIDTHS -->
         <colgroup>
           <col style="width: 45px;" />
-          <col style="width: 110px;" />
-          <col style="width: 220px;" />
-          <col style="width: 140px;" />
-          <col style="width: 100px;" />
+          <col style="width: 105px;" />
+          <col style="width: 200px;" />
           <col style="width: 160px;" />
-          <col style="width: 130px;" />
-          <col style="width: 190px;" />
+          <col style="width: 160px;" />
+          <col style="width: 160px;" />
+          <col style="width: 110px;" />
+          <col style="width: 160px;" />
         </colgroup>
 
         <!-- 1. HEADER BANNER (SPANS ALL 8 COLUMNS) -->
@@ -160,41 +160,41 @@ export function exportMonthToExcel({
         <!-- SPACING ROW -->
         <tr style="height: 14px;"><td colspan="8" style="border: none;"></td></tr>
 
-        <!-- 3. SECTION 1: RINGKASAN ARUS KAS & ALOKASI DANA (8 COLUMNS SYMMETRIC) -->
+        <!-- 3. SECTION 1: RINGKASAN ARUS KAS & ALOKASI DANA (8 COLUMNS BALANCED) -->
         <tr>
           <th colspan="8" style="background-color: #bae6fd; color: #0369a1; border: 1.5px solid #0284c7; text-align: left; font-size: 11pt; padding: 9px 12px;">
             1. RINGKASAN ARUS KAS & ALOKASI DANA (${monthLabel.toUpperCase()})
           </th>
         </tr>
         <tr>
-          <td colspan="2" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Saldo Awal Bulan:</td>
-          <td colspan="2" style="font-weight: bold; text-align: right; color: #0284c7; border: 1px solid #cbd5e1; padding: 8px 12px;">${summary.startBalance || '-'}</td>
-          <td colspan="2" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Alokasi Pagu Pos:</td>
-          <td colspan="2" style="font-weight: bold; text-align: right; color: #ea580c; border: 1px solid #cbd5e1; padding: 8px 12px;">${summary.totalBudget || '-'}</td>
+          <td colspan="3" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Saldo Awal Bulan:</td>
+          <td style="font-weight: bold; text-align: right; color: #0284c7; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.startBalance || '-'}</td>
+          <td colspan="3" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Alokasi Pagu Pos:</td>
+          <td style="font-weight: bold; text-align: right; color: #ea580c; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalBudget || '-'}</td>
         </tr>
         <tr>
-          <td colspan="2" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Pemasukan Masuk Bulan Ini:</td>
-          <td colspan="2" style="font-weight: bold; text-align: right; color: #15803d; border: 1px solid #cbd5e1; padding: 8px 12px;">${summary.monthIncome || '-'}</td>
-          <td colspan="2" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Pengeluaran Riil:</td>
-          <td colspan="2" style="font-weight: bold; text-align: right; color: #dc2626; border: 1px solid #cbd5e1; padding: 8px 12px;">${summary.totalOutflow || '-'}</td>
+          <td colspan="3" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Pemasukan Masuk Bulan Ini:</td>
+          <td style="font-weight: bold; text-align: right; color: #15803d; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.monthIncome || '-'}</td>
+          <td colspan="3" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Pengeluaran Riil:</td>
+          <td style="font-weight: bold; text-align: right; color: #dc2626; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalOutflow || '-'}</td>
         </tr>
         <tr style="background-color: #f8fafc;">
-          <td colspan="2" style="font-weight: bold; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 10px;">TOTAL DANA TERSEDIA:</td>
-          <td colspan="2" style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #0f172a; font-size: 11pt; padding: 8px 12px;">${summary.totalInflow || '-'}</td>
-          <td colspan="2" style="font-weight: bold; border: 1px solid #cbd5e1; color: #15803d; padding: 8px 10px;">SISA PAGU POS BELANJA (HEMAT):</td>
-          <td colspan="2" style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #15803d; font-size: 11pt; padding: 8px 12px;">${summary.remainingBudget || '-'}</td>
+          <td colspan="3" style="font-weight: bold; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 10px;">TOTAL DANA TERSEDIA:</td>
+          <td style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #0f172a; font-size: 11pt; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalInflow || '-'}</td>
+          <td colspan="3" style="font-weight: bold; border: 1px solid #cbd5e1; color: #15803d; padding: 8px 10px;">SISA PAGU POS BELANJA (HEMAT):</td>
+          <td style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #15803d; font-size: 11pt; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.remainingBudget || '-'}</td>
         </tr>
         <tr>
-          <td colspan="2" style="font-weight: bold; background-color: #e0f2fe; color: #0369a1; border: 1.5px solid #0284c7; padding: 9px 10px;">
+          <td colspan="3" style="font-weight: bold; background-color: #e0f2fe; color: #0369a1; border: 1.5px solid #0284c7; padding: 9px 10px;">
             SISA SALDO KAS AKHIR BULAN:
           </td>
-          <td colspan="2" style="font-weight: bold; text-align: right; background-color: #e0f2fe; color: #0369a1; font-size: 11.5pt; border: 1.5px solid #0284c7; padding: 9px 12px;">
+          <td style="font-weight: bold; text-align: right; background-color: #e0f2fe; color: #0369a1; font-size: 11.5pt; border: 1.5px solid #0284c7; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
             ${summary.netBalance || '-'}
           </td>
-          <td colspan="2" style="font-weight: bold; background-color: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; padding: 9px 10px;">
+          <td colspan="3" style="font-weight: bold; background-color: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; padding: 9px 10px;">
             SIMPANAN BERSIH (TABUNGAN AMAN):
           </td>
-          <td colspan="2" style="font-weight: bold; text-align: right; background-color: #fce7f3; color: #9d174d; font-size: 11.5pt; border: 1.5px solid #ec4899; padding: 9px 12px;">
+          <td style="font-weight: bold; text-align: right; background-color: #fce7f3; color: #9d174d; font-size: 11.5pt; border: 1.5px solid #ec4899; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
             ${summary.plannedSavings || '-'}
           </td>
         </tr>
@@ -216,18 +216,18 @@ export function exportMonthToExcel({
         <tr style="background-color: #fce7f3; color: #831843; font-weight: bold;">
           <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">No</th>
           <th colspan="2" style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Nama Pos Pengeluaran</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 10px;">Target Pagu</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 10px;">Realisasi Terpakai</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 10px;">Sisa Pagu (Hemat)</th>
+          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Target Pagu</th>
+          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Realisasi Terpakai</th>
+          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Sisa Pagu (Hemat)</th>
           <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">% Terpakai</th>
           <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Status</th>
         </tr>
         ${catRowsHtml}
         <tr style="background-color: #fdf2f8; font-weight: bold; border-top: 2px solid #ec4899; border-bottom: 2px solid #ec4899;">
-          <td colspan="3" style="text-align: right; border: 1px solid #cbd5e1; color: #831843; padding: 8px 12px;">TOTAL EVALUASI PAGU:</td>
-          <td style="text-align: right; border: 1px solid #cbd5e1; color: #0369a1; padding: 8px 10px;">${formatVal(grandTotalBudget)}</td>
-          <td style="text-align: right; border: 1px solid #cbd5e1; color: #be185d; padding: 8px 10px;">${formatVal(grandTotalSpent)}</td>
-          <td style="text-align: right; border: 1px solid #cbd5e1; color: ${grandRemaining >= 0 ? '#15803d' : '#b91c1c'}; padding: 8px 10px;">${formatVal(grandRemaining)}</td>
+          <td colspan="3" style="text-align: right; border: 1px solid #cbd5e1; color: #831843; padding: 8px 10px;">TOTAL EVALUASI PAGU:</td>
+          <td style="text-align: right; border: 1px solid #cbd5e1; color: #0369a1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandTotalBudget)}</td>
+          <td style="text-align: right; border: 1px solid #cbd5e1; color: #be185d; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandTotalSpent)}</td>
+          <td style="text-align: right; border: 1px solid #cbd5e1; color: ${grandRemaining >= 0 ? '#15803d' : '#b91c1c'}; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandRemaining)}</td>
           <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px 6px;">${grandTotalBudget > 0 ? Math.round((grandTotalSpent / grandTotalBudget) * 100) : 0}%</td>
           <td style="text-align: center; border: 1px solid #cbd5e1; color: ${grandRemaining >= 0 ? '#15803d' : '#b91c1c'}; background-color: ${grandRemaining >= 0 ? '#dcfce7' : '#fee2e2'}; padding: 8px 6px;">
             ${grandRemaining >= 0 ? 'HEMAT' : 'OVER BUDGET'}
@@ -249,7 +249,7 @@ export function exportMonthToExcel({
           <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Keterangan</th>
           <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Pos Kategori</th>
           <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Tipe</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 10px;">Nominal</th>
+          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Nominal</th>
           <th style="border: 1px solid #cbd5e1; padding: 8px 10px;">Akun / Metode</th>
           <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Catatan</th>
         </tr>
