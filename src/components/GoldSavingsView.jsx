@@ -884,12 +884,6 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
         )}
       </div>
 
-      {/* Gold Price Trend Chart (Mingguan, Bulanan, Tahunan) */}
-      <GoldTrendChart
-        currentPrice={gold.pricePerGram}
-        buybackPrice={gold.buybackPerGram || 2363000}
-      />
-
       {/* Gold Transaction / Holdings History */}
       <div className="pastel-card" style={{ padding: '1.4rem', marginTop: '1.5rem', background: '#ffffff', border: '1px solid #fef08a' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '0.8rem' }}>
