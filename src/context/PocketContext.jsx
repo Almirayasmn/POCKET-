@@ -130,6 +130,31 @@ export function PocketProvider({ children }) {
 
   const [isFetchingGoldPrice, setIsFetchingGoldPrice] = useState(false);
 
+  // App Privacy / PIN Lock State
+  const [isAppUnlocked, setIsAppUnlocked] = useState(() => {
+    try {
+      return localStorage.getItem('pocket_duo_unlocked') === 'true';
+    } catch (e) {
+      return false;
+    }
+  });
+
+  const unlockApp = (rememberDevice = true) => {
+    setIsAppUnlocked(true);
+    if (rememberDevice) {
+      try {
+        localStorage.setItem('pocket_duo_unlocked', 'true');
+      } catch (e) {}
+    }
+  };
+
+  const lockApp = () => {
+    setIsAppUnlocked(false);
+    try {
+      localStorage.removeItem('pocket_duo_unlocked');
+    } catch (e) {}
+  };
+
   const [data, setData] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -155,6 +180,7 @@ export function PocketProvider({ children }) {
           return {
             ...parsed,
             users,
+            securityPin: parsed.securityPin || '1234',
             adziimaCategories: parsed.adziimaCategories || ADZIIMA_CATEGORIES,
             yasmeenCategories: parsed.yasmeenCategories || YASMEEN_CATEGORIES,
             monthlyCategories: parsed.monthlyCategories || { yasmeen: {}, adziima: {} },
@@ -180,6 +206,7 @@ export function PocketProvider({ children }) {
       console.error('Failed to load from localStorage:', e);
     }
     return {
+      securityPin: '1234',
       exchangeRate: DEFAULT_EXCHANGE_RATE,
       users: DEFAULT_USERS,
       yasmeenCategories: YASMEEN_CATEGORIES,
@@ -333,6 +360,16 @@ export function PocketProvider({ children }) {
 
   const setExchangeRate = (rate) => {
     setData(prev => ({ ...prev, exchangeRate: parseFloat(rate) || DEFAULT_EXCHANGE_RATE }));
+  };
+
+  // Update App Security PIN
+  const updateSecurityPin = (newPin) => {
+    const clean = String(newPin).trim();
+    if (!clean) return;
+    setData(prev => ({
+      ...prev,
+      securityPin: clean
+    }));
   };
 
   // Update user profile or funds
@@ -1315,7 +1352,12 @@ export function PocketProvider({ children }) {
         isCloudSyncing,
         saveCloudUrl,
         syncFromCloud,
-        syncToCloud
+        syncToCloud,
+        isAppUnlocked,
+        unlockApp,
+        lockApp,
+        securityPin: data?.securityPin || '1234',
+        updateSecurityPin
       }}
     >
       {children}

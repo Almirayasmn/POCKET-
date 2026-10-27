@@ -7,10 +7,12 @@ import GoldSavingsView from './components/GoldSavingsView';
 import QuickAddModal from './components/QuickAddModal';
 import EditProfileModal from './components/EditProfileModal';
 import CloudSyncModal from './components/CloudSyncModal';
-import { Heart, Plus, Home } from 'lucide-react';
+import PinLockScreen from './components/PinLockScreen';
+import ChangePinModal from './components/ChangePinModal';
+import { Heart, Plus, Home, Lock, KeyRound } from 'lucide-react';
 
 function PocketAppContent() {
-  const { activeView, setActiveView } = usePocket();
+  const { activeView, setActiveView, isAppUnlocked, unlockApp, lockApp, securityPin, users } = usePocket();
 
   // Sync active view to document body for pure pastel background switching
   React.useEffect(() => {
@@ -29,6 +31,20 @@ function PocketAppContent() {
 
   // Multi-Device Cloud Sync Modal
   const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
+
+  // Change Security PIN Modal
+  const [isChangePinOpen, setIsChangePinOpen] = useState(false);
+
+  // If the app is locked, show the cute Pastel PIN Lock Screen!
+  if (!isAppUnlocked) {
+    return (
+      <PinLockScreen
+        onUnlock={unlockApp}
+        correctPin={securityPin || '1234'}
+        users={users}
+      />
+    );
+  }
 
   const handleOpenAdd = (defaultType = 'Keluar', initialData = null) => {
     setEditingTx(null);
@@ -55,6 +71,8 @@ function PocketAppContent() {
           onOpenEditProfile={handleOpenEditProfile}
           onOpenCloudModal={() => setIsCloudModalOpen(true)}
           onOpenAdd={handleOpenAdd}
+          onOpenChangePin={() => setIsChangePinOpen(true)}
+          onLockApp={lockApp}
         />
       )}
 
@@ -83,7 +101,7 @@ function PocketAppContent() {
       )}
 
       {/* Footer */}
-      <footer style={{ marginTop: '3.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+      <footer style={{ marginTop: '3.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
         <span>Pocket Duo · Yasmeen & Adziima</span>
         <Heart size={13} color="#f472b6" fill="#f472b6" />
         <span>Pelacak Keuangan Pribadi</span>
@@ -101,6 +119,37 @@ function PocketAppContent() {
           }}
         >
           ☁️ Sinkronisasi Multi-Device
+        </button>
+        <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
+        <button
+          onClick={() => setIsChangePinOpen(true)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            fontSize: 'inherit',
+            padding: 0
+          }}
+        >
+          🔑 Ganti PIN
+        </button>
+        <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
+        <button
+          onClick={lockApp}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            fontSize: 'inherit',
+            padding: 0
+          }}
+          title="Kunci aplikasi ini sekarang"
+        >
+          🔒 Kunci
         </button>
       </footer>
 
@@ -128,6 +177,12 @@ function PocketAppContent() {
       <CloudSyncModal
         isOpen={isCloudModalOpen}
         onClose={() => setIsCloudModalOpen(false)}
+      />
+
+      {/* Change Security PIN Modal */}
+      <ChangePinModal
+        isOpen={isChangePinOpen}
+        onClose={() => setIsChangePinOpen(false)}
       />
     </div>
   );

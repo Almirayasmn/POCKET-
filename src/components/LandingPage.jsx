@@ -19,10 +19,18 @@ import {
   Target,
   Award,
   CheckCircle2,
-  Calendar
+  Calendar,
+  Lock,
+  KeyRound
 } from 'lucide-react';
 
-export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpenAdd }) {
+export default function LandingPage({
+  onOpenEditProfile,
+  onOpenCloudModal,
+  onOpenAdd,
+  onOpenChangePin,
+  onLockApp
+}) {
   const {
     setActiveView,
     users,
@@ -57,32 +65,6 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
 
   return (
     <div style={{ padding: '0.5rem 0 3.5rem', position: 'relative' }}>
-      {/* Decorative Subtle Ambient Glows */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '-30px',
-          left: '5%',
-          width: '320px',
-          height: '320px',
-          background: 'radial-gradient(circle, rgba(244, 114, 182, 0.22) 0%, rgba(244, 114, 182, 0) 70%)',
-          pointerEvents: 'none',
-          zIndex: 0
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: '-30px',
-          right: '5%',
-          width: '320px',
-          height: '320px',
-          background: 'radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, rgba(56, 189, 248, 0) 70%)',
-          pointerEvents: 'none',
-          zIndex: 0
-        }}
-      />
-
       {/* Hero Header */}
       <div className="landing-hero" style={{ position: 'relative', zIndex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.65rem', flexWrap: 'wrap', marginBottom: '1.15rem' }}>
@@ -99,35 +81,80 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
               display: 'inline-flex',
               alignItems: 'center',
               gap: '0.45rem',
-              background: isCloudConnected ? 'rgba(236, 253, 245, 0.95)' : '#ffffff',
-              border: isCloudConnected ? '1.5px solid #6ee7b7' : '1.5px dashed #cbd5e1',
-              color: isCloudConnected ? '#065f46' : '#64748b',
-              padding: '0.42rem 1rem',
+              background: isCloudConnected ? '#f0fdf4' : '#ffffff',
+              border: isCloudConnected ? '1.5px solid #86efac' : '1.5px dashed #cbd5e1',
+              color: isCloudConnected ? '#166534' : '#64748b',
+              padding: '0.42rem 0.95rem',
               borderRadius: 'var(--radius-full)',
               fontSize: '0.78rem',
               fontWeight: 800,
               cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.04)',
-              transition: 'all 0.2s ease',
-              backdropFilter: 'blur(8px)'
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              transition: 'all 0.2s ease'
             }}
-            title="Klik untuk melihat status sinkronisasi antar HP"
+            title="Status sinkronisasi cloud antar HP"
           >
             {isCloudSyncing ? (
-              <RefreshCw size={13} className="animate-spin" color="#059669" />
+              <RefreshCw size={13} className="animate-spin" color="#16a34a" />
             ) : (
               <span
                 style={{
                   width: 9,
                   height: 9,
                   borderRadius: '50%',
-                  background: isCloudConnected ? '#10b981' : '#f59e0b',
-                  display: 'inline-block',
-                  boxShadow: isCloudConnected ? '0 0 8px rgba(16, 185, 129, 0.8)' : 'none'
+                  background: isCloudConnected ? '#22c55e' : '#f59e0b',
+                  display: 'inline-block'
                 }}
               />
             )}
-            <span>{isCloudConnected ? 'Cloud Aktif (HP Berdua Sinkron)' : '⚡ Sinkronkan HP Berdua'}</span>
+            <span>{isCloudConnected ? 'Cloud Terhubung' : 'Sinkronkan HP'}</span>
+          </button>
+
+          {/* Quick PIN Security Buttons */}
+          <button
+            onClick={onOpenChangePin}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: '#ffffff',
+              border: '1.5px solid #fbcfe8',
+              color: '#be185d',
+              padding: '0.42rem 0.85rem',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              transition: 'all 0.2s ease'
+            }}
+            title="Ubah PIN keamanan bersama"
+          >
+            <KeyRound size={13} color="#db2777" />
+            <span>PIN Rahasia</span>
+          </button>
+
+          <button
+            onClick={onLockApp}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: '#ffffff',
+              border: '1.5px solid #e2e8f0',
+              color: '#64748b',
+              padding: '0.42rem 0.85rem',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              transition: 'all 0.2s ease'
+            }}
+            title="Kunci catatan keuangan sekarang"
+          >
+            <Lock size={13} color="#64748b" />
+            <span>Kunci</span>
           </button>
         </div>
 
@@ -149,12 +176,11 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
               alignItems: 'center',
               justifyContent: 'center',
               gap: '0.45rem',
-              background: 'rgba(255, 255, 255, 0.95)',
+              background: '#fdf2f8',
               padding: '0.3rem 0.95rem',
               borderRadius: 'var(--radius-full)',
               border: '1.5px solid #fbcfe8',
-              marginBottom: '0.65rem',
-              boxShadow: '0 2px 10px rgba(244, 114, 182, 0.15)'
+              marginBottom: '0.65rem'
             }}
           >
             <Sparkles size={14} color="#d97706" />
@@ -168,9 +194,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
               fontFamily: 'var(--font-display)',
               fontSize: '2.65rem',
               fontWeight: 900,
-              background: 'linear-gradient(135deg, #0f172a 0%, #334155 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
+              color: '#0f172a',
               lineHeight: 1.15,
               letterSpacing: '-0.025em',
               textAlign: 'center'
@@ -183,7 +207,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
           </div>
         </div>
 
-        {/* Visual Asset Allocation Distribution Bar */}
+        {/* Visual Asset Allocation Distribution Bar - Solid Pastel */}
         <div className="wealth-distribution-container">
           <div className="wealth-distribution-bar">
             <div
@@ -205,35 +229,34 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
 
           <div className="wealth-legend-row">
             <div className="wealth-legend-item" style={{ color: '#be185d' }}>
-              <span className="wealth-legend-dot" style={{ background: '#ec4899' }} />
+              <span className="wealth-legend-dot" style={{ background: '#f472b6' }} />
               <span>🌸 Yasmeen ({yasmeenPercent}%)</span>
             </div>
             <div className="wealth-legend-item" style={{ color: '#0369a1' }}>
-              <span className="wealth-legend-dot" style={{ background: '#0284c7' }} />
+              <span className="wealth-legend-dot" style={{ background: '#38bdf8' }} />
               <span>🌊 Adziima ({adziimaPercent}%)</span>
             </div>
             <div className="wealth-legend-item" style={{ color: '#92400e' }}>
-              <span className="wealth-legend-dot" style={{ background: '#f59e0b' }} />
+              <span className="wealth-legend-dot" style={{ background: '#facc15' }} />
               <span>🪙 Emas 24K ({goldPercent}%)</span>
             </div>
           </div>
         </div>
 
-        {/* Breakdown chips with colorful borders */}
+        {/* Breakdown chips with solid pastel borders */}
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
           <div
             onClick={() => setActiveView('yasmeen')}
             style={{
-              background: '#ffffff',
-              padding: '0.65rem 1.1rem',
+              background: '#fdf2f8',
+              padding: '0.75rem 1.15rem',
               borderRadius: 'var(--radius-lg)',
               border: '1.5px solid #fbcfe8',
               cursor: 'pointer',
               textAlign: 'center',
               flex: '1 1 180px',
               maxWidth: '240px',
-              boxShadow: '0 4px 12px rgba(244, 114, 182, 0.12)',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka catatan Yasmeen"
           >
@@ -251,16 +274,15 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
           <div
             onClick={() => setActiveView('adziima')}
             style={{
-              background: '#ffffff',
-              padding: '0.65rem 1.1rem',
+              background: '#f0f9ff',
+              padding: '0.75rem 1.15rem',
               borderRadius: 'var(--radius-lg)',
               border: '1.5px solid #bae6fd',
               cursor: 'pointer',
               textAlign: 'center',
               flex: '1 1 180px',
               maxWidth: '240px',
-              boxShadow: '0 4px 12px rgba(56, 189, 248, 0.12)',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka catatan Adziima"
           >
@@ -278,16 +300,15 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
           <div
             onClick={() => setActiveView('gold')}
             style={{
-              background: '#ffffff',
-              padding: '0.65rem 1.1rem',
+              background: '#fefce8',
+              padding: '0.75rem 1.15rem',
               borderRadius: 'var(--radius-lg)',
               border: '1.5px solid #fde047',
               cursor: 'pointer',
               textAlign: 'center',
               flex: '1 1 180px',
               maxWidth: '240px',
-              boxShadow: '0 4px 12px rgba(245, 158, 11, 0.12)',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka portofolio emas"
           >
@@ -304,11 +325,11 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
         </div>
       </div>
 
-      {/* Quick Action Floating Strip */}
+      {/* Quick Action Strip */}
       <div className="quick-action-strip">
         <button
           className="btn-quick-pill pink"
-          onClick={() => onOpenAdd && onOpenAdd('expense', 'yasmeen')}
+          onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'yasmeen' })}
           title="Catat pengeluaran Yasmeen langsung"
         >
           <Plus size={15} color="#db2777" />
@@ -317,7 +338,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
 
         <button
           className="btn-quick-pill blue"
-          onClick={() => onOpenAdd && onOpenAdd('expense', 'adziima')}
+          onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'adziima' })}
           title="Catat pengeluaran Adziima langsung"
         >
           <Plus size={15} color="#0284c7" />
@@ -363,7 +384,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '0.9rem',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
                   }}
                 >
                   🌸
@@ -440,7 +461,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
 
             <button
               className="btn-card-quick-add pink"
-              onClick={() => onOpenAdd && onOpenAdd('expense', 'yasmeen')}
+              onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'yasmeen' })}
             >
               <Plus size={14} />
               <span>+ Catat Pengeluaran Yasmeen</span>
@@ -475,7 +496,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '0.9rem',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
                   }}
                 >
                   🌊
@@ -552,7 +573,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
 
             <button
               className="btn-card-quick-add blue"
-              onClick={() => onOpenAdd && onOpenAdd('expense', 'adziima')}
+              onClick={() => onOpenAdd && onOpenAdd('Keluar', { user: 'adziima' })}
             >
               <Plus size={14} />
               <span>+ Catat Pengeluaran Adziima</span>
@@ -570,13 +591,13 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
                     width: '92px',
                     height: '92px',
                     borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #fef08a 0%, #fde047 100%)',
+                    background: '#fef08a',
                     border: '2.5px solid #f59e0b',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     color: '#b45309',
-                    boxShadow: '0 8px 22px rgba(245, 158, 11, 0.3)'
+                    boxShadow: '0 4px 14px rgba(245, 158, 11, 0.2)'
                   }}
                 >
                   <Coins size={46} />
@@ -595,7 +616,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '0.9rem',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    boxShadow: '0 2px 6px rgba(0,0,0,0.08)'
                   }}
                 >
                   ✨
@@ -631,12 +652,12 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
                   <span>Target 25 Gram</span>
                   <span>{goldGrams} / {targetGrams} gr ({goldProgress}%)</span>
                 </div>
-                <div style={{ width: '100%', height: 6, background: '#fef3c7', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: 7, background: '#fef3c7', borderRadius: 99, overflow: 'hidden' }}>
                   <div
                     style={{
                       height: '100%',
                       width: `${goldProgress}%`,
-                      background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                      background: '#f59e0b',
                       borderRadius: 99,
                       transition: 'width 0.4s ease'
                     }}
@@ -667,7 +688,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
         </div>
       </div>
 
-      {/* Shared Goals & Milestones Section */}
+      {/* Shared Goals & Milestones Section - Pure Solid Pastel */}
       <div className="goals-milestone-section">
         <div className="goals-section-header">
           <div className="goals-section-title">
@@ -709,7 +730,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
                   style={{
                     height: '100%',
                     width: `${goldProgress}%`,
-                    background: 'linear-gradient(90deg, #f59e0b, #d97706)',
+                    background: '#f59e0b',
                     borderRadius: 99
                   }}
                 />
@@ -744,7 +765,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
               </p>
             </div>
 
-            <div style={{ background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid #fbcfe8', fontSize: '0.75rem', color: '#9d174d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1.5px solid #fbcfe8', fontSize: '0.75rem', color: '#9d174d', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <Heart size={14} color="#ec4899" fill="#ec4899" />
               <span>Simpan teratur dari sisa stipend & gaji bulanan</span>
             </div>
@@ -754,7 +775,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
           <div className="goal-card habit-theme">
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', padding: '0.25rem 0.7rem', borderRadius: 'var(--radius-full)', border: '1px solid #bae6fd' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#e0f2fe', padding: '0.25rem 0.7rem', borderRadius: 'var(--radius-full)', border: '1.5px solid #bae6fd' }}>
                   <ShieldCheck size={14} color="#0284c7" />
                   <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
                     Kebugaran Finansial
@@ -773,7 +794,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
               </p>
             </div>
 
-            <div style={{ background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid #bae6fd', fontSize: '0.75rem', color: '#0369a1', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <div style={{ background: '#ffffff', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1.5px solid #bae6fd', fontSize: '0.75rem', color: '#0369a1', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <CheckCircle2 size={14} color="#0284c7" />
               <span>Sinkronkan cloud rutin saat berganti hari</span>
             </div>
@@ -805,7 +826,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal, onOpe
           title="Klik untuk cek status cloud"
         >
           <span style={{ fontSize: '1.1rem' }}>☁️</span>
-          <span>Cloud Sync: <strong style={{ color: isCloudConnected ? '#059669' : '#d97706' }}>{isCloudConnected ? 'Tersambung (Aktif)' : 'Siap'}</strong></span>
+          <span>Cloud Sync: <strong style={{ color: isCloudConnected ? '#15803d' : '#d97706' }}>{isCloudConnected ? 'Tersambung (Aktif)' : 'Siap'}</strong></span>
         </div>
       </div>
     </div>
