@@ -54,6 +54,7 @@ function PocketAppContent() {
         <LandingPage
           onOpenEditProfile={handleOpenEditProfile}
           onOpenCloudModal={() => setIsCloudModalOpen(true)}
+          onOpenAdd={handleOpenAdd}
         />
       )}
 
