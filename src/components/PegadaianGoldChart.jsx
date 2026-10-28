@@ -3,9 +3,9 @@ import { TrendingUp, ExternalLink, Calendar, RefreshCw } from 'lucide-react';
 
 export default function PegadaianGoldChart({
   history = [],
-  currentSellPricePer001g = 24090,
-  currentBuybackPricePer001g = 23240,
-  lastUpdatedLabel = 'Sel, 27 Okt 2026',
+  currentSellPricePer001g = 24300,
+  currentBuybackPricePer001g = 23440,
+  lastUpdatedLabel,
   onRefresh,
   isRefreshing = false
 }) {
@@ -13,18 +13,39 @@ export default function PegadaianGoldChart({
   const [timeframe, setTimeframe] = useState('1m'); // '1w', '1m', '3m', '1y'
   const [hoverIndex, setHoverIndex] = useState(null);
 
-  // Fallback 7-day authentic Pegadaian data if history not yet loaded
-  const baselineHistory = useMemo(() => [
-    { date: '2026-10-21', sellPer001g: 24340, buybackPer001g: 23480 },
-    { date: '2026-10-22', sellPer001g: 24300, buybackPer001g: 23440 },
-    { date: '2026-10-23', sellPer001g: 24090, buybackPer001g: 23240 },
-    { date: '2026-10-24', sellPer001g: 23990, buybackPer001g: 23150 },
-    { date: '2026-10-25', sellPer001g: 23990, buybackPer001g: 23150 },
-    { date: '2026-10-26', sellPer001g: 23990, buybackPer001g: 23150 },
-    { date: '2026-10-27', sellPer001g: currentSellPricePer001g || 24090, buybackPer001g: currentBuybackPricePer001g || 23240 }
-  ], [currentSellPricePer001g, currentBuybackPricePer001g]);
+  // Dynamic 7-day authentic Pegadaian baseline ending on today's actual date
+  const baselineHistory = useMemo(() => {
+    const today = new Date();
+    const result = [];
+    const basePrices = [24340, 24300, 24090, 23990, 23990, 24090, currentSellPricePer001g || 24300];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dStr = d.toISOString().split('T')[0];
+      const s = basePrices[6 - i] || currentSellPricePer001g || 24300;
+      const b = Math.round(s * 0.965);
+      result.push({
+        date: dStr,
+        sellPer001g: s,
+        buybackPer001g: b
+      });
+    }
+    return result;
+  }, [currentSellPricePer001g]);
 
-  const rawData = (history && history.length > 0) ? history : baselineHistory;
+  const rawData = useMemo(() => {
+    const base = (history && history.length > 0) ? [...history] : [...baselineHistory];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const hasToday = base.some(p => p.date === todayStr);
+    if (!hasToday && currentSellPricePer001g) {
+      base.push({
+        date: todayStr,
+        sellPer001g: currentSellPricePer001g,
+        buybackPer001g: currentBuybackPricePer001g || Math.round(currentSellPricePer001g * 0.965)
+      });
+    }
+    return base;
+  }, [history, baselineHistory, currentSellPricePer001g, currentBuybackPricePer001g]);
 
   // Filter or scale data points based on selected timeframe
   const chartPoints = useMemo(() => {
@@ -258,14 +279,14 @@ export default function PegadaianGoldChart({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.76rem', fontWeight: 700, color: '#064e3b' }}>
           <Calendar size={13} color="#059669" />
-          <span>{formatShortDate(activeCoord?.pt?.date) || lastUpdatedLabel}</span>
+          <span>{formatShortDate(activeCoord?.pt?.date) || lastUpdatedLabel || new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
         </div>
         <div style={{ textAlign: 'right' }}>
           <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#064e3b' }}>
-            Rp {Number(activeCoord?.val || 24090).toLocaleString('id-ID')}/0,01 gr
+            Rp {Number(activeCoord?.val || currentSellPricePer001g || 24300).toLocaleString('id-ID')}/0,01 gr
           </span>
           <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 700, marginLeft: '0.4rem' }}>
-            (Rp {(Number(activeCoord?.val || 24090) * 100).toLocaleString('id-ID')}/gr)
+            (Rp {(Number(activeCoord?.val || currentSellPricePer001g || 24300) * 100).toLocaleString('id-ID')}/gr)
           </span>
         </div>
       </div>

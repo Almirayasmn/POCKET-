@@ -202,7 +202,7 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
     try {
       const res = await refreshLiveGoldPrices(true);
       if (res && res.success) {
-        setToastMessage(`✓ Berhasil memperbarui harga resmi Pegadaian: Rp ${(res.sellPricePer001g || 24090).toLocaleString('id-ID')}/0,01 gr (Rp ${(res.sellPrice || 2409000).toLocaleString('id-ID')}/gr) • Buyback Rp ${(res.buybackPricePer001g || 23240).toLocaleString('id-ID')}/0,01 gr`);
+        setToastMessage(`✓ Berhasil memperbarui harga resmi Pegadaian: Rp ${(res.sellPricePer001g || 24300).toLocaleString('id-ID')}/0,01 gr (Rp ${(res.sellPrice || 2430000).toLocaleString('id-ID')}/gr) • Buyback Rp ${(res.buybackPricePer001g || 23440).toLocaleString('id-ID')}/0,01 gr`);
         setTimeout(() => setToastMessage(null), 5000);
         try {
           confetti({ particleCount: 35, spread: 65, origin: { y: 0.3 } });
@@ -653,9 +653,9 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
       {/* Official Pegadaian Live Interactive Trend Chart (Sesuai web Pegadaian pada screenshot) */}
       <PegadaianGoldChart
         history={gold.pegadaianHistory}
-        currentSellPricePer001g={gold.pegadaianPrice001g || 24090}
-        currentBuybackPricePer001g={gold.pegadaianBuyback001g || 23240}
-        lastUpdatedLabel={gold.pegadaianDateLabel || 'Sel, 27 Okt 2026'}
+        currentSellPricePer001g={gold.pegadaianPrice001g || 24300}
+        currentBuybackPricePer001g={gold.pegadaianBuyback001g || 23440}
+        lastUpdatedLabel={gold.pegadaianDateLabel || new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
         onRefresh={handleAutoFetch}
         isRefreshing={isFetchingGoldPrice}
       />

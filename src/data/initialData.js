@@ -129,16 +129,18 @@ export const DEFAULT_GOLD_SAVINGS = {
   priceTable: GALERI24_DEFAULT_PRICE_TABLE,
   targetGrams: 25,
   transactions: [],
-  pegadaianLastPrice001g: 24090,
-  pegadaianLastBuyback001g: 23240,
+  pegadaianLastPrice001g: 24300,
+  pegadaianLastBuyback001g: 23440,
+  pegadaianLastDate: '2026-10-28',
+  pegadaianLastDateLabel: 'Rab, 28 Okt 2026',
   pegadaianHistory: [
-    { date: '2026-10-21', sellPer001g: 24340, buybackPer001g: 23480 },
     { date: '2026-10-22', sellPer001g: 24300, buybackPer001g: 23440 },
     { date: '2026-10-23', sellPer001g: 24090, buybackPer001g: 23240 },
     { date: '2026-10-24', sellPer001g: 23990, buybackPer001g: 23150 },
     { date: '2026-10-25', sellPer001g: 23990, buybackPer001g: 23150 },
     { date: '2026-10-26', sellPer001g: 23990, buybackPer001g: 23150 },
-    { date: '2026-10-27', sellPer001g: 24090, buybackPer001g: 23240 }
+    { date: '2026-10-27', sellPer001g: 24090, buybackPer001g: 23240 },
+    { date: '2026-10-28', sellPer001g: 24300, buybackPer001g: 23440 }
   ]
 };
 
