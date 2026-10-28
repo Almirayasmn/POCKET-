@@ -228,20 +228,22 @@ export default function LandingPage({
           </div>
         </div>
 
-        {/* Breakdown chips with solid pastel borders */}
+        {/* Breakdown chips - Clean & Minimalist */}
         <div className="wealth-chips-row">
           <div
             className="wealth-chip-item"
             onClick={() => setActiveView('yasmeen')}
             style={{
-              background: '#fdf2f8',
-              padding: '0.75rem 1.15rem',
-              borderRadius: 'var(--radius-lg)',
-              border: '1.5px solid #fbcfe8',
+              background: '#ffffff',
+              padding: '0.8rem 1.15rem',
+              borderRadius: '14px',
+              border: '1px solid #e2e8f0',
+              borderTop: '3px solid #f472b6',
               cursor: 'pointer',
               textAlign: 'center',
               flex: '1 1 180px',
               maxWidth: '240px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
               transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka catatan Yasmeen"
@@ -249,10 +251,10 @@ export default function LandingPage({
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#db2777', textTransform: 'uppercase' }}>
               🌸 Yasmeen Almira
             </div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#9d174d', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '1.08rem', fontWeight: 900, color: '#0f172a', marginTop: '0.15rem' }}>
               {formatIdr(yasmeenBalanceIdr)}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#db2777', fontWeight: 700, marginTop: '0.1rem' }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginTop: '0.1rem' }}>
               ≈ {formatCny(yasmeen?.totalBalanceCny || 0)}
             </div>
           </div>
@@ -261,14 +263,16 @@ export default function LandingPage({
             className="wealth-chip-item"
             onClick={() => setActiveView('adziima')}
             style={{
-              background: '#f0f9ff',
-              padding: '0.75rem 1.15rem',
-              borderRadius: 'var(--radius-lg)',
-              border: '1.5px solid #bae6fd',
+              background: '#ffffff',
+              padding: '0.8rem 1.15rem',
+              borderRadius: '14px',
+              border: '1px solid #e2e8f0',
+              borderTop: '3px solid #38bdf8',
               cursor: 'pointer',
               textAlign: 'center',
               flex: '1 1 180px',
               maxWidth: '240px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
               transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka catatan Adziima"
@@ -276,10 +280,10 @@ export default function LandingPage({
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
               🌊 Mulkan Adziima
             </div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#0369a1', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '1.08rem', fontWeight: 900, color: '#0f172a', marginTop: '0.15rem' }}>
               {formatIdr(adziimaBalanceIdr)}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#0284c7', fontWeight: 700, marginTop: '0.1rem' }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginTop: '0.1rem' }}>
               Dana Kas Mandiri
             </div>
           </div>
@@ -288,14 +292,16 @@ export default function LandingPage({
             className="wealth-chip-item"
             onClick={() => setActiveView('gold')}
             style={{
-              background: '#fefce8',
-              padding: '0.75rem 1.15rem',
-              borderRadius: 'var(--radius-lg)',
-              border: '1.5px solid #fde047',
+              background: '#ffffff',
+              padding: '0.8rem 1.15rem',
+              borderRadius: '14px',
+              border: '1px solid #e2e8f0',
+              borderTop: '3px solid #f59e0b',
               cursor: 'pointer',
               textAlign: 'center',
               flex: '1 1 180px',
               maxWidth: '240px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
               transition: 'all 0.15s ease'
             }}
             title="Klik untuk buka portofolio emas"
@@ -303,10 +309,10 @@ export default function LandingPage({
             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase' }}>
               🪙 Emas Batangan 24K
             </div>
-            <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#92400e', marginTop: '0.15rem' }}>
+            <div style={{ fontSize: '1.08rem', fontWeight: 900, color: '#0f172a', marginTop: '0.15rem' }}>
               {formatIdr(goldAssetValueIdr)}
             </div>
-            <div style={{ fontSize: '0.72rem', color: '#b45309', fontWeight: 700, marginTop: '0.1rem' }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 600, marginTop: '0.1rem' }}>
               {goldGrams > 0 ? `${goldGrams} gr (${goldKeping} kpg)` : '0 gr tersimpan'}
             </div>
           </div>

@@ -280,111 +280,102 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
 
   return (
     <div>
-      {/* Top Header */}
-      <div className="top-nav">
-        <button className="btn-back-home" onClick={() => setActiveView('landing')}>
-          <ArrowLeft size={16} />
-          <span>Halaman Utama</span>
-        </button>
+      {/* Modern Docked Top Navigation Bar (Evernote/Notion Style) */}
+      <div className="modern-navbar">
+        <div className="modern-nav-left">
+          <button className="modern-nav-btn" onClick={() => setActiveView('landing')}>
+            <ArrowLeft size={14} />
+            <span>Halaman Utama</span>
+          </button>
 
-        <div className="nav-user-badge">
-          <div
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: '#fef08a',
-              border: '1.5px solid #fde047',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#b45309'
-            }}
-          >
-            <Coins size={20} />
-          </div>
-          <div>
-            <div className="nav-user-title" style={{ color: '#b45309' }}>
-              Aset Emas Batangan Galeri 24
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+            <div
+              style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: '#fef3c7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#b45309'
+              }}
+            >
+              <Coins size={18} />
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <span>Yasmeen & Adziima · Galeri 24 Pegadaian</span>
+            <div>
+              <div style={{ fontSize: '0.98rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>
+                Aset Emas Batangan Galeri 24
+              </div>
+              <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                Tabungan Fisik & Investasi Berdua · Yasmeen & Adziima
+              </div>
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', alignItems: 'center' }}>
           {/* Automatic Live Fetch Button */}
           <button
-            className="btn-back-home"
+            className="modern-nav-btn gold"
             onClick={handleAutoFetch}
             disabled={isFetchingGoldPrice}
-            style={{
-              borderColor: '#f59e0b',
-              color: '#ffffff',
-              background: '#f59e0b',
-              fontWeight: 800,
-              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.25)'
-            }}
-            title="Tarik harga live otomatis langsung dari web galeri24.co.id"
+            title="Tarik harga live otomatis dari Pegadaian & Galeri 24"
           >
-            <RefreshCw size={14} className={isFetchingGoldPrice ? 'animate-spin' : ''} />
+            <RefreshCw size={12} className={isFetchingGoldPrice ? 'animate-spin' : ''} />
             <span>{isFetchingGoldPrice ? 'Menarik...' : 'Tarik Otomatis'}</span>
           </button>
 
           <button
-            className="btn-back-home"
+            className="modern-nav-btn"
             onClick={() => setIsSimulatorOpen(prev => !prev)}
             style={{
-              borderColor: isSimulatorOpen ? '#f59e0b' : '#fde047',
-              color: isSimulatorOpen ? '#b45309' : '#92400e',
-              background: isSimulatorOpen ? '#fef9c3' : '#ffffff'
+              background: isSimulatorOpen ? '#fef3c7' : '#ffffff',
+              color: isSimulatorOpen ? '#92400e' : '#334155'
             }}
-            title="Buka Kalkulator & Simulasi Investasi Emas"
+            title="Buka / Tutup Kalkulator & Simulasi Investasi Emas"
           >
-            <Calculator size={14} />
+            <Calculator size={13} />
             <span>Kalkulator</span>
           </button>
 
           <button
-            className="btn-back-home"
+            className="modern-nav-btn"
             onClick={() => setIsPriceTableModalOpen(true)}
-            style={{ borderColor: '#fde047', color: '#b45309', background: '#ffffff' }}
             title="Lihat Daftar Harga Resmi Galeri 24"
           >
-            <TableIcon size={14} />
+            <TableIcon size={13} />
             <span>Tabel Resmi</span>
           </button>
 
           <button
-            className="btn-back-home"
+            className="modern-nav-btn"
             onClick={() => {
               setTargetInput(gold.targetGrams.toString());
               setIsTargetModalOpen(true);
             }}
-            style={{ borderColor: '#fde047', color: '#b45309', background: '#ffffff' }}
             title="Atur Target Emas"
           >
-            <Target size={14} />
+            <Target size={13} />
             <span>Target</span>
           </button>
 
           <button
-            className="btn-back-home"
+            className="modern-nav-btn"
             onClick={onOpenCloudModal}
             style={{
-              borderColor: isCloudConnected ? '#a7f3d0' : '#fde047',
               background: isCloudConnected ? '#ecfdf5' : '#ffffff',
-              color: isCloudConnected ? '#065f46' : '#b45309'
+              color: isCloudConnected ? '#065f46' : '#334155',
+              borderColor: isCloudConnected ? '#a7f3d0' : '#e2e8f0'
             }}
             title="Sinkronisasi Cloud Multi-Device"
           >
             {isCloudSyncing ? (
-              <RefreshCw size={14} className="animate-spin" color="#059669" />
+              <RefreshCw size={13} className="animate-spin" color="#059669" />
             ) : (
-              <Cloud size={14} />
+              <Cloud size={13} />
             )}
-            <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
+            <span>{isCloudConnected ? 'Cloud Aktif' : 'Cloud Sync'}</span>
           </button>
         </div>
       </div>
@@ -393,19 +384,18 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
       {toastMessage && (
         <div
           style={{
-            marginTop: '0.8rem',
-            padding: '0.75rem 1rem',
-            borderRadius: 'var(--radius-md)',
+            marginBottom: '1rem',
+            padding: '0.65rem 1rem',
+            borderRadius: '12px',
             background: toastMessage.startsWith('✓') ? '#ecfdf5' : '#fffbeb',
-            border: `1.5px solid ${toastMessage.startsWith('✓') ? '#a7f3d0' : '#fde68a'}`,
+            border: `1px solid ${toastMessage.startsWith('✓') ? '#a7f3d0' : '#fde68a'}`,
             color: toastMessage.startsWith('✓') ? '#065f46' : '#92400e',
-            fontSize: '0.82rem',
+            fontSize: '0.8rem',
             fontWeight: 700,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-            animation: 'fadeIn 0.25s ease'
+            boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
           }}
         >
           <span>{toastMessage}</span>
@@ -418,64 +408,51 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
         </div>
       )}
 
-      {/* Official Galeri 24 Live Banner & Mode Toggle */}
-      <div
-        style={{
-          marginTop: '1rem',
-          background: '#ffffff',
-          borderRadius: 'var(--radius-lg)',
-          padding: '0.85rem 1.25rem',
-          border: '1px solid #fde047',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-          boxShadow: '0 2px 8px rgba(245, 158, 11, 0.04)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#ecfdf5', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', border: '1px solid #a7f3d0' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
+      {/* Official Galeri 24 Live Strip & Mode Toggle (Clean Editorial Sub-bar) */}
+      <div className="modern-status-strip">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#ecfdf5', padding: '0.2rem 0.55rem', borderRadius: '9999px', border: '1px solid #a7f3d0' }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
             <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#047857' }}>Live galeri24.co.id</span>
           </div>
-          <div style={{ fontSize: '0.82rem', color: '#78350f' }}>
-            Acuan: <strong>{gold.lastUpdatedLabel || 'Galeri 24 Pegadaian'}</strong>
-          </div>
-          <span style={{ color: '#d97706' }}>•</span>
-          <div style={{ fontSize: '0.78rem', color: '#b45309' }}>
-            Harga Jual: <strong>{formatIdr(gold.pricePerGram)}</strong> / gr
-          </div>
-          <span style={{ color: '#d97706' }}>•</span>
-          <div style={{ fontSize: '0.78rem', color: '#059669' }}>
-            Buyback: <strong>{formatIdr(gold.buybackPerGram)}</strong> / gr
-          </div>
+          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+            Acuan: <strong style={{ color: '#0f172a' }}>{gold.lastUpdatedLabel || 'Galeri 24 Pegadaian'}</strong>
+          </span>
+          <span style={{ color: '#cbd5e1' }}>•</span>
+          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+            Harga Jual: <strong style={{ color: '#b45309' }}>{formatIdr(gold.pricePerGram)}</strong> / gr
+          </span>
+          <span style={{ color: '#cbd5e1' }}>•</span>
+          <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+            Buyback: <strong style={{ color: '#047857' }}>{formatIdr(gold.buybackPerGram)}</strong> / gr
+          </span>
           <a
             href="https://galeri24.co.id/harga-emas"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ fontSize: '0.78rem', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', textDecoration: 'underline', fontWeight: 700 }}
+            style={{ fontSize: '0.75rem', color: '#b45309', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', textDecoration: 'none', fontWeight: 700 }}
           >
             <span>Cek Web Resmi</span>
-            <ExternalLink size={12} />
+            <ExternalLink size={11} />
           </a>
         </div>
 
-        {/* Valuation Toggle: Harga Jual vs Harga Buyback */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: '#fefce8', padding: '0.25rem', borderRadius: 'var(--radius-md)', border: '1px solid #fde047' }}>
+        {/* Valuation Toggle: Nilai Toko vs Nilai Buyback */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', background: '#f1f5f9', padding: '0.2rem', borderRadius: '9999px' }}>
           <button
             type="button"
             onClick={() => setGoldValuationMode('sell')}
             style={{
-              padding: '0.32rem 0.75rem',
-              borderRadius: 'var(--radius-sm)',
+              padding: '0.28rem 0.75rem',
+              borderRadius: '9999px',
               border: 'none',
-              fontSize: '0.75rem',
+              fontSize: '0.74rem',
               fontWeight: 700,
               cursor: 'pointer',
-              background: !isBuybackMode ? '#f59e0b' : 'transparent',
-              color: !isBuybackMode ? '#ffffff' : '#92400e',
-              transition: 'all 0.2s ease'
+              background: !isBuybackMode ? '#ffffff' : 'transparent',
+              color: !isBuybackMode ? '#0f172a' : '#64748b',
+              boxShadow: !isBuybackMode ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              transition: 'all 0.15s ease'
             }}
           >
             Nilai Toko (Jual: {formatIdr(gold.pricePerGram)}/gr)
@@ -484,15 +461,16 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
             type="button"
             onClick={() => setGoldValuationMode('buyback')}
             style={{
-              padding: '0.32rem 0.75rem',
-              borderRadius: 'var(--radius-sm)',
+              padding: '0.28rem 0.75rem',
+              borderRadius: '9999px',
               border: 'none',
-              fontSize: '0.75rem',
+              fontSize: '0.74rem',
               fontWeight: 700,
               cursor: 'pointer',
-              background: isBuybackMode ? '#b45309' : 'transparent',
-              color: isBuybackMode ? '#ffffff' : '#92400e',
-              transition: 'all 0.2s ease'
+              background: isBuybackMode ? '#ffffff' : 'transparent',
+              color: isBuybackMode ? '#0f172a' : '#64748b',
+              boxShadow: isBuybackMode ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              transition: 'all 0.15s ease'
             }}
           >
             Nilai Cair (Buyback: {formatIdr(gold.buybackPerGram || 2363000)}/gr)
@@ -500,151 +478,129 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
         </div>
       </div>
 
-      {/* Gold Hero Card */}
-      <div className="gold-banner" style={{ background: '#fefce8', border: '2px solid #fef08a', borderRadius: 'var(--radius-xl)', padding: '1.6rem', marginTop: '1rem', boxShadow: '0 4px 16px rgba(245, 158, 11, 0.08)' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      {/* Clean Editorial Executive Hero (Evernote Style - ZERO NESTED CARDS) */}
+      <div className="editorial-hero-section">
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem' }}>
           <div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#ffffff', padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-full)', border: '1px solid #fde047', marginBottom: '0.6rem' }}>
-              <ShieldCheck size={14} color="#b45309" />
-              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Galeri 24 · Emas Batangan 24 Karat (999.9)
-              </span>
+            <div style={{ fontSize: '0.74rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.4rem' }}>
+              Galeri 24 Pegadaian · Emas Batangan 24 Karat (999.9)
             </div>
 
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 900, color: '#92400e', lineHeight: 1.1 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.65rem', fontWeight: 900, color: '#0f172a', lineHeight: 1.1 }}>
               {gold.totalGrams.toFixed(2)}{' '}
-              <span style={{ fontSize: '1.3rem', fontWeight: 700 }}>gram</span>
-              <span style={{ fontSize: '1.05rem', fontWeight: 600, color: '#b45309', marginLeft: '0.75rem' }}>
-                ({gold.totalKeping} keping)
+              <span style={{ fontSize: '1.35rem', fontWeight: 600, color: '#64748b' }}>gram</span>
+              <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#94a3b8', marginLeft: '0.65rem' }}>
+                ({gold.totalKeping} keping tersimpan)
               </span>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-              <div style={{ fontSize: '0.95rem', color: '#78350f' }}>
-                {isBuybackMode ? 'Nilai Pencairan Hari Ini (Buyback):' : 'Estimasi Nilai Pasar Terkini:'}{' '}
-                <strong>{formatIdr(gold.currentAssetValueIdr)}</strong>
+            {/* Market Valuation & Inline Gain/Loss Pill */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginTop: '0.65rem' }}>
+              <div style={{ fontSize: '1.15rem', color: '#0f172a', fontWeight: 800 }}>
+                {formatIdr(gold.currentAssetValueIdr)}
               </div>
-              <span style={{ color: '#d97706' }}>•</span>
-              <div style={{ fontSize: '0.82rem', color: '#92400e', background: '#ffffff', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-sm)', border: '1px solid #fde047' }}>
-                Acuan: <strong>{formatIdr(gold.activeValuationPrice)}</strong> / gr
+              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
+                ({isBuybackMode ? 'Harga Buyback' : 'Harga Toko'}: {formatIdr(gold.activeValuationPrice)}/gr)
+              </span>
+
+              {/* Sleek Inline Gain/Loss Pill - No heavy card */}
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  padding: '0.22rem 0.65rem',
+                  borderRadius: '9999px',
+                  background: isProfit ? '#dcfce7' : '#fee2e2',
+                  color: isProfit ? '#15803d' : '#b91c1c',
+                  fontSize: '0.76rem',
+                  fontWeight: 800
+                }}
+              >
+                {isProfit ? <TrendingUp size={13} /> : <TrendingDown size={13} />}
+                <span>
+                  {gold.totalGoldSpentIdr > 0
+                    ? `${isProfit ? '+' : ''}${formatIdr(gold.profitLossIdr)} (${isProfit ? '+' : ''}${gold.profitLossPercent}%)`
+                    : 'Belum ada modal tercatat'}
+                </span>
               </div>
+
+              {gold.totalGoldSpentIdr > 0 && (
+                <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+                  Modal: {formatIdr(gold.totalGoldSpentIdr)} · Rata-rata: {formatIdr(Math.round(gold.avgBuyPricePerGram))}/gr
+                </span>
+              )}
             </div>
           </div>
 
           <button
-            className="btn-enter-profile btn-enter-gold"
+            className="modern-nav-btn gold"
             onClick={() => handleOpenAddModal(1)}
-            style={{ width: 'auto', padding: '0.75rem 1.4rem', background: '#f59e0b', color: '#ffffff', border: 'none', boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)' }}
+            style={{ padding: '0.65rem 1.35rem', fontSize: '0.85rem' }}
           >
-            <Plus size={18} strokeWidth={2.5} />
+            <Plus size={16} strokeWidth={2.5} />
             <span>Catat Emas Galeri 24</span>
           </button>
         </div>
 
-        {/* Dynamic Trend & Gain/Loss Banner ("bergerak naik turun asetnya sesuai tren emas") */}
-        <div style={{ marginTop: '1.3rem', background: '#ffffff', borderRadius: 'var(--radius-lg)', padding: '1rem 1.25rem', border: '1px solid #fde047' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <div
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  background: isProfit ? '#dcfce7' : '#fee2e2',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: isProfit ? '#16a34a' : '#dc2626'
-                }}
-              >
-                {isProfit ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-              </div>
-              <div>
-                <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Pergerakan Tren Nilai Aset ({isBuybackMode ? 'Berdasarkan Buyback' : 'Berdasarkan Harga Toko'})
-                </div>
-                <div style={{ fontSize: '1.05rem', fontWeight: 800, color: isProfit ? '#15803d' : '#b91c1c' }}>
-                  {gold.totalGoldSpentIdr > 0 ? (
-                    <>
-                      {isProfit ? '+' : ''}{formatIdr(gold.profitLossIdr)}{' '}
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>
-                        ({isProfit ? '+' : ''}{gold.profitLossPercent}%)
-                      </span>
-                    </>
-                  ) : (
-                    'Belum ada modal tercatat'
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)' }}>
-                Total Modal Beli: <strong>{formatIdr(gold.totalGoldSpentIdr)}</strong>
-              </div>
-              <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: '0.15rem' }}>
-                Rata-rata Harga Beli: <strong>{gold.totalGrams > 0 ? `${formatIdr(Math.round(gold.avgBuyPricePerGram))}/gr` : '-'}</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress bar towards target */}
-        <div style={{ marginTop: '1.2rem', paddingTop: '1rem', borderTop: '1px solid rgba(251, 191, 36, 0.4)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 700, color: '#92400e', marginBottom: '0.4rem' }}>
+        {/* Target Progress Bar - Minimalist Clean Line */}
+        <div style={{ marginTop: '1.4rem', paddingTop: '1.1rem', borderTop: '1px solid #f1f5f9' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', fontWeight: 700, color: '#475569', marginBottom: '0.45rem' }}>
             <span>Target Emas Berdua: {gold.targetGrams} gram</span>
-            <span>{gold.progressPercent}% Tercapai</span>
+            <span style={{ color: '#0f172a', fontWeight: 800 }}>{gold.progressPercent}% Tercapai</span>
           </div>
-          <div className="progress-bar-bg" style={{ height: '10px', background: 'rgba(255,255,255,0.85)', border: '1px solid #fef08a' }}>
+          <div style={{ height: '7px', background: '#f1f5f9', borderRadius: '9999px', overflow: 'hidden' }}>
             <div
-              className="progress-bar-fill"
               style={{
                 width: `${gold.progressPercent}%`,
-                background: '#f59e0b'
+                height: '100%',
+                background: '#f59e0b',
+                borderRadius: '9999px',
+                transition: 'width 0.4s ease'
               }}
             />
           </div>
         </div>
 
-        {/* Contribution breakdown */}
-        <div className="gold-stats-grid" style={{ marginTop: '1.2rem' }}>
-          <div className="gold-stat-item" style={{ background: '#ffffff', border: '1px solid #fde047' }}>
-            <div className="gold-stat-label">Disetor Yasmeen</div>
-            <div className="gold-stat-value" style={{ color: '#db2777' }}>
-              {gold.yasmeenContributedGrams.toFixed(2)} gr
+        {/* 4-Column Continuous Metrics Strip - Clean Dividers, ZERO BOXED CARDS */}
+        <div className="metrics-strip">
+          <div className="metrics-col">
+            <div className="metrics-label" style={{ color: '#db2777' }}>Disetor Yasmeen</div>
+            <div className="metrics-value" style={{ color: '#be185d' }}>
+              {gold.yasmeenContributedGrams.toFixed(2)} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>gr</span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            <div className="metrics-sub">
               ≈ {formatIdr(gold.yasmeenContributedValueIdr || 0)}
             </div>
           </div>
 
-          <div className="gold-stat-item" style={{ background: '#ffffff', border: '1px solid #fde047' }}>
-            <div className="gold-stat-label">Disetor Adziima</div>
-            <div className="gold-stat-value" style={{ color: '#0284c7' }}>
-              {gold.adziimaContributedGrams.toFixed(2)} gr
+          <div className="metrics-col">
+            <div className="metrics-label" style={{ color: '#0284c7' }}>Disetor Adziima</div>
+            <div className="metrics-value" style={{ color: '#0369a1' }}>
+              {gold.adziimaContributedGrams.toFixed(2)} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>gr</span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            <div className="metrics-sub">
               ≈ {formatIdr(gold.adziimaContributedValueIdr || 0)}
             </div>
           </div>
 
-          <div className="gold-stat-item" style={{ background: '#ffffff', border: '1px solid #fde047' }}>
-            <div className="gold-stat-label">Patungan Berdua (50:50)</div>
-            <div className="gold-stat-value" style={{ color: '#d97706' }}>
-              {contributorStats.shared.grams.toFixed(2)} gr
+          <div className="metrics-col">
+            <div className="metrics-label" style={{ color: '#d97706' }}>Patungan (50:50)</div>
+            <div className="metrics-value" style={{ color: '#b45309' }}>
+              {contributorStats.shared.grams.toFixed(2)} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>gr</span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+            <div className="metrics-sub">
               ≈ {formatIdr(contributorStats.shared.value || 0)}
             </div>
           </div>
 
-          <div className="gold-stat-item" style={{ background: '#ffffff', border: '1px solid #fde047' }}>
-            <div className="gold-stat-label">Total Keping Batangan</div>
-            <div className="gold-stat-value" style={{ color: '#b45309' }}>
-              {gold.totalKeping} Keping
+          <div className="metrics-col">
+            <div className="metrics-label" style={{ color: '#475569' }}>Total Keping Batangan</div>
+            <div className="metrics-value" style={{ color: '#0f172a' }}>
+              {gold.totalKeping} <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b' }}>Kpg</span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              Galeri 24 Pegadaian
+            <div className="metrics-sub">
+              Galeri 24 Pegadaian Resmi
             </div>
           </div>
         </div>
@@ -660,19 +616,16 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
         isRefreshing={isFetchingGoldPrice}
       />
 
-      {/* Interactive Gold Investment Simulator & Calculator */}
-      <div
-        className="pastel-card"
-        style={{
-          padding: '1.2rem 1.4rem',
-          marginTop: '1.2rem',
-          background: '#ffffff',
-          border: '1.5px solid #fde047',
-          borderRadius: 'var(--radius-lg)',
-          boxShadow: '0 2px 10px rgba(245, 158, 11, 0.05)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem' }}>
+      {/* Interactive Gold Investment Simulator & Calculator (Collapsible) */}
+      {isSimulatorOpen && (
+        <div
+          className="editorial-hero-section"
+          style={{
+            marginTop: '1.2rem',
+            background: '#ffffff'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#fef08a', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#b45309' }}>
               <Calculator size={18} />
@@ -883,9 +836,10 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
           </div>
         )}
       </div>
+    )}
 
       {/* Gold Transaction / Holdings History */}
-      <div className="pastel-card" style={{ padding: '1.4rem', marginTop: '1.5rem', background: '#ffffff', border: '1px solid #fef08a' }}>
+      <div className="editorial-hero-section" style={{ marginTop: '1.5rem', background: '#ffffff' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.2rem', flexWrap: 'wrap', gap: '0.8rem' }}>
           <div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)' }}>

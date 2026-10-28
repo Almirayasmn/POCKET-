@@ -63,24 +63,24 @@ body {
   transition: background-color 0.25s ease;
 }
 
-/* Distinct Solid Pastel Backgrounds - NO GRADIENTS AT ALL */
+/* Modern Clean Website Canvas - Calm Neutrals (Evernote/Notion Style) */
 body.view-landing {
-  background-color: #faf5fa !important; /* Soft Solid Pastel Lavender/Blush */
+  background-color: #fafbfc !important;
   background-image: none !important;
 }
 
 body.view-yasmeen {
-  background-color: #fce7f3 !important; /* Visible Solid Pastel Pink */
+  background-color: #fdfafc !important;
   background-image: none !important;
 }
 
 body.view-adziima {
-  background-color: #e0f2fe !important; /* Visible Solid Pastel Blue */
+  background-color: #f8fafc !important;
   background-image: none !important;
 }
 
 body.view-gold {
-  background-color: #fef08a !important; /* Distinct Solid Pastel Yellow / Gold */
+  background-color: #fbfbfa !important; /* Elegant warm off-white canvas, NOT bright yellow */
   background-image: none !important;
 }
 
@@ -327,15 +327,15 @@ button, input, select, textarea {
   font-weight: 500;
 }
 
-/* Joint Wealth Dashboard Banner - Clean Solid Pastel Aesthetic */
+/* Joint Wealth Dashboard Hero - Clean Modern Editorial Layout */
 .joint-wealth-banner {
   max-width: 1040px;
   margin: 0 auto 2.2rem;
-  padding: 2rem 2.2rem;
+  padding: 2.2rem 2.4rem;
   background: #ffffff;
-  border: 2px solid #fbcfe8;
-  border-radius: 26px;
-  box-shadow: 0 8px 24px rgba(244, 114, 182, 0.08);
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -420,52 +420,52 @@ button, input, select, textarea {
 }
 
 .profile-select-card {
-  padding: 2.2rem 1.8rem;
-  border-radius: 24px;
+  padding: 2rem 1.6rem;
+  border-radius: 20px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.profile-select-card:hover {
+  transform: translateY(-2px);
+  border-color: #cbd5e1;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
 }
 
 .profile-select-card.pink {
-  background: #fdf2f8; /* Solid Pastel Pink */
-  border: 2px solid #fbcfe8;
-  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08);
+  border-top: 3px solid #f472b6;
 }
 
 .profile-select-card.pink:hover {
-  transform: translateY(-4px);
   border-color: #f472b6;
-  box-shadow: 0 10px 24px rgba(244, 114, 182, 0.2);
+  box-shadow: 0 8px 24px rgba(244, 114, 182, 0.12);
 }
 
 .profile-select-card.blue {
-  background: #f0f9ff; /* Solid Pastel Blue */
-  border: 2px solid #bae6fd;
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.08);
+  border-top: 3px solid #38bdf8;
 }
 
 .profile-select-card.blue:hover {
-  transform: translateY(-4px);
   border-color: #38bdf8;
-  box-shadow: 0 10px 24px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 8px 24px rgba(56, 189, 248, 0.12);
 }
 
 .profile-select-card.gold {
-  background: #fefce8; /* Solid Pastel Butter Yellow */
-  border: 2px solid #fde047;
-  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
+  border-top: 3px solid #f59e0b;
 }
 
 .profile-select-card.gold:hover {
-  transform: translateY(-4px);
-  border-color: #eab308;
-  box-shadow: 0 10px 24px rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.12);
 }
 
 .profile-avatar-circle {
@@ -634,6 +634,162 @@ button, input, select, textarea {
 /* ==========================================================================
    UNIFIED DASHBOARD HEADER (PREMIUM APP BAR)
    ========================================================================== */
+/* ==========================================================================
+   MODERN WEBSITE DESIGN SYSTEM (EVERNOTE / NOTION STYLE - CLEAN OPEN LAYOUT)
+   ========================================================================== */
+.modern-navbar {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.85rem 1.35rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.modern-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.modern-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.modern-nav-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.modern-nav-btn.primary {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.modern-nav-btn.primary:hover {
+  background: #1e293b;
+}
+
+.modern-nav-btn.gold {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+
+.modern-nav-btn.gold:hover {
+  background: #d97706;
+}
+
+/* Modern Sleek Status Strip */
+.modern-status-strip {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.65rem 1.15rem;
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+/* Modern Executive Hero Section - Zero Nested Cards */
+.editorial-hero-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.85rem 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* 4-Column Continuous Metrics Strip - Clean Dividers, NO BOXED CARDS */
+.metrics-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid #f1f5f9;
+  margin-top: 1.6rem;
+  padding-top: 1.35rem;
+}
+
+.metrics-col {
+  padding: 0 1.25rem;
+  border-right: 1px solid #f1f5f9;
+}
+
+.metrics-col:first-child {
+  padding-left: 0;
+}
+
+.metrics-col:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.metrics-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.35rem;
+}
+
+.metrics-value {
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.15;
+}
+
+.metrics-sub {
+  font-size: 0.76rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .editorial-hero-section {
+    padding: 1.35rem 1.15rem;
+  }
+  .metrics-strip {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem 0.75rem;
+  }
+  .metrics-col {
+    padding: 0 0.5rem;
+    border-right: none;
+  }
+  .metrics-col:nth-child(odd) {
+    border-right: 1px solid #f1f5f9;
+  }
+}
+
 .unified-header-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);

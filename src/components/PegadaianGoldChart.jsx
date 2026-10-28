@@ -129,13 +129,13 @@ export default function PegadaianGoldChart({
   return (
     <div
       style={{
-        maxWidth: '640px',
+        maxWidth: '100%',
         margin: '1.2rem auto 0',
         background: '#ffffff',
-        borderRadius: '16px',
-        border: '1.5px solid #d1fae5',
-        boxShadow: '0 4px 16px rgba(16, 185, 129, 0.06)',
-        padding: '0.9rem 1.1rem 0.75rem',
+        borderRadius: '20px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.02)',
+        padding: '1.15rem 1.35rem 0.95rem',
         position: 'relative'
       }}
     >
