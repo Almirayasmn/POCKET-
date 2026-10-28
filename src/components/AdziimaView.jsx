@@ -381,7 +381,10 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </div>
           <div className="frugal-text">
             <h4>
-              {adziima.hasDailyBudgetSet ? 'Panduan Jatah Pos Harian (Daily)' : 'Target Belanja Harian (Daily)'} · {monthLabel}
+              {adziima.hasDailyBudgetSet ? 'Panduan Jatah Pos Harian' : 'Target Belanja Harian'}{' '}
+              <span className="handwriting-accent" style={{ color: '#0284c7', fontSize: '1.25rem', marginLeft: '0.2rem' }}>
+                {monthLabel}
+              </span>
             </h4>
             <p>
               {adziima.hasDailyBudgetSet ? (

@@ -83,7 +83,12 @@ export default function UnifiedDashboardHeader({
 
             <div className="udh-user-info">
               <div className="udh-user-name-row">
-                <span className="udh-user-name">{user.name || (isYasmeen ? 'Yasmeen Almira' : 'Adziima')}</span>
+                <span className="udh-user-name">
+                  {user.name || (isYasmeen ? 'Yasmeen Almira' : 'Adziima')}{' '}
+                  <span className="handwriting-accent" style={{ color: isYasmeen ? '#db2777' : '#0284c7', fontSize: '1.15rem', marginLeft: '0.2rem' }}>
+                    {isYasmeen ? 'di China' : 'di Indo'}
+                  </span>
+                </span>
                 <span className="udh-country-pill" style={{ background: tagBg, color: tagText }}>
                   {isYasmeen ? (isChina ? '🇨🇳 Nanning' : '🇮🇩 Indo') : '🇮🇩 Indonesia'}
                 </span>

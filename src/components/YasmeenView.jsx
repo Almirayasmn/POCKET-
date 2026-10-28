@@ -441,7 +441,10 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
             <Sparkles size={18} color="#db2777" />
             <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#9d174d' }}>
-              Panduan Jatah Belanja & Makan {monthLabel}
+              Panduan Jatah Belanja & Makan{' '}
+              <span className="handwriting-accent" style={{ color: '#db2777', fontSize: '1.25rem', marginLeft: '0.2rem' }}>
+                {monthLabel}
+              </span>
             </h4>
           </div>
           <p style={{ fontSize: '0.85rem', color: '#831843', lineHeight: 1.5, margin: 0 }}>

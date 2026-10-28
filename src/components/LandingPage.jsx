@@ -54,33 +54,41 @@ export default function LandingPage({
 
   return (
     <div style={{ padding: '0.5rem 0 3.5rem', position: 'relative' }}>
-      {/* Hero Header */}
-      <div className="landing-hero" style={{ position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <div className="landing-couple-pill">
-            <Heart size={14} color="#ec4899" fill="#ec4899" style={{ animation: 'pulseHeart 2.5s infinite' }} />
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#be185d', letterSpacing: '0.01em' }}>
-              Pocket Duo · Yasmeen & Adziima
+      {/* Modern Top Navbar (Editorial Layout) */}
+      <header className="modern-navbar">
+        <div className="modern-nav-left">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+            <span style={{ fontSize: '1.3rem', fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '-0.03em', color: '#0f172a' }}>
+              pocket duo<span style={{ color: '#ec4899' }}>.</span>
+            </span>
+            <span className="landing-couple-pill">
+              <Heart size={12} color="#ec4899" fill="#ec4899" />
+              <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#be185d' }}>
+                Yasmeen & Adziima
+              </span>
             </span>
           </div>
+        </div>
 
+        {/* Center Portal Quick Links */}
+        <nav className="nav-center-links">
+          <button type="button" onClick={() => setActiveView('yasmeen')} className="nav-link-item">
+            🌸 Yasmeen
+          </button>
+          <button type="button" onClick={() => setActiveView('adziima')} className="nav-link-item">
+            🌊 Adziima
+          </button>
+          <button type="button" onClick={() => setActiveView('gold')} className="nav-link-item">
+            🪙 Emas 24K
+          </button>
+        </nav>
+
+        {/* Right Security & Sync Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
           <button
+            type="button"
             onClick={onOpenCloudModal}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              background: isCloudConnected ? '#f0fdf4' : '#ffffff',
-              border: isCloudConnected ? '1.5px solid #86efac' : '1.5px dashed #cbd5e1',
-              color: isCloudConnected ? '#166534' : '#64748b',
-              padding: '0.38rem 0.75rem',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.74rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-              transition: 'all 0.2s ease'
-            }}
+            className="ghost-pill-btn"
             title="Status sinkronisasi cloud antar HP"
           >
             <span
@@ -95,60 +103,80 @@ export default function LandingPage({
             <span>{isCloudConnected ? 'Cloud' : 'Sync'}</span>
           </button>
 
-          {/* Quick PIN Security Buttons */}
           <button
+            type="button"
             onClick={onOpenChangePin}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              background: '#ffffff',
-              border: '1.5px solid #fbcfe8',
-              color: '#be185d',
-              padding: '0.38rem 0.75rem',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.74rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-              transition: 'all 0.2s ease'
-            }}
+            className="ghost-pill-btn"
             title="Ubah PIN keamanan bersama"
           >
-            <KeyRound size={12} color="#db2777" />
+            <KeyRound size={13} color="#db2777" />
             <span>PIN</span>
           </button>
 
           <button
+            type="button"
             onClick={onLockApp}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '0.35rem',
-              background: '#ffffff',
-              border: '1.5px solid #e2e8f0',
-              color: '#64748b',
-              padding: '0.38rem 0.75rem',
-              borderRadius: 'var(--radius-full)',
-              fontSize: '0.74rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-              transition: 'all 0.2s ease'
-            }}
+            className="ghost-pill-btn"
             title="Kunci catatan keuangan sekarang"
           >
-            <Lock size={12} color="#64748b" />
+            <Lock size={13} color="#64748b" />
             <span>Kunci</span>
           </button>
         </div>
+      </header>
 
-        <h1 className="landing-title">
-          Kelola Keuangan & Tabungan Bersama
+      {/* Editorial Hero Header (Cure & IPO FX Inspiration) */}
+      <div className="landing-hero" style={{ position: 'relative', zIndex: 1, padding: '1.2rem 0 2.2rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem', marginBottom: '1rem' }}>
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              background: '#fdf2f8',
+              border: '1px solid #fbcfe8',
+              padding: '0.35rem 0.95rem',
+              borderRadius: 99,
+              fontSize: '0.74rem',
+              fontWeight: 800,
+              color: '#9d174d',
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase'
+            }}
+          >
+            <Sparkles size={13} color="#db2777" />
+            Shared Finance & Gold Vault
+          </span>
+        </div>
+
+        <h1
+          className="landing-title"
+          style={{
+            fontSize: 'clamp(2.3rem, 5.2vw, 3.8rem)',
+            fontWeight: 900,
+            letterSpacing: '-0.035em',
+            lineHeight: 1.15,
+            maxWidth: '920px',
+            margin: '0 auto 1.1rem',
+            color: '#0f172a'
+          }}
+        >
+          Satu Dompet, <span className="handwriting-accent" style={{ color: '#db2777' }}>dua hati</span>{' '}
+          tumbuh bersama.
         </h1>
 
-        <p className="landing-subtitle">
-          Satu dompet dua hati, mencatat pengeluaran harian, tabungan mandiri, dan investasi emas fisik Galeri 24 secara transparan.
+        <p
+          className="landing-subtitle"
+          style={{
+            fontSize: '1.05rem',
+            color: '#64748b',
+            maxWidth: '660px',
+            margin: '0 auto',
+            lineHeight: 1.6,
+            fontWeight: 500
+          }}
+        >
+          Pencatatan pengeluaran harian, tabungan mandiri China–Indonesia, dan portofolio emas fisik Galeri 24 dalam satu kanvas terpadu yang transparan.
         </p>
       </div>
 
@@ -356,7 +384,12 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div className="profile-name">{users.yasmeen?.name || 'Yasmeen Almira'}</div>
+            <div className="profile-name">
+              {users.yasmeen?.name || 'Yasmeen Almira'}{' '}
+              <span className="handwriting-accent" style={{ color: '#db2777', fontSize: '1.25rem', display: 'inline-block', marginLeft: '0.25rem' }}>
+                🌸 China
+              </span>
+            </div>
             {users.yasmeen?.bio && (
               <p className="profile-desc" style={{ marginBottom: '1rem' }}>
                 {users.yasmeen.bio}
@@ -458,7 +491,12 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div className="profile-name">{users.adziima?.name || 'Muhammad Mulkan Adziima'}</div>
+            <div className="profile-name">
+              {users.adziima?.name || 'Muhammad Mulkan Adziima'}{' '}
+              <span className="handwriting-accent" style={{ color: '#0284c7', fontSize: '1.25rem', display: 'inline-block', marginLeft: '0.25rem' }}>
+                🌊 Indo
+              </span>
+            </div>
             {users.adziima?.bio && (
               <p className="profile-desc" style={{ marginBottom: '1rem' }}>
                 {users.adziima.bio}
@@ -568,7 +606,12 @@ export default function LandingPage({
               </div>
             </div>
 
-            <div className="profile-name">Aset Emas Berdua</div>
+            <div className="profile-name">
+              Aset Emas Berdua{' '}
+              <span className="handwriting-accent" style={{ color: '#b45309', fontSize: '1.25rem', display: 'inline-block', marginLeft: '0.25rem' }}>
+                ✨ 24 Karat
+              </span>
+            </div>
             <div className="profile-tag tag-gold">
               <span>Galeri 24 · Emas Batangan 24K</span>
             </div>
