@@ -863,11 +863,13 @@ export function PocketProvider({ children }) {
   };
 
   const updatePegadaianChartHistory = ({ history, pricePer001g, buybackPer001g, dateLabel, date }) => {
-    const today = new Date();
-    const todayStr = date || today.toISOString().split('T')[0];
-    const todayLabel = dateLabel || `${today.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
+    const nowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+    const todayStr = date || nowWib.toISOString().split('T')[0];
+    const todayLabel = dateLabel || `${nowWib.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
     const price001g = parseFloat(pricePer001g) || 24300;
     const buyback001g = parseFloat(buybackPer001g) || 23440;
+    const sellPricePerGram = price001g * 100;
+    const buybackPricePerGram = buyback001g * 100;
 
     setData(prev => {
       const prevHistory = prev.goldSavings?.pegadaianHistory || DEFAULT_GOLD_SAVINGS.pegadaianHistory || [];
@@ -881,8 +883,8 @@ export function PocketProvider({ children }) {
             date: todayStr,
             sellPer001g: price001g,
             buybackPer001g: buyback001g,
-            sellPerGram: price001g * 100,
-            buybackPerGram: buyback001g * 100
+            sellPerGram: sellPricePerGram,
+            buybackPerGram: buybackPricePerGram
           });
         }
       } else {
@@ -893,8 +895,8 @@ export function PocketProvider({ children }) {
             date: todayStr,
             sellPer001g: price001g,
             buybackPer001g: buyback001g,
-            sellPerGram: price001g * 100,
-            buybackPerGram: buyback001g * 100
+            sellPerGram: sellPricePerGram,
+            buybackPerGram: buybackPricePerGram
           }
         ];
       }
@@ -909,7 +911,11 @@ export function PocketProvider({ children }) {
           pegadaianLastPrice001g: price001g,
           pegadaianLastBuyback001g: buyback001g,
           pegadaianLastDate: todayStr,
-          pegadaianLastDateLabel: todayLabel
+          pegadaianLastDateLabel: todayLabel,
+          pricePerGramIdr: sellPricePerGram,
+          buybackPerGramIdr: buybackPricePerGram,
+          lastUpdated: todayStr,
+          lastUpdatedLabel: todayLabel
         }
       };
     });
@@ -958,9 +964,26 @@ export function PocketProvider({ children }) {
     }
   };
 
-  // Automatically fetch fresh Pegadaian chart history on app mount
+  // Automatically fetch fresh Pegadaian chart history on app mount and window focus/resume
   useEffect(() => {
     refreshLiveGoldPrices();
+
+    const handleFocus = () => {
+      refreshLiveGoldPrices();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        refreshLiveGoldPrices();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   // Bulletproof Calculations per selectedMonth

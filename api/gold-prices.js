@@ -1,66 +1,89 @@
 // Vercel Serverless Function: Fetch live official gold prices & trend history from Pegadaian (Tabungan Emas & Galeri 24)
 export default async function handler(req, res) {
-  res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=3600');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Access-Control-Allow-Origin', '*');
 
-  // 1. Try Pegadaian Tabungan Emas API
-  try {
-    const priceRes = await fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian', {
-      headers: { 'Accept': 'application/json' }
-    });
+    // Current date in Jakarta (WIB)
+    const nowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+    const todayWibStr = nowWib.toISOString().split('T')[0];
 
-    if (priceRes.ok) {
-      const priceJson = await priceRes.json();
-      const item = priceJson?.data?.[0];
-      if (item && item.sellPrice) {
-        const sellPer001g = Number(item.sellPrice);
-        const buybackPer001g = Number(item.buybackPrice || Math.round(sellPer001g * 0.965));
-        const sellPricePerGram = sellPer001g * 100;
-        const buybackPricePerGram = buybackPer001g * 100;
-        const recordedDate = item.recordedDate || new Date().toISOString().split('T')[0];
+    // 1. Try Pegadaian Tabungan Emas API
+    try {
+      const priceRes = await fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian', {
+        headers: { 'Accept': 'application/json' },
+        cache: 'no-store'
+      });
 
-        // Fetch history separately without blocking main price
-        let historyData = [];
-        try {
-          const historyRes = await fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian/history?length=30', {
-            headers: { 'Accept': 'application/json' }
-          });
-          if (historyRes.ok) {
-            const historyJson = await historyRes.json();
-            if (Array.isArray(historyJson?.data) && historyJson.data.length > 0) {
-              historyData = historyJson.data.map(h => ({
-                date: h.recordedDate,
-                sellPer001g: Number(h.sellPrice),
-                buybackPer001g: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)),
-                sellPerGram: Number(h.sellPrice) * 100,
-                buybackPerGram: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)) * 100
-              }));
+      if (priceRes.ok) {
+        const priceJson = await priceRes.json();
+        const item = priceJson?.data?.[0];
+        if (item && item.sellPrice) {
+          const sellPer001g = Number(item.sellPrice);
+          const buybackPer001g = Number(item.buybackPrice || Math.round(sellPer001g * 0.965));
+          const sellPricePerGram = sellPer001g * 100;
+          const buybackPricePerGram = buybackPer001g * 100;
+          const recordedDate = item.recordedDate || todayWibStr;
+          const effectiveDate = (recordedDate < todayWibStr) ? todayWibStr : recordedDate;
+
+          // Fetch history separately without blocking main price
+          let historyData = [];
+          try {
+            const historyRes = await fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian/history?length=30', {
+              headers: { 'Accept': 'application/json' },
+              cache: 'no-store'
+            });
+            if (historyRes.ok) {
+              const historyJson = await historyRes.json();
+              if (Array.isArray(historyJson?.data) && historyJson.data.length > 0) {
+                historyData = historyJson.data.map(h => ({
+                  date: h.recordedDate,
+                  sellPer001g: Number(h.sellPrice),
+                  buybackPer001g: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)),
+                  sellPerGram: Number(h.sellPrice) * 100,
+                  buybackPerGram: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)) * 100
+                }));
+              }
             }
+          } catch (hErr) {
+            console.warn('Pegadaian history endpoint error:', hErr);
           }
-        } catch (hErr) {
-          console.warn('Pegadaian history endpoint error:', hErr);
+
+          // Ensure today's date exists in history
+          if (Array.isArray(historyData) && historyData.length > 0) {
+            const hasToday = historyData.some(h => h.date === effectiveDate);
+            if (!hasToday) {
+              historyData.push({
+                date: effectiveDate,
+                sellPer001g,
+                buybackPer001g,
+                sellPerGram: sellPricePerGram,
+                buybackPerGram: buybackPricePerGram
+              });
+            }
+            historyData.sort((a, b) => new Date(a.date) - new Date(b.date));
+          }
+
+          const parts = effectiveDate.split('-').map(Number);
+          const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+          const dateLabel = `${dateObj.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
+
+          return res.status(200).json({
+            success: true,
+            source: 'https://sahabat.pegadaian.co.id/harga-emas',
+            brand: 'Pegadaian (Tabungan Emas)',
+            date: effectiveDate,
+            dateLabel,
+            sellPrice: sellPricePerGram,
+            buybackPrice: buybackPricePerGram,
+            sellPricePer001g: sellPer001g,
+            buybackPricePer001g: buybackPer001g,
+            history: historyData
+          });
         }
-
-        const dateObj = new Date(recordedDate);
-        const dateLabel = `${dateObj.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
-
-        return res.status(200).json({
-          success: true,
-          source: 'https://sahabat.pegadaian.co.id/harga-emas',
-          brand: 'Pegadaian (Tabungan Emas)',
-          date: recordedDate,
-          dateLabel,
-          sellPrice: sellPricePerGram,
-          buybackPrice: buybackPricePerGram,
-          sellPricePer001g: sellPer001g,
-          buybackPricePer001g: buybackPer001g,
-          history: historyData
-        });
       }
+    } catch (err) {
+      console.warn('Pegadaian API fetch failed, trying Galeri 24 fallback...', err);
     }
-  } catch (err) {
-    console.warn('Pegadaian API fetch failed, trying Galeri 24 fallback...', err);
-  }
 
   // 2. Fallback to Galeri 24 HTML scraper
   try {

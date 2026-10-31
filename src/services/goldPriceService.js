@@ -3,6 +3,10 @@
  */
 
 export async function fetchLiveGoldPrices() {
+  // Current date in Jakarta (WIB)
+  const nowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+  const todayWibStr = nowWib.toISOString().split('T')[0];
+
   // 1. Try local or Vercel serverless endpoint
   try {
     const res = await fetch('/api/gold-prices', { cache: 'no-store' });
@@ -23,7 +27,8 @@ export async function fetchLiveGoldPrices() {
   // 2. Direct fetch to Pegadaian worker (CORS-friendly for Vite dev & frontend)
   try {
     const priceRes = await fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian', {
-      headers: { 'Accept': 'application/json' }
+      headers: { 'Accept': 'application/json' },
+      cache: 'no-store'
     });
 
     if (priceRes.ok) {
@@ -34,13 +39,15 @@ export async function fetchLiveGoldPrices() {
         const buybackPer001g = Number(item.buybackPrice || Math.round(sellPer001g * 0.965));
         const sellPricePerGram = sellPer001g * 100;
         const buybackPricePerGram = buybackPer001g * 100;
-        const recordedDate = item.recordedDate || new Date().toISOString().split('T')[0];
+        const recordedDate = item.recordedDate || todayWibStr;
+        const effectiveDate = (recordedDate < todayWibStr) ? todayWibStr : recordedDate;
 
         // Fetch history separately without blocking main price
         let historyData = [];
         try {
           const historyRes = await fetch('https://logam-mulia-api.iamutaki.workers.dev/api/prices/pegadaian/history?length=30', {
-            headers: { 'Accept': 'application/json' }
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
           });
           if (historyRes.ok) {
             const historyJson = await historyRes.json();
@@ -50,7 +57,7 @@ export async function fetchLiveGoldPrices() {
                 sellPer001g: Number(h.sellPrice),
                 buybackPer001g: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)),
                 sellPerGram: Number(h.sellPrice) * 100,
-                buybackPerGram: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)) * 100
+                buybackPricePerGram: Number(h.buybackPrice || Math.round(h.sellPrice * 0.965)) * 100
               }));
             }
           }
@@ -58,15 +65,30 @@ export async function fetchLiveGoldPrices() {
           console.warn('Pegadaian history endpoint unavailable, using dynamic history:', hErr);
         }
 
-        // Format official Indonesian date label
-        const dateObj = new Date(recordedDate);
+        // Ensure today's date exists in history
+        if (Array.isArray(historyData) && historyData.length > 0) {
+          const hasToday = historyData.some(h => h.date === effectiveDate);
+          if (!hasToday) {
+            historyData.push({
+              date: effectiveDate,
+              sellPer001g,
+              buybackPer001g,
+              sellPerGram: sellPricePerGram,
+              buybackPerGram: buybackPricePerGram
+            });
+          }
+          historyData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+
+        const parts = effectiveDate.split('-').map(Number);
+        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
         const dateLabel = `${dateObj.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
 
         return {
           success: true,
           source: 'https://sahabat.pegadaian.co.id/harga-emas',
           brand: 'Pegadaian (Tabungan Emas)',
-          date: recordedDate,
+          date: effectiveDate,
           dateLabel,
           sellPrice: sellPricePerGram,
           buybackPrice: buybackPricePerGram,
@@ -83,8 +105,6 @@ export async function fetchLiveGoldPrices() {
   }
 
   // 3. Fallback to dynamic authentic baseline Pegadaian values ending on today's actual date
-  const today = new Date();
-  const todayStr = today.toISOString().split('T')[0];
   const defaultSell001g = 24300;
   const defaultBuyback001g = 23440;
   const defaultSell = defaultSell001g * 100;
@@ -94,7 +114,7 @@ export async function fetchLiveGoldPrices() {
   const dynamicHistory = [];
   const basePrices = [24340, 24300, 24090, 23990, 23990, 24090, defaultSell001g];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date(today);
+    const d = new Date(nowWib);
     d.setDate(d.getDate() - i);
     const dStr = d.toISOString().split('T')[0];
     const s001g = basePrices[6 - i] || defaultSell001g;
@@ -112,8 +132,8 @@ export async function fetchLiveGoldPrices() {
     success: true,
     source: 'sahabat.pegadaian.co.id (Tabungan Emas)',
     brand: 'Pegadaian (Tabungan Emas)',
-    date: todayStr,
-    dateLabel: `${today.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`,
+    date: todayWibStr,
+    dateLabel: `${nowWib.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`,
     sellPrice: defaultSell,
     buybackPrice: defaultBuyback,
     sellPricePer001g: defaultSell001g,

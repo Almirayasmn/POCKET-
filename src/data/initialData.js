@@ -118,29 +118,33 @@ export const GALERI24_DEFAULT_PRICE_TABLE = [
   { grams: 100, sell: 243849000, buyback: 234755000 }
 ];
 
+const defaultNowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
+const defaultTodayStr = defaultNowWib.toISOString().split('T')[0];
+const defaultTodayLabel = `${defaultNowWib.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
+
 export const DEFAULT_GOLD_SAVINGS = {
   brand: 'Galeri 24 (Pegadaian)',
-  pricePerGramIdr: 2510000,
-  buybackPerGramIdr: 2363000,
+  pricePerGramIdr: 2430000,
+  buybackPerGramIdr: 2344000,
   valuationMode: 'sell', // 'sell' or 'buyback'
-  lastUpdated: '2026-10-27',
-  lastUpdatedLabel: 'Acuan Resmi Galeri 24',
+  lastUpdated: defaultTodayStr,
+  lastUpdatedLabel: defaultTodayLabel,
   sourceUrl: 'https://galeri24.co.id/harga-emas',
   priceTable: GALERI24_DEFAULT_PRICE_TABLE,
   targetGrams: 25,
   transactions: [],
   pegadaianLastPrice001g: 24300,
   pegadaianLastBuyback001g: 23440,
-  pegadaianLastDate: '2026-10-28',
-  pegadaianLastDateLabel: 'Rab, 28 Okt 2026',
+  pegadaianLastDate: defaultTodayStr,
+  pegadaianLastDateLabel: defaultTodayLabel,
   pegadaianHistory: [
-    { date: '2026-10-22', sellPer001g: 24300, buybackPer001g: 23440 },
     { date: '2026-10-23', sellPer001g: 24090, buybackPer001g: 23240 },
     { date: '2026-10-24', sellPer001g: 23990, buybackPer001g: 23150 },
     { date: '2026-10-25', sellPer001g: 23990, buybackPer001g: 23150 },
     { date: '2026-10-26', sellPer001g: 23990, buybackPer001g: 23150 },
     { date: '2026-10-27', sellPer001g: 24090, buybackPer001g: 23240 },
-    { date: '2026-10-28', sellPer001g: 24300, buybackPer001g: 23440 }
+    { date: '2026-10-28', sellPer001g: 24300, buybackPer001g: 23440 },
+    { date: defaultTodayStr, sellPer001g: 24300, buybackPer001g: 23440 }
   ]
 };
 
