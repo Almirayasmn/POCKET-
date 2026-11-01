@@ -1,17 +1,17 @@
-// Utility for Exporting Monthly Financial Reports to Multi-Sheet Excel (.xls) compatible with Microsoft Excel and Google Sheets
-// 100% Pure Rupiah (Rp) - Zero Yuan / CNY mentions - Full Multi-Sheet (Tab) Support
+// Utility for Exporting Monthly Financial Reports to Excel (.xls) compatible with Microsoft Excel and Google Sheets
+// 100% Pure Rupiah (Rp) - Zero Yuan / CNY mentions - Full Multi-Month History Tracking
 
 // Helper formatting in pure Rupiah
 const formatVal = (v) => `Rp ${Math.round(Number(v || 0)).toLocaleString('id-ID')}`;
 
-function generateSheetTableHtml({
+function generateMonthTableRows({
   userName,
   monthLabel,
   transactions = [],
   categories = [],
   categorySpending = {},
   summary = {},
-  exportDate
+  isFirstSection = false
 }) {
   // 1. Generate Category Budget vs Actual Evaluation Rows (8-column aligned)
   let catRowsHtml = '';
@@ -80,155 +80,106 @@ function generateSheetTableHtml({
   });
 
   return `
-    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-    <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-      <style>
-        body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10pt; color: #1e293b; background-color: #ffffff; }
-        table { border-collapse: collapse; table-layout: fixed; width: 100%; margin-bottom: 20px; }
-        th { font-weight: bold; text-align: center; }
-        td { vertical-align: middle; }
-      </style>
-    </head>
-    <body>
-      <table style="width: 100%; border-collapse: collapse;">
-        <!-- UNIFIED 8-COLUMN LAYOUT -->
-        <colgroup>
-          <col style="width: 45px;" />
-          <col style="width: 105px;" />
-          <col style="width: 200px;" />
-          <col style="width: 160px;" />
-          <col style="width: 160px;" />
-          <col style="width: 160px;" />
-          <col style="width: 110px;" />
-          <col style="width: 160px;" />
-        </colgroup>
+    <!-- PERIODE HEADER -->
+    <tr>
+      <td colspan="8" style="background-color: #831843; color: #ffffff; padding: 12px 16px; font-size: 13pt; font-weight: bold; text-align: left; letter-spacing: 0.5px;">
+        📅 PERIODE: ${monthLabel.toUpperCase()}
+      </td>
+    </tr>
 
-        <!-- 1. HEADER BANNER (SPANS ALL 8 COLUMNS) -->
-        <tr>
-          <td colspan="8" style="background-color: #fdf2f8; border: 1.5px solid #f472b6; padding: 14px 18px; text-align: left;">
-            <div style="font-size: 15pt; font-weight: bold; color: #be185d; letter-spacing: 0.5px;">
-              🌸 POCKET DUO · LAPORAN KEUANGAN BULANAN
-            </div>
-            <div style="font-size: 12pt; font-weight: bold; color: #0284c7; margin-top: 3px;">
-              ${userName.toUpperCase()} · PERIODE ${monthLabel.toUpperCase()}
-            </div>
-            <div style="font-size: 9pt; color: #64748b; margin-top: 4px;">
-              Mata Uang: <b>100% Rupiah (Rp)</b> | Dicetak pada: <b>${exportDate}</b>
-            </div>
-          </td>
-        </tr>
+    <!-- SECTION: RINGKASAN ARUS KAS & ALOKASI DANA -->
+    <tr>
+      <th colspan="8" style="background-color: #bae6fd; color: #0369a1; border: 1.5px solid #0284c7; text-align: left; font-size: 11pt; padding: 9px 12px;">
+        1. RINGKASAN ARUS KAS & ALOKASI DANA (${monthLabel.toUpperCase()})
+      </th>
+    </tr>
+    <tr>
+      <td colspan="3" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Saldo Awal Bulan (Akumulasi Kas Lalu):</td>
+      <td style="font-weight: bold; text-align: right; color: #0284c7; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.startBalance || '-'}</td>
+      <td colspan="3" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Alokasi Pagu Pos:</td>
+      <td style="font-weight: bold; text-align: right; color: #ea580c; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalBudget || '-'}</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Pemasukan Bulan Ini:</td>
+      <td style="font-weight: bold; text-align: right; color: #15803d; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.monthIncome || '-'}</td>
+      <td colspan="3" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Pengeluaran Riil:</td>
+      <td style="font-weight: bold; text-align: right; color: #dc2626; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalOutflow || '-'}</td>
+    </tr>
+    <tr style="background-color: #f8fafc;">
+      <td colspan="3" style="font-weight: bold; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 10px;">TOTAL DANA TERSEDIA:</td>
+      <td style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #0f172a; font-size: 11pt; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalInflow || '-'}</td>
+      <td colspan="3" style="font-weight: bold; border: 1px solid #cbd5e1; color: #15803d; padding: 8px 10px;">SISA PAGU POS BELANJA (HEMAT):</td>
+      <td style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #15803d; font-size: 11pt; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.remainingBudget || '-'}</td>
+    </tr>
+    <tr>
+      <td colspan="3" style="font-weight: bold; background-color: #e0f2fe; color: #0369a1; border: 1.5px solid #0284c7; padding: 9px 10px;">
+        SISA SALDO KAS AKHIR BULAN:
+      </td>
+      <td style="font-weight: bold; text-align: right; background-color: #e0f2fe; color: #0369a1; font-size: 11.5pt; border: 1.5px solid #0284c7; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
+        ${summary.netBalance || '-'}
+      </td>
+      <td colspan="3" style="font-weight: bold; background-color: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; padding: 9px 10px;">
+        SIMPANAN BERSIH (TABUNGAN AMAN):
+      </td>
+      <td style="font-weight: bold; text-align: right; background-color: #fce7f3; color: #9d174d; font-size: 11.5pt; border: 1.5px solid #ec4899; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
+        ${summary.plannedSavings || '-'}
+      </td>
+    </tr>
 
-        <!-- SPACING ROW -->
-        <tr style="height: 10px;"><td colspan="8" style="border: none;"></td></tr>
+    <!-- SPACING -->
+    <tr style="height: 12px;"><td colspan="8" style="border: none;"></td></tr>
 
-        <!-- 2. CATATAN RINGKAS ROLLING BALANCE -->
-        <tr>
-          <td colspan="8" style="background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 9px 14px; font-size: 9pt; color: #0369a1; line-height: 1.5;">
-            💡 <b>LOGIKA PERGANTIAN BULAN (ROLLING BALANCE):</b> Sisa saldo kas akhir bulan sebelumnya otomatis terbawa menjadi <b>Saldo Awal Kas</b> di bulan ini.
-          </td>
-        </tr>
+    <!-- SECTION: EVALUASI TARGET PAGU ANGGARAN VS REALISASI PER POS -->
+    <tr>
+      <th colspan="8" style="background-color: #fbcfe8; color: #831843; border: 1.5px solid #ec4899; text-align: left; font-size: 11pt; padding: 9px 12px;">
+        2. EVALUASI TARGET PAGU ANGGARAN VS REALISASI PER POS PENGELUARAN (${monthLabel.toUpperCase()})
+      </th>
+    </tr>
+    <tr style="background-color: #fce7f3; color: #831843; font-weight: bold;">
+      <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">No</th>
+      <th colspan="2" style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Nama Pos Pengeluaran</th>
+      <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Target Pagu</th>
+      <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Realisasi Terpakai</th>
+      <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Sisa Pagu (Hemat)</th>
+      <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">% Terpakai</th>
+      <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Status</th>
+    </tr>
+    ${catRowsHtml || '<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 14px; border: 1px solid #cbd5e1;">Belum ada pos pengeluaran yang diatur di bulan ini.</td></tr>'}
+    <tr style="background-color: #fdf2f8; font-weight: bold; border-top: 2px solid #ec4899; border-bottom: 2px solid #ec4899;">
+      <td colspan="3" style="text-align: right; border: 1px solid #cbd5e1; color: #831843; padding: 8px 10px;">TOTAL EVALUASI PAGU:</td>
+      <td style="text-align: right; border: 1px solid #cbd5e1; color: #0369a1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandTotalBudget)}</td>
+      <td style="text-align: right; border: 1px solid #cbd5e1; color: #be185d; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandTotalSpent)}</td>
+      <td style="text-align: right; border: 1px solid #cbd5e1; color: ${grandRemaining >= 0 ? '#15803d' : '#b91c1c'}; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandRemaining)}</td>
+      <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px 6px;">${grandTotalBudget > 0 ? Math.round((grandTotalSpent / grandTotalBudget) * 100) : 0}%</td>
+      <td style="text-align: center; border: 1px solid #cbd5e1; color: ${grandRemaining >= 0 ? '#15803d' : '#b91c1c'}; background-color: ${grandRemaining >= 0 ? '#dcfce7' : '#fee2e2'}; padding: 8px 6px;">
+        ${grandRemaining >= 0 ? 'HEMAT' : 'OVER BUDGET'}
+      </td>
+    </tr>
 
-        <!-- SPACING ROW -->
-        <tr style="height: 14px;"><td colspan="8" style="border: none;"></td></tr>
+    <!-- SPACING -->
+    <tr style="height: 12px;"><td colspan="8" style="border: none;"></td></tr>
 
-        <!-- 3. SECTION 1: RINGKASAN ARUS KAS & ALOKASI DANA -->
-        <tr>
-          <th colspan="8" style="background-color: #bae6fd; color: #0369a1; border: 1.5px solid #0284c7; text-align: left; font-size: 11pt; padding: 9px 12px;">
-            1. RINGKASAN ARUS KAS & ALOKASI DANA (${monthLabel.toUpperCase()})
-          </th>
-        </tr>
-        <tr>
-          <td colspan="3" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Saldo Awal Bulan (Akumulasi Kas Lalu):</td>
-          <td style="font-weight: bold; text-align: right; color: #0284c7; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.startBalance || '-'}</td>
-          <td colspan="3" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Alokasi Pagu Pos:</td>
-          <td style="font-weight: bold; text-align: right; color: #ea580c; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalBudget || '-'}</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="font-weight: bold; background-color: #fdf2f8; color: #9d174d; border: 1px solid #cbd5e1; padding: 8px 10px;">Pemasukan Bulan Ini:</td>
-          <td style="font-weight: bold; text-align: right; color: #15803d; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.monthIncome || '-'}</td>
-          <td colspan="3" style="font-weight: bold; background-color: #f0f9ff; color: #0369a1; border: 1px solid #cbd5e1; padding: 8px 10px;">Total Pengeluaran Riil:</td>
-          <td style="font-weight: bold; text-align: right; color: #dc2626; border: 1px solid #cbd5e1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalOutflow || '-'}</td>
-        </tr>
-        <tr style="background-color: #f8fafc;">
-          <td colspan="3" style="font-weight: bold; border: 1px solid #cbd5e1; color: #0f172a; padding: 8px 10px;">TOTAL DANA TERSEDIA:</td>
-          <td style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #0f172a; font-size: 11pt; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.totalInflow || '-'}</td>
-          <td colspan="3" style="font-weight: bold; border: 1px solid #cbd5e1; color: #15803d; padding: 8px 10px;">SISA PAGU POS BELANJA (HEMAT):</td>
-          <td style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #15803d; font-size: 11pt; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.remainingBudget || '-'}</td>
-        </tr>
-        <tr>
-          <td colspan="3" style="font-weight: bold; background-color: #e0f2fe; color: #0369a1; border: 1.5px solid #0284c7; padding: 9px 10px;">
-            SISA SALDO KAS AKHIR BULAN:
-          </td>
-          <td style="font-weight: bold; text-align: right; background-color: #e0f2fe; color: #0369a1; font-size: 11.5pt; border: 1.5px solid #0284c7; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
-            ${summary.netBalance || '-'}
-          </td>
-          <td colspan="3" style="font-weight: bold; background-color: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; padding: 9px 10px;">
-            SIMPANAN BERSIH (TABUNGAN AMAN):
-          </td>
-          <td style="font-weight: bold; text-align: right; background-color: #fce7f3; color: #9d174d; font-size: 11.5pt; border: 1.5px solid #ec4899; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
-            ${summary.plannedSavings || '-'}
-          </td>
-        </tr>
-        <tr>
-          <td colspan="8" style="font-size: 8.5pt; color: #64748b; font-style: italic; background-color: #fafafa; border: 1px solid #cbd5e1; padding: 6px 12px;">
-            * Saldo Kas Akhir (${summary.netBalance || '-'}) adalah kas riil yang otomatis terbawa menjadi Saldo Awal di bulan berikutnya.
-          </td>
-        </tr>
+    <!-- SECTION: BUKU TRANSAKSI BULAN INI -->
+    <tr>
+      <th colspan="8" style="background-color: #bae6fd; color: #0369a1; border: 1.5px solid #0284c7; text-align: left; font-size: 11pt; padding: 9px 12px;">
+        3. BUKU TRANSAKSI RINCI (${monthLabel.toUpperCase()})
+      </th>
+    </tr>
+    <tr style="background-color: #e0f2fe; color: #0369a1; font-weight: bold;">
+      <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">No</th>
+      <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Tanggal</th>
+      <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Keterangan</th>
+      <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Pos Kategori</th>
+      <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Tipe</th>
+      <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Nominal (Rp)</th>
+      <th style="border: 1px solid #cbd5e1; padding: 8px 10px;">Akun / Metode</th>
+      <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Catatan</th>
+    </tr>
+    ${txRowsHtml || '<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 14px; border: 1px solid #cbd5e1;">Belum ada transaksi tercatat di bulan ini.</td></tr>'}
 
-        <!-- SPACING ROW -->
-        <tr style="height: 16px;"><td colspan="8" style="border: none;"></td></tr>
-
-        <!-- 4. SECTION 2: EVALUASI TARGET PAGU ANGGARAN VS REALISASI PER POS -->
-        <tr>
-          <th colspan="8" style="background-color: #fbcfe8; color: #831843; border: 1.5px solid #ec4899; text-align: left; font-size: 11pt; padding: 9px 12px;">
-            2. EVALUASI TARGET PAGU ANGGARAN VS REALISASI PER POS PENGELUARAN (${monthLabel.toUpperCase()})
-          </th>
-        </tr>
-        <tr style="background-color: #fce7f3; color: #831843; font-weight: bold;">
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">No</th>
-          <th colspan="2" style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Nama Pos Pengeluaran</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Target Pagu</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Realisasi Terpakai</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Sisa Pagu (Hemat)</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">% Terpakai</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Status</th>
-        </tr>
-        ${catRowsHtml || '<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 14px; border: 1px solid #cbd5e1;">Belum ada pos pengeluaran yang diatur di bulan ini.</td></tr>'}
-        <tr style="background-color: #fdf2f8; font-weight: bold; border-top: 2px solid #ec4899; border-bottom: 2px solid #ec4899;">
-          <td colspan="3" style="text-align: right; border: 1px solid #cbd5e1; color: #831843; padding: 8px 10px;">TOTAL EVALUASI PAGU:</td>
-          <td style="text-align: right; border: 1px solid #cbd5e1; color: #0369a1; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandTotalBudget)}</td>
-          <td style="text-align: right; border: 1px solid #cbd5e1; color: #be185d; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandTotalSpent)}</td>
-          <td style="text-align: right; border: 1px solid #cbd5e1; color: ${grandRemaining >= 0 ? '#15803d' : '#b91c1c'}; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${formatVal(grandRemaining)}</td>
-          <td style="text-align: center; border: 1px solid #cbd5e1; padding: 8px 6px;">${grandTotalBudget > 0 ? Math.round((grandTotalSpent / grandTotalBudget) * 100) : 0}%</td>
-          <td style="text-align: center; border: 1px solid #cbd5e1; color: ${grandRemaining >= 0 ? '#15803d' : '#b91c1c'}; background-color: ${grandRemaining >= 0 ? '#dcfce7' : '#fee2e2'}; padding: 8px 6px;">
-            ${grandRemaining >= 0 ? 'HEMAT' : 'OVER BUDGET'}
-          </td>
-        </tr>
-
-        <!-- SPACING ROW -->
-        <tr style="height: 16px;"><td colspan="8" style="border: none;"></td></tr>
-
-        <!-- 5. SECTION 3: BUKU TRANSAKSI BULAN INI -->
-        <tr>
-          <th colspan="8" style="background-color: #bae6fd; color: #0369a1; border: 1.5px solid #0284c7; text-align: left; font-size: 11pt; padding: 9px 12px;">
-            3. BUKU TRANSAKSI BULAN INI (${monthLabel.toUpperCase()})
-          </th>
-        </tr>
-        <tr style="background-color: #e0f2fe; color: #0369a1; font-weight: bold;">
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">No</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Tanggal</th>
-          <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Keterangan</th>
-          <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Pos Kategori</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Tipe</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Nominal (Rp)</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 10px;">Akun / Metode</th>
-          <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Catatan</th>
-        </tr>
-        ${txRowsHtml || '<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 14px; border: 1px solid #cbd5e1;">Belum ada transaksi tercatat di bulan ini.</td></tr>'}
-      </table>
-    </body>
-    </html>
+    <!-- MAJOR SECTION SEPARATOR -->
+    <tr style="height: 28px;"><td colspan="8" style="border: none; border-bottom: 3px dashed #f472b6;"></td></tr>
+    <tr style="height: 16px;"><td colspan="8" style="border: none;"></td></tr>
   `;
 }
 
@@ -251,11 +202,9 @@ export function exportMonthToExcel({
     day: 'numeric'
   });
 
-  // Prepare sheet list (if sheets array provided, use it; otherwise fallback to single sheet)
   const sheetList = (sheets && sheets.length > 0)
     ? sheets
     : [{
-        sheetName: monthLabel.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 31),
         monthLabel,
         transactions,
         categories,
@@ -263,72 +212,91 @@ export function exportMonthToExcel({
         summary
       }];
 
-  const boundary = "----=_NextPart_PocketDuoWorkbook";
+  const allMonthsHtml = sheetList.map((s, idx) => generateMonthTableRows({
+    userName,
+    monthLabel: s.monthLabel,
+    transactions: s.transactions,
+    categories: s.categories,
+    categorySpending: s.categorySpending,
+    summary: s.summary,
+    isFirstSection: idx === 0
+  })).join('\n');
 
-  // Build the master manifest with <x:ExcelWorksheets>
-  const worksheetsXml = sheetList.map((s, idx) => `
-    <x:ExcelWorksheet>
-      <x:Name>${s.sheetName}</x:Name>
-      <x:WorksheetSource HRef="sheet${idx + 1}.htm"/>
-      <x:WorksheetOptions>
-        <x:DisplayGridlines/>
-      </x:WorksheetOptions>
-    </x:ExcelWorksheet>
-  `).join('\n');
+  const excelTemplate = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+    <head>
+      <!--[if gte mso 9]>
+      <xml>
+        <x:ExcelWorkbook>
+          <x:ExcelWorksheets>
+            <x:ExcelWorksheet>
+              <x:Name>${userName} - Rekap Bulanan</x:Name>
+              <x:WorksheetOptions>
+                <x:DisplayGridlines/>
+              </x:WorksheetOptions>
+            </x:ExcelWorksheet>
+          </x:ExcelWorksheets>
+        </x:ExcelWorkbook>
+      </xml>
+      <![endif]-->
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+      <style>
+        body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10pt; color: #1e293b; background-color: #ffffff; }
+        table { border-collapse: collapse; table-layout: fixed; width: 100%; margin-bottom: 20px; }
+        th { font-weight: bold; text-align: center; }
+        td { vertical-align: middle; }
+      </style>
+    </head>
+    <body>
+      <table style="width: 100%; border-collapse: collapse;">
+        <!-- UNIFIED 8-COLUMN LAYOUT -->
+        <colgroup>
+          <col style="width: 45px;" />
+          <col style="width: 105px;" />
+          <col style="width: 200px;" />
+          <col style="width: 160px;" />
+          <col style="width: 160px;" />
+          <col style="width: 160px;" />
+          <col style="width: 110px;" />
+          <col style="width: 160px;" />
+        </colgroup>
 
-  const mainHtm = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <!--[if gte mso 9]>
-  <xml>
-    <x:ExcelWorkbook>
-      <x:ExcelWorksheets>
-        ${worksheetsXml}
-      </x:ExcelWorksheets>
-    </x:ExcelWorkbook>
-  </xml>
-  <![endif]-->
-</head>
-<body></body>
-</html>`;
+        <!-- MASTER TOP BANNER -->
+        <tr>
+          <td colspan="8" style="background-color: #fdf2f8; border: 2px solid #db2777; padding: 16px 20px; text-align: left;">
+            <div style="font-size: 16pt; font-weight: bold; color: #be185d; letter-spacing: 0.5px;">
+              🌸 POCKET DUO · LAPORAN KEUANGAN KELUARGA LENGKAP
+            </div>
+            <div style="font-size: 12pt; font-weight: bold; color: #0284c7; margin-top: 4px;">
+              ${userName.toUpperCase()} · PERIODE TERAKHIR: ${monthLabel.toUpperCase()}
+            </div>
+            <div style="font-size: 9.5pt; color: #475569; margin-top: 6px;">
+              Mata Uang: <b>100% Rupiah (IDR)</b> | Dicetak pada: <b>${exportDate}</b> | Menyertakan data bulan aktif dan riwayat bulan-bulan sebelumnya
+            </div>
+          </td>
+        </tr>
 
-  // For each sheet, build its full HTML content as a separate MIME part
-  const sheetParts = sheetList.map((s, idx) => {
-    const tableHtml = generateSheetTableHtml({
-      userName,
-      monthLabel: s.monthLabel,
-      transactions: s.transactions,
-      categories: s.categories,
-      categorySpending: s.categorySpending,
-      summary: s.summary,
-      exportDate
-    });
+        <!-- SPACING -->
+        <tr style="height: 14px;"><td colspan="8" style="border: none;"></td></tr>
 
-    return `
---${boundary}
-Content-Location: file:///C:/sheet${idx + 1}.htm
-Content-Transfer-Encoding: text/html
-Content-Type: text/html; charset="utf-8"
+        <!-- CATATAN ARUS KAS -->
+        <tr>
+          <td colspan="8" style="background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 10px 14px; font-size: 9pt; color: #0369a1; line-height: 1.5;">
+            💡 <b>CATATAN AKUMULASI DATA:</b> Laporan ini menyertakan seluruh data bulan aktif dan riwayat bulan sebelumnya secara terstruktur. Sisa saldo kas setiap bulan otomatis terbawa menjadi Saldo Awal Kas di bulan berikutnya.
+          </td>
+        </tr>
 
-${tableHtml}
-`;
-  }).join('\n');
+        <!-- SPACING -->
+        <tr style="height: 18px;"><td colspan="8" style="border: none;"></td></tr>
 
-  const mhtmlContent = `MIME-Version: 1.0
-X-Document-Type: Workbook
-Content-Type: multipart/related; boundary="${boundary}"
+        <!-- ALL MONTHS SECTIONS (CURRENT & PAST MONTHS CUMULATIVE) -->
+        ${allMonthsHtml}
+      </table>
+    </body>
+    </html>
+  `;
 
---${boundary}
-Content-Location: file:///C:/main.htm
-Content-Transfer-Encoding: text/html
-Content-Type: text/html; charset="utf-8"
-
-${mainHtm}
-${sheetParts}
---${boundary}--
-`;
-
-  const blob = new Blob(['\ufeff' + mhtmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const blob = new Blob(['\ufeff' + excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
