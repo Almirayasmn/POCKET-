@@ -229,7 +229,10 @@ export function mergeFullState(local, remote) {
   };
 
   const securityPin = remote?.securityPin || local?.securityPin || (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || '123456';
-  const googleDriveUrl = remote?.googleDriveUrl || local?.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : '') || 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing';
+  const rawDrive = remote?.googleDriveUrl || local?.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : '') || 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing';
+  const googleDriveUrl = (!rawDrive || rawDrive.includes('/my-drive') || rawDrive === 'https://drive.google.com' || rawDrive === 'https://drive.google.com/')
+    ? 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing'
+    : rawDrive;
 
   return {
     ...local,

@@ -24,6 +24,13 @@ import { getLocalDateString } from '../utils/formatters';
 const STORAGE_KEY = 'pocket_duo_storage_v10';
 export const DEFAULT_GOOGLE_DRIVE_FOLDER_URL = 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing';
 
+export const resolveDriveUrl = (url) => {
+  if (!url || typeof url !== 'string' || url.includes('/my-drive') || url === 'https://drive.google.com' || url === 'https://drive.google.com/') {
+    return DEFAULT_GOOGLE_DRIVE_FOLDER_URL;
+  }
+  return url;
+};
+
 // Helper function to get list of months between startBaseline and targetMonth
 export function getMonthsListBetween(startM, targetM) {
   const list = [];
@@ -196,7 +203,7 @@ export function PocketProvider({ children }) {
               valuationMode: parsed.goldSavings?.valuationMode || 'sell'
             },
             monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
-            googleDriveUrl: parsed.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null) || DEFAULT_GOOGLE_DRIVE_FOLDER_URL
+            googleDriveUrl: resolveDriveUrl(parsed.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null))
           };
         }
       }
@@ -214,7 +221,7 @@ export function PocketProvider({ children }) {
       adziimaTransactions: SAMPLE_ADZIIMA_TRANSACTIONS,
       goldSavings: DEFAULT_GOLD_SAVINGS,
       monthlyBudgets: { yasmeen: {}, adziima: {} },
-      googleDriveUrl: (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null) || DEFAULT_GOOGLE_DRIVE_FOLDER_URL
+      googleDriveUrl: DEFAULT_GOOGLE_DRIVE_FOLDER_URL
     };
   });
 
@@ -386,7 +393,7 @@ export function PocketProvider({ children }) {
 
   // Update Google Drive folder URL for monthly recap archives
   const updateGoogleDriveUrl = (url) => {
-    const clean = (url || '').trim() || DEFAULT_GOOGLE_DRIVE_FOLDER_URL;
+    const clean = resolveDriveUrl((url || '').trim());
     try {
       localStorage.setItem('pocket_gdrive_url', clean);
     } catch (e) {}
@@ -1582,7 +1589,7 @@ export function PocketProvider({ children }) {
         lockApp,
         securityPin: (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || data?.securityPin || '123456',
         updateSecurityPin,
-        googleDriveUrl: data?.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null) || DEFAULT_GOOGLE_DRIVE_FOLDER_URL,
+        googleDriveUrl: resolveDriveUrl(data?.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null)),
         updateGoogleDriveUrl
       }}
     >
