@@ -107,24 +107,30 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   // Export to Excel handler
   const handleExportExcel = () => {
+    // Collect all transactions up to current selectedMonth so October and previous months are fully preserved
+    const allTxUpToMonth = (data?.yasmeenTransactions || []).filter(tx => {
+      const txMonth = (tx?.date || '').slice(0, 7);
+      return txMonth && txMonth <= selectedMonth;
+    });
+
     exportMonthToExcel({
       userName: user.name || 'Yasmeen',
       monthLabel,
+      selectedMonth,
       transactions: currentMonthTx,
+      allTransactions: allTxUpToMonth,
       categories: yasmeen.categories || currentCategories,
       categorySpending: yasmeen.spending,
-      currency: isViewYuan ? 'CNY' : 'IDR',
-      exchangeRate,
-      isChinaPeriod: isChina,
+      currency: 'IDR',
       summary: {
-        startBalance: formatPrimary(yasmeen.startBalanceCny, yasmeen.startBalanceIdr),
-        monthIncome: formatPrimary(yasmeen.monthIncomeCny, yasmeen.monthIncomeIdr),
-        totalInflow: formatPrimary(yasmeen.totalInflowCny, yasmeen.totalInflowIdr),
-        totalBudget: formatPrimary(yasmeen.totalAllBudgetCny, yasmeen.totalAllBudgetIdr),
-        totalOutflow: formatPrimary(yasmeen.totalOutflowCny, yasmeen.totalOutflowIdr),
-        remainingBudget: formatPrimary(yasmeen.remainingAllBudgetCny, yasmeen.remainingAllBudgetIdr),
-        plannedSavings: formatPrimary(yasmeen.plannedSavingsCny, yasmeen.plannedSavingsIdr),
-        netBalance: formatPrimary(yasmeen.totalBalanceCny, yasmeen.totalBalanceIdr)
+        startBalance: formatIdr(yasmeen.startBalanceIdr),
+        monthIncome: formatIdr(yasmeen.monthIncomeIdr),
+        totalInflow: formatIdr(yasmeen.totalInflowIdr),
+        totalBudget: formatIdr(yasmeen.totalAllBudgetIdr),
+        totalOutflow: formatIdr(yasmeen.totalOutflowIdr),
+        remainingBudget: formatIdr(yasmeen.remainingAllBudgetIdr),
+        plannedSavings: formatIdr(yasmeen.plannedSavingsIdr),
+        netBalance: formatIdr(yasmeen.totalBalanceIdr)
       }
     });
   };

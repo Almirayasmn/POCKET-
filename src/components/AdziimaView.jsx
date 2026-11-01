@@ -78,14 +78,20 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   // Export to Excel handler
   const handleExportExcel = () => {
+    const allTxUpToMonth = (data?.adziimaTransactions || []).filter(tx => {
+      const txMonth = (tx?.date || '').slice(0, 7);
+      return txMonth && txMonth <= selectedMonth;
+    });
+
     exportMonthToExcel({
       userName: user.name || 'Adziima',
       monthLabel,
+      selectedMonth,
       transactions: currentMonthTx,
+      allTransactions: allTxUpToMonth,
       categories: adziima.categories || adziimaCategories,
       categorySpending: adziima.spending,
       currency: 'IDR',
-      isChinaPeriod: false,
       summary: {
         startBalance: formatIdr(adziima.initialIdr),
         monthIncome: formatIdr(adziima.monthIncomeIdr),
