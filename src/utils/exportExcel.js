@@ -293,13 +293,16 @@ export function exportMonthToExcel({
     </html>
   `;
 
-  const blob = new Blob([excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
+  const blob = new Blob(['\ufeff' + excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = safeFileName;
+  a.style.display = 'none';
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(() => {
+    if (a.parentNode) document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 2000);
 }

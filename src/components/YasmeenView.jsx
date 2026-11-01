@@ -49,7 +49,8 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     yasmeenCurrencyView,
     setYasmeenCurrencyView,
     isCloudConnected,
-    isCloudSyncing
+    isCloudSyncing,
+    yasmeenTransactions
   } = usePocket();
 
   const { yasmeen } = calculations;
@@ -108,7 +109,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   // Export to Excel handler
   const handleExportExcel = () => {
     // Collect all transactions up to current selectedMonth so October and previous months are fully preserved
-    const allTxUpToMonth = (data?.yasmeenTransactions || []).filter(tx => {
+    const allTxUpToMonth = (yasmeenTransactions || []).filter(tx => {
       const txMonth = (tx?.date || '').slice(0, 7);
       return txMonth && txMonth <= selectedMonth;
     });

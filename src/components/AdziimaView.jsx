@@ -42,7 +42,8 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     setTotalMoney,
     selectedMonth,
     isCloudConnected,
-    isCloudSyncing
+    isCloudSyncing,
+    adziimaTransactions
   } = usePocket();
 
   const { adziima } = calculations;
@@ -78,7 +79,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   // Export to Excel handler
   const handleExportExcel = () => {
-    const allTxUpToMonth = (data?.adziimaTransactions || []).filter(tx => {
+    const allTxUpToMonth = (adziimaTransactions || []).filter(tx => {
       const txMonth = (tx?.date || '').slice(0, 7);
       return txMonth && txMonth <= selectedMonth;
     });
