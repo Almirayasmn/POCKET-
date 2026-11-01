@@ -103,13 +103,14 @@ export async function pushCloudSubpath(baseUrl, subpath, data) {
 // Merge transactions safely by ID without losing local unpushed or remote new entries
 export function mergeTransactions(local = [], remote = []) {
   const map = new Map();
+  const DUMMY_IDS = new Set(['tx-y1', 'tx-y2', 'tx-y3']);
   // Remote entries first
   (remote || []).forEach(tx => {
-    if (tx && tx.id) map.set(tx.id, tx);
+    if (tx && tx.id && !DUMMY_IDS.has(tx.id)) map.set(tx.id, tx);
   });
   // Local overlay: preserves local entries that haven't reached cloud yet
   (local || []).forEach(tx => {
-    if (tx && tx.id) {
+    if (tx && tx.id && !DUMMY_IDS.has(tx.id)) {
       if (!map.has(tx.id)) {
         map.set(tx.id, tx);
       } else {

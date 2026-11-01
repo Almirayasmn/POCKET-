@@ -118,7 +118,7 @@ export function PocketProvider({ children }) {
         return saved;
       }
     } catch (e) {}
-    return 'CNY';
+    return 'IDR';
   });
 
   const setYasmeenCurrencyView = (curr) => {
@@ -161,7 +161,7 @@ export function PocketProvider({ children }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.users?.yasmeen && parsed.users?.adziima) {
-          // Clean legacy bios if needed
+          // Clean legacy bios and dummy mock transactions if needed
           const users = {
             ...parsed.users,
             yasmeen: {
@@ -177,6 +177,9 @@ export function PocketProvider({ children }) {
             }
           };
 
+          // Filter out dummy mock transactions
+          const cleanYasTx = (parsed.yasmeenTransactions || []).filter(tx => !['tx-y1', 'tx-y2', 'tx-y3'].includes(tx?.id));
+
           return {
             ...parsed,
             users,
@@ -184,7 +187,7 @@ export function PocketProvider({ children }) {
             adziimaCategories: parsed.adziimaCategories || ADZIIMA_CATEGORIES,
             yasmeenCategories: parsed.yasmeenCategories || YASMEEN_CATEGORIES,
             monthlyCategories: parsed.monthlyCategories || { yasmeen: {}, adziima: {} },
-            yasmeenTransactions: parsed.yasmeenTransactions || [],
+            yasmeenTransactions: cleanYasTx,
             adziimaTransactions: parsed.adziimaTransactions || [],
             goldSavings: {
               ...DEFAULT_GOLD_SAVINGS,
@@ -212,7 +215,7 @@ export function PocketProvider({ children }) {
       yasmeenCategories: YASMEEN_CATEGORIES,
       adziimaCategories: ADZIIMA_CATEGORIES,
       monthlyCategories: { yasmeen: {}, adziima: {} },
-      yasmeenTransactions: SAMPLE_YASMEEN_TRANSACTIONS,
+      yasmeenTransactions: [],
       adziimaTransactions: SAMPLE_ADZIIMA_TRANSACTIONS,
       goldSavings: DEFAULT_GOLD_SAVINGS,
       monthlyBudgets: { yasmeen: {}, adziima: {} }
@@ -643,8 +646,9 @@ export function PocketProvider({ children }) {
       const currentList = resolveCategories(prev, userId, month);
       const updatedList = currentList.map(c => {
         if (c.id !== catId) return c;
-        if (userId === 'adziima') return { ...c, budgetIdr: num };
-        return { ...c, budgetCny: num };
+        const asIdr = num;
+        const asCny = Math.round((num / rate) * 100) / 100;
+        return { ...c, budgetIdr: asIdr, budgetCny: asCny };
       });
       const monthlyCategories = { ...(prev.monthlyCategories || {}) };
       const userMonthlyCats = { ...(monthlyCategories[userId] || {}) };
@@ -660,8 +664,9 @@ export function PocketProvider({ children }) {
         monthlyCategories,
         [key]: (prev[key] || []).map(c => {
           if (c.id !== catId) return c;
-          if (userId === 'adziima') return { ...c, budgetIdr: num };
-          return { ...c, budgetCny: num };
+          const asIdr = num;
+          const asCny = Math.round((num / rate) * 100) / 100;
+          return { ...c, budgetIdr: asIdr, budgetCny: asCny };
         })
       };
     });
@@ -1053,7 +1058,7 @@ export function PocketProvider({ children }) {
         // Special rule for Yasmeen's kebutuhan_awal:
         // November has initial cost of Rp 500.000 (¥182). Future months default to ¥0 / Rp 0
         if (userId === 'yasmeen' && catId === 'kebutuhan_awal') {
-          return (currentMonth === '2026-10' || currentMonth === '2026-11') ? 182 : 0;
+          return (currentMonth === '2026-10' || currentMonth === '2026-11') ? 500000 : 0;
         }
 
         // 2. Look back through earlier months in chronological order
@@ -1071,30 +1076,46 @@ export function PocketProvider({ children }) {
       // 1. Yasmeen Monthly Calculations for currentMonth (Stipend dicatat manual di Pemasukan)
       let monthIncomeYasmeenCny = 0;
       let monthOutflowYasmeenCny = 0;
+      let monthIncomeYasmeenIdr = 0;
+      let monthOutflowYasmeenIdr = 0;
 
       monthYasmeenTx.forEach(tx => {
         if (tx?.type === 'Masuk') {
           monthIncomeYasmeenCny += (tx?.amountCny || 0);
+          monthIncomeYasmeenIdr += (tx?.amountIdr || 0);
         } else {
           monthOutflowYasmeenCny += (tx?.amountCny || 0);
+          monthOutflowYasmeenIdr += (tx?.amountIdr || 0);
         }
       });
 
+      const startBalanceYasmeenIdr = startBalanceYasmeenCny * rate;
       const totalInflowYasmeenCny = startBalanceYasmeenCny + monthIncomeYasmeenCny;
+      const totalInflowYasmeenIdr = startBalanceYasmeenIdr + monthIncomeYasmeenIdr;
       const netMonthYasmeenCny = totalInflowYasmeenCny - monthOutflowYasmeenCny;
+      const netMonthYasmeenIdr = totalInflowYasmeenIdr - monthOutflowYasmeenIdr;
       const reserveYasmeenCny = yasmeen?.emergencyReserveCny || 0;
+      const reserveYasmeenIdr = (yasmeen?.emergencyReserveIdr !== undefined && yasmeen?.emergencyReserveIdr !== null)
+        ? parseFloat(yasmeen.emergencyReserveIdr)
+        : (reserveYasmeenCny * rate);
       const safeYasmeenCny = Math.max(0, netMonthYasmeenCny - reserveYasmeenCny);
+      const safeYasmeenIdr = Math.max(0, netMonthYasmeenIdr - reserveYasmeenIdr);
 
-      // Categories spending for selected month with inherited budget
+      // Categories spending for selected month with inherited budget (Baseline in IDR)
       const baseYasmeenCats = isYasmeenInChina
         ? currentYasmeenCategories
         : currentAdziimaCategories;
 
       const activeCategories = baseYasmeenCats.map(c => {
-        const resolvedBudget = getCategoryBudget('yasmeen', c.id, isYasmeenInChina ? c.budgetCny : c.budgetIdr);
-        return isYasmeenInChina
-          ? { ...c, budgetCny: resolvedBudget, budgetIdr: resolvedBudget * rate }
-          : { ...c, budgetIdr: resolvedBudget, budgetCny: Math.round((resolvedBudget / rate) * 100) / 100 };
+        const defaultBudgetIdr = (c.budgetIdr !== undefined && c.budgetIdr !== null && c.budgetIdr > 0)
+          ? c.budgetIdr
+          : ((c.budgetCny || 0) * rate);
+        const resolvedBudget = getCategoryBudget('yasmeen', c.id, defaultBudgetIdr);
+        return {
+          ...c,
+          budgetIdr: resolvedBudget,
+          budgetCny: Math.round((resolvedBudget / rate) * 100) / 100
+        };
       });
 
       const yasmeenSpending = {};
@@ -1228,21 +1249,22 @@ export function PocketProvider({ children }) {
       // --- Perhitungan Jatah Harian Yasmeen (Murni dari Pos Daily: Makan, Jajan, Kebutuhan Harian, Belanja Lain) ---
       const dailyCatIdsYasmeen = ['makan', 'jajan', 'kebutuhan_harian', 'belanja_lain'];
       const dailyCatsYasmeen = activeCategories.filter(c => dailyCatIdsYasmeen.includes(c.id));
-      const totalDailyBudgetYasmeenCny = dailyCatsYasmeen.reduce((sum, c) => sum + (c.budgetCny || 0), 0);
-      const totalDailySpentYasmeenCny = dailyCatsYasmeen.reduce((sum, c) => sum + (yasmeenSpending[c.id]?.totalCny || 0), 0);
-      const remainingDailyBudgetYasmeenCny = Math.max(0, totalDailyBudgetYasmeenCny - totalDailySpentYasmeenCny);
+      const totalDailyBudgetYasmeenIdr = dailyCatsYasmeen.reduce((sum, c) => sum + (c.budgetIdr || 0), 0);
+      const totalDailySpentYasmeenIdr = dailyCatsYasmeen.reduce((sum, c) => sum + (yasmeenSpending[c.id]?.totalIdr || 0), 0);
+      const remainingDailyBudgetYasmeenIdr = Math.max(0, totalDailyBudgetYasmeenIdr - totalDailySpentYasmeenIdr);
 
-      const hasDailyBudgetYasmeen = totalDailyBudgetYasmeenCny > 0;
-      const dailySafeYasmeenCny = hasDailyBudgetYasmeen
-        ? Math.round((remainingDailyBudgetYasmeenCny / remainingDays) * 10) / 10
+      const hasDailyBudgetYasmeen = totalDailyBudgetYasmeenIdr > 0;
+      const dailySafeYasmeenIdr = hasDailyBudgetYasmeen
+        ? Math.round(remainingDailyBudgetYasmeenIdr / remainingDays)
         : 0;
+      const dailySafeYasmeenCny = Math.round((dailySafeYasmeenIdr / rate) * 10) / 10;
 
       // --- Ringkasan Alokasi Anggaran Semua Pos & Simpanan Bersih Yasmeen ---
-      const totalAllBudgetYasmeenCny = activeCategories.reduce((sum, c) => sum + (isYasmeenInChina ? (c.budgetCny || 0) : (c.budgetIdr || 0)), 0);
-      const remainingAllBudgetYasmeenCny = Math.max(0, totalAllBudgetYasmeenCny - monthOutflowYasmeenCny);
-      const plannedSavingsYasmeenCny = Math.max(0, totalInflowYasmeenCny - totalAllBudgetYasmeenCny);
-      const isOverAllocatedYasmeen = totalAllBudgetYasmeenCny > totalInflowYasmeenCny && totalInflowYasmeenCny > 0;
-      const overAllocatedAmountYasmeenCny = isOverAllocatedYasmeen ? (totalAllBudgetYasmeenCny - totalInflowYasmeenCny) : 0;
+      const totalAllBudgetYasmeenIdr = activeCategories.reduce((sum, c) => sum + (c.budgetIdr || 0), 0);
+      const remainingAllBudgetYasmeenIdr = Math.max(0, totalAllBudgetYasmeenIdr - monthOutflowYasmeenIdr);
+      const plannedSavingsYasmeenIdr = Math.max(0, totalInflowYasmeenIdr - totalAllBudgetYasmeenIdr);
+      const isOverAllocatedYasmeen = totalAllBudgetYasmeenIdr > totalInflowYasmeenIdr && totalInflowYasmeenIdr > 0;
+      const overAllocatedAmountYasmeenIdr = isOverAllocatedYasmeen ? (totalAllBudgetYasmeenIdr - totalInflowYasmeenIdr) : 0;
 
       return {
         rate,
@@ -1252,39 +1274,41 @@ export function PocketProvider({ children }) {
           monthTx: monthYasmeenTx,
           isChina: isYasmeenInChina,
           initialCny: startBalanceYasmeenCny,
-          initialIdr: startBalanceYasmeenCny * rate,
+          initialIdr: startBalanceYasmeenIdr,
           startBalanceCny: startBalanceYasmeenCny,
-          startBalanceIdr: startBalanceYasmeenCny * rate,
+          startBalanceIdr: startBalanceYasmeenIdr,
           stipendCny: 0,
           stipendIdr: 0,
           isStipendCair: false,
           monthIncomeCny: monthIncomeYasmeenCny,
-          monthIncomeIdr: monthIncomeYasmeenCny * rate,
+          monthIncomeIdr: monthIncomeYasmeenIdr,
           totalInflowCny: totalInflowYasmeenCny,
-          totalInflowIdr: totalInflowYasmeenCny * rate,
+          totalInflowIdr: totalInflowYasmeenIdr,
           totalOutflowCny: monthOutflowYasmeenCny,
-          totalOutflowIdr: monthOutflowYasmeenCny * rate,
+          totalOutflowIdr: monthOutflowYasmeenIdr,
           totalBalanceCny: netMonthYasmeenCny,
-          totalBalanceIdr: netMonthYasmeenCny * rate,
+          totalBalanceIdr: netMonthYasmeenIdr,
           reserveCny: reserveYasmeenCny,
-          reserveIdr: reserveYasmeenCny * rate,
+          reserveIdr: reserveYasmeenIdr,
           safeToSpendCny: safeYasmeenCny,
-          safeToSpendIdr: safeYasmeenCny * rate,
+          safeToSpendIdr: safeYasmeenIdr,
           remainingDays,
           hasDailyBudgetSet: hasDailyBudgetYasmeen,
-          remainingDailyBudgetCny: remainingDailyBudgetYasmeenCny,
-          totalDailyBudgetCny: totalDailyBudgetYasmeenCny,
+          remainingDailyBudgetCny: Math.round((remainingDailyBudgetYasmeenIdr / rate) * 100) / 100,
+          remainingDailyBudgetIdr: remainingDailyBudgetYasmeenIdr,
+          totalDailyBudgetCny: Math.round((totalDailyBudgetYasmeenIdr / rate) * 100) / 100,
+          totalDailyBudgetIdr: totalDailyBudgetYasmeenIdr,
           dailySafeCny: dailySafeYasmeenCny,
-          dailySafeIdr: dailySafeYasmeenCny * rate,
-          totalAllBudgetCny: totalAllBudgetYasmeenCny,
-          totalAllBudgetIdr: totalAllBudgetYasmeenCny * rate,
-          remainingAllBudgetCny: remainingAllBudgetYasmeenCny,
-          remainingAllBudgetIdr: remainingAllBudgetYasmeenCny * rate,
-          plannedSavingsCny: plannedSavingsYasmeenCny,
-          plannedSavingsIdr: plannedSavingsYasmeenCny * rate,
+          dailySafeIdr: dailySafeYasmeenIdr,
+          totalAllBudgetCny: Math.round((totalAllBudgetYasmeenIdr / rate) * 100) / 100,
+          totalAllBudgetIdr: totalAllBudgetYasmeenIdr,
+          remainingAllBudgetCny: Math.round((remainingAllBudgetYasmeenIdr / rate) * 100) / 100,
+          remainingAllBudgetIdr: remainingAllBudgetYasmeenIdr,
+          plannedSavingsCny: Math.round((plannedSavingsYasmeenIdr / rate) * 100) / 100,
+          plannedSavingsIdr: plannedSavingsYasmeenIdr,
           isOverAllocated: isOverAllocatedYasmeen,
-          overAllocatedAmountCny: overAllocatedAmountYasmeenCny,
-          overAllocatedAmountIdr: overAllocatedAmountYasmeenCny * rate,
+          overAllocatedAmountCny: Math.round((overAllocatedAmountYasmeenIdr / rate) * 100) / 100,
+          overAllocatedAmountIdr: overAllocatedAmountYasmeenIdr,
           spending: yasmeenSpending,
           categories: activeCategories || [],
           nongkrongDays: data?.nongkrongChecklist?.[currentMonth] || []

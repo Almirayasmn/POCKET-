@@ -84,19 +84,19 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   const handleStartEditBudget = (cat) => {
     setEditingCatId(cat.id);
-    if (!isChina || !isViewYuan) {
-      setTempBudget((cat.budgetIdr || 0).toString());
-    } else {
+    if (isViewYuan) {
       setTempBudget((cat.budgetCny || 0).toString());
+    } else {
+      setTempBudget((cat.budgetIdr || 0).toString());
     }
   };
 
   const handleSaveBudget = (catId) => {
     const val = parseFloat(tempBudget) || 0;
-    if (!isChina || !isViewYuan) {
-      // Inputted as IDR, convert to CNY for baseline
-      const asCny = Math.round((val / exchangeRate) * 100) / 100;
-      updateCategoryBudget('yasmeen', catId, asCny);
+    if (isViewYuan) {
+      // Inputted as CNY, convert to IDR
+      const asIdr = Math.round(val * exchangeRate);
+      updateCategoryBudget('yasmeen', catId, asIdr);
     } else {
       updateCategoryBudget('yasmeen', catId, val);
     }
@@ -609,8 +609,9 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                 onClick={() => onOpenAdd('Keluar', {
                   title: 'Nongkrong Kafe',
                   category: 'jajan',
-                  amount: 75,
-                  notes: 'Sesi kafe (Pagu maks. ¥75)'
+                  amount: isViewYuan ? 75 : 206250,
+                  inputCurrency: isViewYuan ? 'CNY' : 'IDR',
+                  notes: 'Sesi kafe (Pagu maks. Rp 206.250 ≈ ¥75)'
                 })}
                 style={{
                   flex: 1,
@@ -995,13 +996,11 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   <div className="tx-right">
                     <div className="tx-amount" style={{ color: isIncome ? '#059669' : '#db2777' }}>
                       {isIncome
-                        ? (isChina ? `+${formatCny(tx.amountCny)}` : `+${formatIdr(tx.amountIdr)}`)
-                        : (isChina ? `-${formatCny(tx.amountCny)}` : `-${formatIdr(tx.amountIdr)}`)}
-                      {isChina && (
-                        <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 500 }}>
-                          ≈ {formatIdr(tx.amountIdr)}
-                        </div>
-                      )}
+                        ? (isViewYuan ? `+${formatCny(tx.amountCny)}` : `+${formatIdr(tx.amountIdr)}`)
+                        : (isViewYuan ? `-${formatCny(tx.amountCny)}` : `-${formatIdr(tx.amountIdr)}`)}
+                      <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 500 }}>
+                        {isViewYuan ? `≈ ${formatIdr(tx.amountIdr)}` : `≈ ${formatCny(tx.amountCny)}`}
+                      </div>
                     </div>
                     <div className="tx-actions">
                       <button

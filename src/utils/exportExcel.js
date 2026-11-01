@@ -20,8 +20,9 @@ export function exportMonthToExcel({
   });
 
   // Helper formatting for values with explicit space between currency and amount
+  const isCny = currency === 'CNY';
   const formatVal = (v) =>
-    isChinaPeriod
+    isCny
       ? `¥ ${Number(v || 0).toFixed(2)}`
       : `Rp ${Math.round(Number(v || 0)).toLocaleString('id-ID')}`;
 
@@ -32,8 +33,8 @@ export function exportMonthToExcel({
 
   categories.forEach((cat, idx) => {
     const sp = categorySpending[cat.id] || { totalIdr: 0, totalCny: 0, count: 0 };
-    const budgetVal = isChinaPeriod ? (cat.budgetCny || 0) : (cat.budgetIdr || 0);
-    const spentVal = isChinaPeriod ? (sp.totalCny || 0) : (sp.totalIdr || 0);
+    const budgetVal = isCny ? (cat.budgetCny || 0) : (cat.budgetIdr || 0);
+    const spentVal = isCny ? (sp.totalCny || 0) : (sp.totalIdr || 0);
     const remainingVal = budgetVal - spentVal;
     const percentUsed = budgetVal > 0 ? Math.round((spentVal / budgetVal) * 100) : (spentVal > 0 ? 100 : 0);
 

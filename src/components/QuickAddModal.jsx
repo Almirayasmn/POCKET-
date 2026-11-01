@@ -37,7 +37,7 @@ export default function QuickAddModal({
   const [type, setType] = useState('Keluar'); // 'Keluar' | 'Masuk'
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
-  const [inputCurrency, setInputCurrency] = useState(isAdziima ? 'IDR' : 'CNY');
+  const [inputCurrency, setInputCurrency] = useState('IDR');
   const [category, setCategory] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [date, setDate] = useState(() => getLocalDateString());
@@ -49,12 +49,13 @@ export default function QuickAddModal({
       if (editingTx) {
         setType(editingTx.type || 'Keluar');
         setTitle(editingTx.title || '');
+        const editCurr = editingTx.inputCurrency || 'IDR';
+        setInputCurrency(editCurr);
         setAmount(
-          isAdziima
-            ? (editingTx.amountIdr || 0).toString()
-            : (editingTx.amountCny || 0).toString()
+          editCurr === 'CNY'
+            ? (editingTx.amountCny || 0).toString()
+            : (editingTx.amountIdr || 0).toString()
         );
-        setInputCurrency(isAdziima ? 'IDR' : (editingTx.inputCurrency || 'CNY'));
         setCategory(editingTx.category || (isAdziima ? 'makan_harian' : 'makan'));
         setPaymentMethod(editingTx.paymentMethod || (isAdziima ? 'BCA' : 'Bank Mandiri'));
         setDate(editingTx.date || today);
@@ -62,8 +63,9 @@ export default function QuickAddModal({
       } else {
         setType(initialData?.type || defaultType || 'Keluar');
         setTitle(initialData?.title || '');
+        const initCurr = initialData?.inputCurrency || 'IDR';
+        setInputCurrency(initCurr);
         setAmount(initialData?.amount != null ? initialData.amount.toString() : '');
-        setInputCurrency(initialData?.inputCurrency || (isAdziima ? 'IDR' : 'CNY'));
         setPaymentMethod(initialData?.paymentMethod || currentPaymentMethods[0] || (isAdziima ? 'BCA' : 'Bank Mandiri'));
         setCategory(initialData?.category || currentCategories[0]?.id || (isAdziima ? 'makan_harian' : 'makan'));
         setDate(initialData?.date || today);
@@ -77,7 +79,7 @@ export default function QuickAddModal({
   const handleSelectPreset = (p) => {
     setTitle(p.title);
     setAmount(p.amount.toString());
-    setInputCurrency(isAdziima ? 'IDR' : p.currency);
+    setInputCurrency(p.currency || 'IDR');
     setCategory(p.category);
     setType('Keluar');
   };
@@ -137,9 +139,9 @@ export default function QuickAddModal({
   let previewText = '';
   if (numAmount > 0 && !isAdziima) {
     if (inputCurrency === 'CNY') {
-      previewText = `≈ ${formatIdr(numAmount * exchangeRate)}`;
+      previewText = `✨ Dikonversi langsung ke IDR: ${formatIdr(numAmount * exchangeRate)} (Kurs 1 ¥ = Rp ${exchangeRate.toLocaleString('id-ID')})`;
     } else {
-      previewText = `≈ ${formatCny(numAmount / exchangeRate)}`;
+      previewText = `≈ ${formatCny(numAmount / exchangeRate)} (Kurs Rp ${exchangeRate.toLocaleString('id-ID')})`;
     }
   }
 
@@ -154,9 +156,7 @@ export default function QuickAddModal({
             <h3>
               {editingTx
                 ? 'Edit Transaksi'
-                : isAdziima
-                ? 'Catat Transaksi (Rp)'
-                : 'Catat Transaksi (¥)'}
+                : (type === 'Masuk' ? 'Catat Pemasukan' : 'Catat Pengeluaran')}
             </h3>
           </div>
           <button className="modal-close-btn" onClick={onClose}>
@@ -265,7 +265,7 @@ export default function QuickAddModal({
                 >
                   <CategoryIcon name={p.iconName} size={13} color="currentColor" />
                   <span>
-                    {p.title} ({p.currency === 'IDR' ? `Rp ${p.amount.toLocaleString('id-ID')}` : `¥${p.amount}`})
+                    {p.title} ({p.currency === 'IDR' ? `Rp ${p.amount.toLocaleString('id-ID')}` : `¥${p.amount}`}{p.noteCny ? ` • ${p.noteCny}` : ''})
                   </span>
                 </button>
               ))}
@@ -274,45 +274,114 @@ export default function QuickAddModal({
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Amount */}
+          {/* Amount & Currency Selection */}
           <div className="form-group">
-            <label className="form-label">
-              Nominal {isAdziima ? '(Rupiah Rp)' : '(Yuan ¥ / Rp)'} *
-            </label>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
+              <label className="form-label" style={{ margin: 0 }}>
+                {type === 'Masuk' ? 'Nominal Pemasukan *' : 'Nominal Pengeluaran *'}
+              </label>
+              {!isAdziima && (
+                <div style={{ display: 'flex', background: '#f1f5f9', padding: '2px', borderRadius: 'var(--radius-full)', gap: '2px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (inputCurrency !== 'IDR') {
+                        const num = parseFloat(amount);
+                        if (num > 0) setAmount(Math.round(num * exchangeRate).toString());
+                        setInputCurrency('IDR');
+                      }
+                    }}
+                    style={{
+                      border: 'none',
+                      background: inputCurrency === 'IDR' ? '#ffffff' : 'transparent',
+                      color: inputCurrency === 'IDR' ? '#db2777' : '#64748b',
+                      fontWeight: inputCurrency === 'IDR' ? 800 : 600,
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      boxShadow: inputCurrency === 'IDR' ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    Rp Rupiah
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (inputCurrency !== 'CNY') {
+                        const num = parseFloat(amount);
+                        if (num > 0) setAmount((Math.round((num / exchangeRate) * 100) / 100).toString());
+                        setInputCurrency('CNY');
+                      }
+                    }}
+                    style={{
+                      border: 'none',
+                      background: inputCurrency === 'CNY' ? '#ec4899' : 'transparent',
+                      color: inputCurrency === 'CNY' ? '#ffffff' : '#64748b',
+                      fontWeight: inputCurrency === 'CNY' ? 800 : 600,
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: '0.75rem',
+                      cursor: 'pointer',
+                      boxShadow: inputCurrency === 'CNY' ? '0 1px 4px rgba(236,72,153,0.3)' : 'none',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    ¥ Yuan
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '0.85rem',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  fontWeight: 800,
+                  color: '#94a3b8',
+                  fontSize: '0.95rem',
+                  pointerEvents: 'none'
+                }}
+              >
+                {inputCurrency === 'CNY' ? '¥' : 'Rp'}
+              </span>
               <input
                 type="number"
                 step="any"
                 className="form-input"
-                placeholder={isAdziima ? 'Contoh: 25000' : 'Contoh: 15'}
+                placeholder={inputCurrency === 'CNY' ? 'Contoh: 1000' : 'Contoh: 25000'}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                style={{ fontSize: '1.15rem', fontWeight: 800, fontFamily: 'var(--font-display)' }}
+                style={{
+                  paddingLeft: inputCurrency === 'CNY' ? '2.1rem' : '2.9rem',
+                  fontSize: '1.2rem',
+                  fontWeight: 800,
+                  fontFamily: 'var(--font-display)'
+                }}
                 autoFocus
                 required
               />
-              {!isAdziima && (
-                <button
-                  type="button"
-                  style={{
-                    padding: '0 0.9rem',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1.5px solid var(--card-border-subtle)',
-                    background: '#fdf2f8',
-                    color: '#db2777',
-                    fontWeight: 800,
-                    fontSize: '0.88rem',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
-                  }}
-                  onClick={() => setInputCurrency(inputCurrency === 'CNY' ? 'IDR' : 'CNY')}
-                >
-                  {inputCurrency === 'CNY' ? '¥ Yuan' : 'Rp IDR'}
-                </button>
-              )}
             </div>
             {previewText && (
-              <div style={{ fontSize: '0.78rem', color: '#10b981', marginTop: '0.3rem', fontWeight: 600 }}>
+              <div
+                style={{
+                  fontSize: '0.78rem',
+                  color: inputCurrency === 'CNY' ? '#047857' : '#64748b',
+                  marginTop: '0.4rem',
+                  fontWeight: 700,
+                  background: inputCurrency === 'CNY' ? '#ecfdf5' : '#f8fafc',
+                  padding: '0.35rem 0.65rem',
+                  borderRadius: '6px',
+                  border: inputCurrency === 'CNY' ? '1px solid #a7f3d0' : '1px solid #e2e8f0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem'
+                }}
+              >
                 {previewText}
               </div>
             )}

@@ -2,22 +2,22 @@
 
 export const DEFAULT_EXCHANGE_RATE = 2750; // 1 CNY = 2.750 IDR
 
-// Yasmeen Categories (Nanning, China - Sesuai Google Sheet & Prinsip Stipend ¥1.500)
+// Yasmeen Categories (Nanning, China - Sesuai Prinsip Anggaran Bulanan)
 export const YASMEEN_CATEGORIES = [
-  { id: 'makan', name: 'Makan', iconName: 'Utensils', budgetCny: 900, color: '#f472b6', note: 'Makan ¥30/hari (¥900/bulan)' },
-  { id: 'jajan', name: 'Jajan & nongkrong', iconName: 'Coffee', budgetCny: 200, color: '#ec4899', note: 'Jajan & santai' },
-  { id: 'pos_tambahan', name: 'Pos tambahan', iconName: 'Tag', budgetCny: 0, color: '#94a3b8', note: 'Pos cadangan' },
-  { id: 'transport', name: 'Transport', iconName: 'Train', budgetCny: 100, color: '#38bdf8', note: 'Metro & bus Nanning' },
-  { id: 'internet', name: 'Internet', iconName: 'Wifi', budgetCny: 60, color: '#2dd4bf', note: 'Paket data bulanan' },
-  { id: 'laundry', name: 'Laundry', iconName: 'Shirt', budgetCny: 40, color: '#34d399', note: 'Mesin cuci kampus' },
-  { id: 'listrik_air', name: 'Listrik & air', iconName: 'Zap', budgetCny: 50, color: '#fbbf24', note: 'Token utilitas asrama' },
-  { id: 'kesehatan', name: 'Kesehatan', iconName: 'HeartPulse', budgetCny: 50, color: '#f87171', note: 'Obat & vitamin' },
-  { id: 'belanja_lain', name: 'Belanja lain', iconName: 'ShoppingBag', budgetCny: 70, color: '#f472b6', note: 'Keperluan harian' },
-  { id: 'toiletries', name: 'Toiletries', iconName: 'Luggage', budgetCny: 0, color: '#a855f7', note: 'Peralatan mandi' },
-  { id: 'asrama', name: 'Asrama', iconName: 'Zap', budgetCny: 0, color: '#6366f1', note: 'Keperluan asrama' },
-  { id: 'kebutuhan_awal', name: 'Kebutuhan awal', iconName: 'Luggage', budgetCny: 182, color: '#fb923c', note: 'Biaya awal Nov: Rp 500rb (¥182)' },
-  { id: 'tiket_pesawat', name: 'Tiket Pesawat', iconName: 'Plane', budgetCny: 0, color: '#0ea5e9', note: 'Penerbangan Indo ⇄ China' },
-  { id: 'qris_debit_bca', name: 'QRIS / Debit BCA', iconName: 'CreditCard', budgetCny: 0, color: '#38bdf8', note: 'Transaksi via QRIS / BCA' },
+  { id: 'makan', name: 'Makan', iconName: 'Utensils', budgetIdr: 2475000, budgetCny: 900, color: '#f472b6', note: 'Makan Rp 82.500/hari (Rp 2.475.000/bln ≈ ¥900)' },
+  { id: 'jajan', name: 'Jajan & nongkrong', iconName: 'Coffee', budgetIdr: 550000, budgetCny: 200, color: '#ec4899', note: 'Jajan & santai (Rp 550.000 ≈ ¥200)' },
+  { id: 'pos_tambahan', name: 'Pos tambahan', iconName: 'Tag', budgetIdr: 0, budgetCny: 0, color: '#94a3b8', note: 'Pos cadangan' },
+  { id: 'transport', name: 'Transport', iconName: 'Train', budgetIdr: 275000, budgetCny: 100, color: '#38bdf8', note: 'Metro & bus Nanning (Rp 275.000 ≈ ¥100)' },
+  { id: 'internet', name: 'Internet', iconName: 'Wifi', budgetIdr: 165000, budgetCny: 60, color: '#2dd4bf', note: 'Paket data bulanan (Rp 165.000 ≈ ¥60)' },
+  { id: 'laundry', name: 'Laundry', iconName: 'Shirt', budgetIdr: 110000, budgetCny: 40, color: '#34d399', note: 'Mesin cuci kampus (Rp 110.000 ≈ ¥40)' },
+  { id: 'listrik_air', name: 'Listrik & air', iconName: 'Zap', budgetIdr: 137500, budgetCny: 50, color: '#fbbf24', note: 'Token utilitas asrama (Rp 137.500 ≈ ¥50)' },
+  { id: 'kesehatan', name: 'Kesehatan', iconName: 'HeartPulse', budgetIdr: 137500, budgetCny: 50, color: '#f87171', note: 'Obat & vitamin (Rp 137.500 ≈ ¥50)' },
+  { id: 'belanja_lain', name: 'Belanja lain', iconName: 'ShoppingBag', budgetIdr: 192500, budgetCny: 70, color: '#f472b6', note: 'Keperluan harian (Rp 192.500 ≈ ¥70)' },
+  { id: 'toiletries', name: 'Toiletries', iconName: 'Luggage', budgetIdr: 0, budgetCny: 0, color: '#a855f7', note: 'Peralatan mandi' },
+  { id: 'asrama', name: 'Asrama', iconName: 'Zap', budgetIdr: 0, budgetCny: 0, color: '#6366f1', note: 'Keperluan asrama' },
+  { id: 'kebutuhan_awal', name: 'Kebutuhan awal', iconName: 'Luggage', budgetIdr: 500000, budgetCny: 182, color: '#fb923c', note: 'Biaya awal Nov: Rp 500.000 (¥182)' },
+  { id: 'tiket_pesawat', name: 'Tiket Pesawat', iconName: 'Plane', budgetIdr: 0, budgetCny: 0, color: '#0ea5e9', note: 'Penerbangan Indo ⇄ China' },
+  { id: 'qris_debit_bca', name: 'QRIS / Debit BCA', iconName: 'CreditCard', budgetIdr: 0, budgetCny: 0, color: '#38bdf8', note: 'Transaksi via QRIS / BCA' },
 ];
 
 // Adziima Categories (Indonesia - Rupiah Rp, Hemat & Rapi)
@@ -39,11 +39,11 @@ export const DEFAULT_USERS = {
     avatarInitials: 'YA',
     roleTag: 'Nanning, China',
     bio: '', // Kosongkan awal sesuai permintaan
-    currency: 'CNY',
+    currency: 'IDR',
     themeColor: '#f472b6',
     initialFundIdr: 10000000, // Rp 10.000.000
     initialFundCny: 3636.36,   // ¥3.636,36
-    stipendCny: 1000,          // ¥1.000 per bulan
+    stipendCny: 1000,          // ¥1.000 per bulan (Rp 2.750.000)
     stipendReceived: false,
     otherIncomeCny: 0,
     emergencyReserveCny: 1000, // ¥1.000 cadangan (Rp 2.750.000)
@@ -63,47 +63,7 @@ export const DEFAULT_USERS = {
   }
 };
 
-export const SAMPLE_YASMEEN_TRANSACTIONS = [
-  {
-    id: 'tx-y1',
-    date: '2026-11-01',
-    category: 'makan',
-    title: 'Nasi ayam',
-    amountCny: 12,
-    amountIdr: 33000,
-    inputCurrency: 'CNY',
-    type: 'Keluar',
-    paidBy: 'yasmeen',
-    paymentMethod: 'WeChat Pay',
-    notes: 'Kantin kampus'
-  },
-  {
-    id: 'tx-y2',
-    date: '2026-11-01',
-    category: 'jajan',
-    title: 'Teh',
-    amountCny: 5,
-    amountIdr: 13750,
-    inputCurrency: 'CNY',
-    type: 'Keluar',
-    paidBy: 'yasmeen',
-    paymentMethod: 'Alipay',
-    notes: 'Minuman'
-  },
-  {
-    id: 'tx-y3',
-    date: '2026-11-02',
-    category: 'jajan',
-    title: 'Kafe bersama Najma',
-    amountCny: 45,
-    amountIdr: 123750,
-    inputCurrency: 'CNY',
-    type: 'Keluar',
-    paidBy: 'yasmeen',
-    paymentMethod: 'WeChat Pay',
-    notes: 'Nongkrong kafe'
-  }
-];
+export const SAMPLE_YASMEEN_TRANSACTIONS = [];
 
 export const SAMPLE_ADZIIMA_TRANSACTIONS = [];
 
@@ -151,6 +111,8 @@ export const DEFAULT_GOLD_SAVINGS = {
 export const PAYMENT_METHODS_YASMEEN = [
   'Bank Mandiri',
   'Bank BCA',
+  'WeChat Pay',
+  'Alipay',
   'E-Wallet',
   'Tunai / Cash'
 ];
@@ -162,15 +124,15 @@ export const PAYMENT_METHODS_ADZIIMA = [
   'Tunai / Cash'
 ];
 
-// Presets (Professional clean labels)
+// Presets (IDR amounts with CNY notes)
 export const PRESETS_YASMEEN = [
-  { title: 'Tiket Pesawat', amount: 1500, category: 'tiket_pesawat', iconName: 'Plane', currency: 'CNY' },
-  { title: 'Nasi Ayam Kantin', amount: 12, category: 'makan', iconName: 'Utensils', currency: 'CNY' },
-  { title: 'Teh / Minuman', amount: 5, category: 'jajan', iconName: 'CupSoda', currency: 'CNY' },
-  { title: 'Nongkrong Kafe (Maks. ¥75)', amount: 75, category: 'jajan', iconName: 'Coffee', currency: 'CNY' },
-  { title: 'Metro Nanning', amount: 4, category: 'transport', iconName: 'Train', currency: 'CNY' },
-  { title: 'Laundry Kampus', amount: 4, category: 'laundry', iconName: 'Shirt', currency: 'CNY' },
-  { title: 'Debit BCA / QRIS', amount: 0, category: 'qris_debit_bca', iconName: 'CreditCard', currency: 'IDR' },
+  { title: 'Nasi Ayam Kantin', amount: 33000, category: 'makan', iconName: 'Utensils', currency: 'IDR', noteCny: '¥12' },
+  { title: 'Teh / Minuman', amount: 13750, category: 'jajan', iconName: 'CupSoda', currency: 'IDR', noteCny: '¥5' },
+  { title: 'Nongkrong Kafe (Maks. ¥75)', amount: 206250, category: 'jajan', iconName: 'Coffee', currency: 'IDR', noteCny: '¥75' },
+  { title: 'Metro Nanning', amount: 11000, category: 'transport', iconName: 'Train', currency: 'IDR', noteCny: '¥4' },
+  { title: 'Laundry Kampus', amount: 11000, category: 'laundry', iconName: 'Shirt', currency: 'IDR', noteCny: '¥4' },
+  { title: 'Debit BCA / QRIS', amount: 0, category: 'qris_debit_bca', iconName: 'CreditCard', currency: 'IDR', noteCny: '' },
+  { title: 'Tiket Pesawat', amount: 4125000, category: 'tiket_pesawat', iconName: 'Plane', currency: 'IDR', noteCny: '¥1.500' },
 ];
 
 export const PRESETS_ADZIIMA = [
