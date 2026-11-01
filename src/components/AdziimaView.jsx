@@ -31,8 +31,6 @@ import {
   FolderUp
 } from 'lucide-react';
 import ManageCategoriesModal from './ManageCategoriesModal';
-import GoogleDriveModal from './GoogleDriveModal';
-import PostExportDrivePrompt from './PostExportDrivePrompt';
 
 export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, onOpenCloudModal }) {
   const {
@@ -47,7 +45,8 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     isCloudConnected,
     isCloudSyncing,
     adziimaTransactions,
-    getCategoriesForMonth
+    getCategoriesForMonth,
+    googleDriveUrl
   } = usePocket();
 
   const { adziima } = calculations;
@@ -62,8 +61,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
   const [isManageCatOpen, setIsManageCatOpen] = useState(false);
-  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
-  const [drivePromptInfo, setDrivePromptInfo] = useState({ isOpen: false, fileName: '', monthLabel: '' });
 
   const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
 
@@ -114,7 +111,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     const netBalance = isCur ? adziima.totalBalanceIdr : (mIncome - mOutflow);
     const plannedSavings = Math.max(0, totalInflow - totalBudget);
 
-    const fileName = exportMonthToExcel({
+    exportMonthToExcel({
       userName: user.name || 'Adziima',
       monthLabel: label,
       selectedMonth: targetMonth,
@@ -131,12 +128,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         plannedSavings: formatIdr(plannedSavings),
         netBalance: formatIdr(netBalance)
       }
-    });
-
-    setDrivePromptInfo({
-      isOpen: true,
-      monthLabel: label,
-      fileName
     });
   };
 
@@ -165,7 +156,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           setIsEditingMoney(true);
         }}
         onOpenCloudModal={onOpenCloudModal}
-        onOpenDriveModal={() => setIsDriveModalOpen(true)}
         onExportExcel={handleExportExcel}
         transactionCount={currentMonthTx.length}
       />
@@ -596,15 +586,17 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               <span>Unduh XLS</span>
             </button>
 
-            <button
+            <a
+              href={googleDriveUrl || 'https://drive.google.com'}
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn-back-home"
-              onClick={() => setIsDriveModalOpen(true)}
-              style={{ background: '#ecfdf5', borderColor: '#6ee7b7', color: '#047857' }}
-              title="Folder Arsip Google Drive Rekapan Bulanan"
+              style={{ background: '#ecfdf5', borderColor: '#6ee7b7', color: '#047857', textDecoration: 'none' }}
+              title="Buka Folder Google Drive"
             >
               <FolderUp size={14} />
-              <span>Drive Arsip</span>
-            </button>
+              <span>Buka Drive</span>
+            </a>
           </div>
         </div>
 
@@ -726,24 +718,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         isOpen={isManageCatOpen}
         onClose={() => setIsManageCatOpen(false)}
         userId="adziima"
-      />
-
-      {/* Google Drive Archive Modal */}
-      <GoogleDriveModal
-        isOpen={isDriveModalOpen}
-        onClose={() => setIsDriveModalOpen(false)}
-        userName={user.name || 'Adziima'}
-        userId="adziima"
-        transactions={adziimaTransactions}
-        currentMonth={selectedMonth}
-      />
-
-      {/* Post-Download Google Drive Reminder Prompt */}
-      <PostExportDrivePrompt
-        isOpen={drivePromptInfo.isOpen}
-        onClose={() => setDrivePromptInfo(prev => ({ ...prev, isOpen: false }))}
-        fileName={drivePromptInfo.fileName}
-        monthLabel={drivePromptInfo.monthLabel}
       />
     </div>
   );

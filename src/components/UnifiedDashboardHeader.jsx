@@ -33,7 +33,8 @@ export default function UnifiedDashboardHeader({
     selectedMonth,
     setSelectedMonth,
     isCloudConnected,
-    isCloudSyncing
+    isCloudSyncing,
+    googleDriveUrl
   } = usePocket();
 
   const currentIndex = ALL_MONTH_OPTIONS.findIndex(m => m.value === selectedMonth);
@@ -143,18 +144,18 @@ export default function UnifiedDashboardHeader({
             </button>
           )}
 
-          {/* Google Drive Archive Button */}
-          {onOpenDriveModal && (
-            <button
-              type="button"
-              className="udh-btn-action udh-btn-drive"
-              onClick={onOpenDriveModal}
-              title="Folder Arsip Google Drive Rekapan Bulanan"
-            >
-              <FolderUp size={15} />
-              <span>Drive Arsip</span>
-            </button>
-          )}
+          {/* Google Drive Direct Link */}
+          <a
+            href={googleDriveUrl || 'https://drive.google.com'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="udh-btn-action udh-btn-drive"
+            title="Buka Folder Google Drive Rekapan Bulanan"
+            style={{ textDecoration: 'none' }}
+          >
+            <FolderUp size={15} />
+            <span>Folder Drive</span>
+          </a>
         </div>
       </div>
 

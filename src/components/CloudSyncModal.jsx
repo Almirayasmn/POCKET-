@@ -9,7 +9,8 @@ import {
   UploadCloud,
   DownloadCloud,
   ShieldCheck,
-  Smartphone
+  Smartphone,
+  FolderUp
 } from 'lucide-react';
 
 export default function CloudSyncModal({ isOpen, onClose }) {
@@ -19,10 +20,14 @@ export default function CloudSyncModal({ isOpen, onClose }) {
     isCloudSyncing,
     saveCloudUrl,
     syncFromCloud,
-    syncToCloud
+    syncToCloud,
+    googleDriveUrl,
+    updateGoogleDriveUrl
   } = usePocket();
 
   const [inputUrl, setInputUrl] = useState(firebaseDbUrl || '');
+  const [driveInput, setDriveInput] = useState(googleDriveUrl || '');
+  const [driveMsg, setDriveMsg] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
   const [isTesting, setIsTesting] = useState(false);
 
@@ -229,6 +234,41 @@ export default function CloudSyncModal({ isOpen, onClose }) {
             </div>
           </div>
         )}
+
+        {/* Google Drive Folder Link Setting */}
+        <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+            <FolderUp size={16} color="#059669" />
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#065f46' }}>Link Folder Google Drive</span>
+          </div>
+          <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.6rem', lineHeight: 1.4 }}>
+            Tempel link folder Google Drive kamu di sini agar tombol <b>Folder Drive</b> di header langsung membuka folder tersebut:
+          </p>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              type="url"
+              value={driveInput}
+              onChange={(e) => setDriveInput(e.target.value)}
+              placeholder="https://drive.google.com/drive/folders/..."
+              className="form-input"
+              style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (updateGoogleDriveUrl) {
+                  updateGoogleDriveUrl(driveInput.trim());
+                  setDriveMsg('Tersimpan!');
+                  setTimeout(() => setDriveMsg(''), 2500);
+                }
+              }}
+              className="btn-primary"
+              style={{ padding: '0.5rem 0.9rem', fontSize: '0.8rem', background: '#059669', borderColor: '#047857' }}
+            >
+              {driveMsg || 'Simpan'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -31,8 +31,6 @@ import {
   FolderUp
 } from 'lucide-react';
 import ManageCategoriesModal from './ManageCategoriesModal';
-import GoogleDriveModal from './GoogleDriveModal';
-import PostExportDrivePrompt from './PostExportDrivePrompt';
 
 const DAYS_OF_WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
@@ -54,7 +52,8 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     isCloudConnected,
     isCloudSyncing,
     yasmeenTransactions,
-    getCategoriesForMonth
+    getCategoriesForMonth,
+    googleDriveUrl
   } = usePocket();
 
   const { yasmeen } = calculations;
@@ -79,8 +78,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
   const [isManageCatOpen, setIsManageCatOpen] = useState(false);
-  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
-  const [drivePromptInfo, setDrivePromptInfo] = useState({ isOpen: false, fileName: '', monthLabel: '' });
 
   const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
 
@@ -143,7 +140,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     const netBalance = isCur ? yasmeen.totalBalanceIdr : (mIncome - mOutflow);
     const plannedSavings = Math.max(0, totalInflow - totalBudget);
 
-    const fileName = exportMonthToExcel({
+    exportMonthToExcel({
       userName: user.name || 'Yasmeen Almira',
       monthLabel: label,
       selectedMonth: targetMonth,
@@ -160,12 +157,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         plannedSavings: formatIdr(plannedSavings),
         netBalance: formatIdr(netBalance)
       }
-    });
-
-    setDrivePromptInfo({
-      isOpen: true,
-      monthLabel: label,
-      fileName
     });
   };
 
@@ -195,7 +186,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           setIsEditingModal(true);
         }}
         onOpenCloudModal={onOpenCloudModal}
-        onOpenDriveModal={() => setIsDriveModalOpen(true)}
         onExportExcel={handleExportExcel}
         transactionCount={currentMonthTx.length}
       />
@@ -618,15 +608,17 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               <span>Unduh XLS</span>
             </button>
 
-            <button
+            <a
+              href={googleDriveUrl || 'https://drive.google.com'}
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn-back-home"
-              onClick={() => setIsDriveModalOpen(true)}
-              style={{ background: '#ecfdf5', borderColor: '#6ee7b7', color: '#047857' }}
-              title="Folder Arsip Google Drive Rekapan Bulanan"
+              style={{ background: '#ecfdf5', borderColor: '#6ee7b7', color: '#047857', textDecoration: 'none' }}
+              title="Buka Folder Google Drive"
             >
               <FolderUp size={14} />
-              <span>Drive Arsip</span>
-            </button>
+              <span>Buka Drive</span>
+            </a>
           </div>
         </div>
 
@@ -746,24 +738,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         isOpen={isManageCatOpen}
         onClose={() => setIsManageCatOpen(false)}
         userId="yasmeen"
-      />
-
-      {/* Google Drive Archive Modal */}
-      <GoogleDriveModal
-        isOpen={isDriveModalOpen}
-        onClose={() => setIsDriveModalOpen(false)}
-        userName={user.name || 'Yasmeen Almira'}
-        userId="yasmeen"
-        transactions={yasmeenTransactions}
-        currentMonth={selectedMonth}
-      />
-
-      {/* Post-Download Google Drive Reminder Prompt */}
-      <PostExportDrivePrompt
-        isOpen={drivePromptInfo.isOpen}
-        onClose={() => setDrivePromptInfo(prev => ({ ...prev, isOpen: false }))}
-        fileName={drivePromptInfo.fileName}
-        monthLabel={drivePromptInfo.monthLabel}
       />
     </div>
   );
