@@ -66,7 +66,10 @@ export default function UnifiedDashboardHeader({
           <button
             type="button"
             className="udh-btn-back"
-            onClick={() => setActiveView('landing')}
+            onClick={() => {
+              if (setSelectedMonth) setSelectedMonth('2026-11');
+              setActiveView('landing');
+            }}
             title="Kembali ke Halaman Beranda"
           >
             <ArrowLeft size={16} />

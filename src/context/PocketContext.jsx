@@ -1382,13 +1382,68 @@ export function PocketProvider({ children }) {
       const totalAllBudgetYasmeenIdr = activeCategories.reduce((sum, c) => sum + (c.budgetIdr || 0), 0);
       const remainingAllBudgetYasmeenIdr = Math.max(0, totalAllBudgetYasmeenIdr - monthOutflowYasmeenIdr);
       const plannedSavingsYasmeenIdr = Math.max(0, totalInflowYasmeenIdr - totalAllBudgetYasmeenIdr);
-      const isOverAllocatedYasmeen = totalAllBudgetYasmeenIdr > totalInflowYasmeenIdr && totalInflowYasmeenIdr > 0;
-      const overAllocatedAmountYasmeenIdr = isOverAllocatedYasmeen ? (totalAllBudgetYasmeenIdr - totalInflowYasmeenIdr) : 0;
+      // --- 4. Actual Live Balances per Hari Ini (Strictly for Landing Page & Global Wealth) ---
+      const actualMonthStr = getLocalDateString().slice(0, 7);
+      const resolvedActualMonth = actualMonthStr >= '2026-10' ? actualMonthStr : '2026-10';
+
+      const actualPastMonths = resolvedActualMonth > startBaselineMonth
+        ? getMonthsListBetween(startBaselineMonth, resolvedActualMonth)
+        : [];
+      const actualRelevantMonths = [...actualPastMonths, resolvedActualMonth];
+
+      let actualYasmeenNetCny = 0;
+      let actualYasmeenNetIdr = 0;
+      (data?.yasmeenTransactions || []).forEach(tx => {
+        const txMonth = (tx?.date || '').slice(0, 7);
+        if (actualRelevantMonths.includes(txMonth)) {
+          if (tx.type === 'Masuk') {
+            actualYasmeenNetCny += (tx.amountCny || 0);
+            actualYasmeenNetIdr += (tx.amountIdr || 0);
+          } else {
+            actualYasmeenNetCny -= (tx.amountCny || 0);
+            actualYasmeenNetIdr -= (tx.amountIdr || 0);
+          }
+        }
+      });
+
+      let actualAdziimaNetIdr = 0;
+      (data?.adziimaTransactions || []).forEach(tx => {
+        const txMonth = (tx?.date || '').slice(0, 7);
+        if (actualRelevantMonths.includes(txMonth)) {
+          if (tx.type === 'Masuk') actualAdziimaNetIdr += (tx.amountIdr || 0);
+          else actualAdziimaNetIdr -= (tx.amountIdr || 0);
+        }
+      });
+
+      const actualYasmeenBalanceCny = baseInitialYasmeenCny + actualYasmeenNetCny;
+      const actualYasmeenBalanceIdr = actualYasmeenBalanceCny * rate;
+      const actualAdziimaBalanceIdr = baseInitialAdziimaIdr + actualAdziimaNetIdr;
+
+      const actualGoldAssetValueIdr = activeValuationPrice * totalGrams;
+      const actualTotalJointWealthIdr = actualYasmeenBalanceIdr + actualAdziimaBalanceIdr + actualGoldAssetValueIdr;
+
+      const actualSafeTotal = actualTotalJointWealthIdr > 0 ? actualTotalJointWealthIdr : 1;
+      const actualYasmeenPercent = actualTotalJointWealthIdr > 0 ? Math.round((actualYasmeenBalanceIdr / actualSafeTotal) * 100) : 33;
+      const actualAdziimaPercent = actualTotalJointWealthIdr > 0 ? Math.round((actualAdziimaBalanceIdr / actualSafeTotal) * 100) : 33;
+      const actualGoldPercent = actualTotalJointWealthIdr > 0 ? Math.max(0, 100 - actualYasmeenPercent - actualAdziimaPercent) : 34;
+
+      const actualBalances = {
+        actualMonth: resolvedActualMonth,
+        yasmeenBalanceCny: actualYasmeenBalanceCny,
+        yasmeenBalanceIdr: actualYasmeenBalanceIdr,
+        adziimaBalanceIdr: actualAdziimaBalanceIdr,
+        goldAssetValueIdr: actualGoldAssetValueIdr,
+        totalJointWealthIdr: actualTotalJointWealthIdr,
+        yasmeenPercent: actualYasmeenPercent,
+        adziimaPercent: actualAdziimaPercent,
+        goldPercent: actualGoldPercent
+      };
 
       return {
         rate,
         isYasmeenInChina,
         currentMonth,
+        actualBalances,
         yasmeen: {
           monthTx: monthYasmeenTx,
           isChina: isYasmeenInChina,
@@ -1490,6 +1545,17 @@ export function PocketProvider({ children }) {
         rate: DEFAULT_EXCHANGE_RATE,
         isYasmeenInChina: true,
         currentMonth: selectedMonth || '2026-10',
+        actualBalances: {
+          actualMonth: '2026-11',
+          yasmeenBalanceCny: 3636.36,
+          yasmeenBalanceIdr: 10000000,
+          adziimaBalanceIdr: 0,
+          goldAssetValueIdr: 0,
+          totalJointWealthIdr: 10000000,
+          yasmeenPercent: 100,
+          adziimaPercent: 0,
+          goldPercent: 0
+        },
         yasmeen: {
           monthTx: [],
           isChina: true,

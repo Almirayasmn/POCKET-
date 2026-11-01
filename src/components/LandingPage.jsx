@@ -30,24 +30,25 @@ export default function LandingPage({
     isCloudConnected,
     isCloudSyncing,
     selectedMonth,
+    setSelectedMonth,
     yasmeenTransactions,
+    adziimaTransactions,
     googleDriveUrl
   } = usePocket();
 
-  const { yasmeen, adziima, gold } = calculations;
+  const { yasmeen, adziima, gold, actualBalances = {} } = calculations;
   const isYasmeenIdr = yasmeenCurrencyView === 'IDR';
 
-  // Calculate combined total net worth (Duit Yasmeen + Duit Adziima + Nilai Aset Emas)
-  const yasmeenBalanceIdr = yasmeen?.totalBalanceIdr || 0;
-  const adziimaBalanceIdr = adziima?.totalBalanceIdr || 0;
-  const goldAssetValueIdr = gold?.currentAssetValueIdr || 0;
-  const totalJointWealthIdr = yasmeenBalanceIdr + adziimaBalanceIdr + goldAssetValueIdr;
+  // Always use live actual balances per hari ini for Landing Page!
+  const yasmeenBalanceIdr = actualBalances.yasmeenBalanceIdr ?? (yasmeen?.totalBalanceIdr || 0);
+  const yasmeenBalanceCny = actualBalances.yasmeenBalanceCny ?? (yasmeen?.totalBalanceCny || 0);
+  const adziimaBalanceIdr = actualBalances.adziimaBalanceIdr ?? (adziima?.totalBalanceIdr || 0);
+  const goldAssetValueIdr = actualBalances.goldAssetValueIdr ?? (gold?.currentAssetValueIdr || 0);
+  const totalJointWealthIdr = actualBalances.totalJointWealthIdr ?? (yasmeenBalanceIdr + adziimaBalanceIdr + goldAssetValueIdr);
 
-  // Percentage distribution calculations
-  const safeTotal = totalJointWealthIdr > 0 ? totalJointWealthIdr : 1;
-  const yasmeenPercent = totalJointWealthIdr > 0 ? Math.round((yasmeenBalanceIdr / safeTotal) * 100) : 33;
-  const adziimaPercent = totalJointWealthIdr > 0 ? Math.round((adziimaBalanceIdr / safeTotal) * 100) : 33;
-  const goldPercent = totalJointWealthIdr > 0 ? Math.max(0, 100 - yasmeenPercent - adziimaPercent) : 34;
+  const yasmeenPercent = actualBalances.yasmeenPercent ?? 33;
+  const adziimaPercent = actualBalances.adziimaPercent ?? 33;
+  const goldPercent = actualBalances.goldPercent ?? 34;
 
   const goldGrams = gold?.totalGrams || 0;
   const goldKeping = gold?.totalKeping || 0;
@@ -392,13 +393,13 @@ export default function LandingPage({
           <div>
             <div className="profile-amount-box" style={{ border: '1.5px solid #fbcfe8' }}>
               <div style={{ fontSize: '0.72rem', color: '#9d174d', fontWeight: 800, letterSpacing: '0.04em' }}>
-                TOTAL UANG AKTIF
+                TOTAL UANG AKTIF (AKTUAL HARI INI)
               </div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', fontWeight: 900, color: '#be185d', marginTop: '0.15rem' }}>
-                {isYasmeenIdr ? formatIdr(yasmeen.totalBalanceIdr) : formatCny(yasmeen.totalBalanceCny)}
+                {isYasmeenIdr ? formatIdr(yasmeenBalanceIdr) : formatCny(yasmeenBalanceCny)}
               </div>
               <div style={{ fontSize: '0.78rem', color: '#db2777', marginTop: '0.2rem', fontWeight: 700 }}>
-                ≈ {isYasmeenIdr ? formatCny(yasmeen.totalBalanceCny) : formatIdr(yasmeen.totalBalanceIdr)}
+                ≈ {isYasmeenIdr ? formatCny(yasmeenBalanceCny) : formatIdr(yasmeenBalanceIdr)}
               </div>
 
               {yasmeen?.dailyAverageSafeCny !== undefined && (
@@ -427,7 +428,10 @@ export default function LandingPage({
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 className="btn-enter-profile btn-enter-pink"
-                onClick={() => setActiveView('yasmeen')}
+                onClick={() => {
+                  if (setSelectedMonth) setSelectedMonth('2026-11');
+                  setActiveView('yasmeen');
+                }}
                 style={{ flex: 1 }}
               >
                 <span>Buka Catatan Yasmeen</span>
@@ -494,13 +498,13 @@ export default function LandingPage({
           <div>
             <div className="profile-amount-box" style={{ border: '1.5px solid #bae6fd' }}>
               <div style={{ fontSize: '0.72rem', color: '#0369a1', fontWeight: 800, letterSpacing: '0.04em' }}>
-                TOTAL UANG AKTIF
+                TOTAL UANG AKTIF (AKTUAL HARI INI)
               </div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', fontWeight: 900, color: '#0284c7', marginTop: '0.15rem' }}>
-                {(users.adziima?.initialFundIdr > 0 || (adziima.monthTx && adziima.monthTx.length > 0)) ? formatIdr(adziima.totalBalanceIdr) : 'Atur Duit Sendiri'}
+                {(users.adziima?.initialFundIdr > 0 || (adziimaTransactions && adziimaTransactions.length > 0) || adziimaBalanceIdr > 0) ? formatIdr(adziimaBalanceIdr) : 'Atur Duit Sendiri'}
               </div>
               <div style={{ fontSize: '0.78rem', color: '#0369a1', marginTop: '0.2rem', fontWeight: 700 }}>
-                {(users.adziima?.initialFundIdr > 0 || (adziima.monthTx && adziima.monthTx.length > 0)) ? 'Tersedia & Terkendali' : 'Klik untuk mulai'}
+                {(users.adziima?.initialFundIdr > 0 || (adziimaTransactions && adziimaTransactions.length > 0) || adziimaBalanceIdr > 0) ? 'Tersedia & Terkendali' : 'Klik untuk mulai'}
               </div>
 
               {adziima?.dailyAverageSafeIdr !== undefined && (
@@ -529,7 +533,10 @@ export default function LandingPage({
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 className="btn-enter-profile btn-enter-blue"
-                onClick={() => setActiveView('adziima')}
+                onClick={() => {
+                  if (setSelectedMonth) setSelectedMonth('2026-11');
+                  setActiveView('adziima');
+                }}
                 style={{ flex: 1 }}
               >
                 <span>Buka Catatan Adziima</span>
