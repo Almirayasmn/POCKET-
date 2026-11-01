@@ -48,7 +48,15 @@ export function resolveCategories(catsState, userId, targetMonth) {
 
   // 1. Direct match for this specific month
   if (userMonthlyCats && userMonthlyCats[month] !== undefined) {
-    return Array.isArray(userMonthlyCats[month]) ? userMonthlyCats[month] : [];
+    const list = Array.isArray(userMonthlyCats[month]) ? userMonthlyCats[month] : [];
+    if (userId === 'yasmeen' && month > '2026-10') {
+      const hasLegacy = list.some(c =>
+        ['jajan', 'pos_tambahan', 'tiket_pesawat', 'visa', 'tarik_tunai', 'hal_lain', 'co_shopee'].includes(c.id) ||
+        ['CO Shopee', 'Tiket Pesawat', 'Visa', 'Tarik Tunai', 'Hal Lain'].includes(c.name)
+      );
+      if (hasLegacy) return [];
+    }
+    return list;
   }
 
   // 2. For Yasmeen: user explicitly requested:
@@ -268,10 +276,13 @@ export function PocketProvider({ children }) {
             const remAdzLen = (cleanRemote.adziimaTransactions || []).length;
             const remDelLen = (cleanRemote.deletedTransactionIds || []).length;
             const mergedDelLen = (merged.deletedTransactionIds || []).length;
+            const remYasCatsLen = (cleanRemote.monthlyCategories?.yasmeen?.['2026-11'] || []).length;
+            const mergedYasCatsLen = (merged.monthlyCategories?.yasmeen?.['2026-11'] || []).length;
             if (
               merged.yasmeenTransactions.length !== remYasLen ||
               merged.adziimaTransactions.length !== remAdzLen ||
-              mergedDelLen !== remDelLen
+              mergedDelLen !== remDelLen ||
+              remYasCatsLen !== mergedYasCatsLen
             ) {
               pushCloudData(firebaseDbUrl, merged).catch(() => {});
             }

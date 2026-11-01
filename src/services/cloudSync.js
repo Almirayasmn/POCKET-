@@ -171,14 +171,52 @@ export function mergeFullState(local, remote) {
     }
   };
 
+  // Sanitize Yasmeen monthly categories so legacy categories never resurrect from Firebase
+  const sanitizeYasCats = (userCats) => {
+    if (!userCats || typeof userCats !== 'object') return {};
+    const res = {};
+    for (const [m, list] of Object.entries(userCats)) {
+      if (m > '2026-10') {
+        if (Array.isArray(list)) {
+          const hasLegacy = list.some(c =>
+            ['jajan', 'pos_tambahan', 'tiket_pesawat', 'visa', 'tarik_tunai', 'hal_lain', 'co_shopee'].includes(c.id) ||
+            ['CO Shopee', 'Tiket Pesawat', 'Visa', 'Tarik Tunai', 'Hal Lain'].includes(c.name)
+          );
+          if (hasLegacy) {
+            res[m] = [];
+            continue;
+          }
+        }
+      }
+      res[m] = Array.isArray(list) ? list : [];
+    }
+    return res;
+  };
+
+  const cleanLocalYas = sanitizeYasCats(local.monthlyCategories?.yasmeen);
+  const cleanRemoteYas = sanitizeYasCats(remote.monthlyCategories?.yasmeen);
+  const mergedYasCats = {
+    ...cleanRemoteYas,
+    ...cleanLocalYas
+  };
+  // Ensure November 2026 and future months with legacy categories stay empty
+  Object.keys(mergedYasCats).forEach(m => {
+    if (m > '2026-10') {
+      const list = mergedYasCats[m];
+      if (Array.isArray(list) && list.some(c =>
+        ['jajan', 'pos_tambahan', 'tiket_pesawat', 'visa', 'tarik_tunai', 'hal_lain', 'co_shopee'].includes(c.id) ||
+        ['CO Shopee', 'Tiket Pesawat', 'Visa', 'Tarik Tunai', 'Hal Lain'].includes(c.name)
+      )) {
+        mergedYasCats[m] = [];
+      }
+    }
+  });
+
   const monthlyCategories = {
-    yasmeen: {
-      ...(local.monthlyCategories?.yasmeen || {}),
-      ...(remote.monthlyCategories?.yasmeen || {})
-    },
+    yasmeen: mergedYasCats,
     adziima: {
-      ...(local.monthlyCategories?.adziima || {}),
-      ...(remote.monthlyCategories?.adziima || {})
+      ...(remote.monthlyCategories?.adziima || {}),
+      ...(local.monthlyCategories?.adziima || {})
     }
   };
 
@@ -192,6 +230,7 @@ export function mergeFullState(local, remote) {
   return {
     ...local,
     ...remote,
+    yasmeenCategories: [],
     securityPin,
     deletedTransactionIds,
     users: mergedUsers,
