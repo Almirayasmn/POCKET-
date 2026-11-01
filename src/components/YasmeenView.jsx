@@ -55,18 +55,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const { yasmeen } = calculations;
   const user = users.yasmeen || {};
   const isChina = yasmeen.isChina; // True if <= 2027-01, False if > 2027-01
-  const isViewYuan = isChina && yasmeenCurrencyView !== 'IDR';
+  const isViewYuan = false;
 
   const formatPrimary = (cny, idr) => {
-    if (!isChina || !isViewYuan) return formatIdr(idr);
-    return formatCny(cny);
+    return formatIdr(idr);
   };
 
-  const formatSecondary = (cny, idr) => {
-    if (!isChina) return null;
-    if (isViewYuan) return `≈ ${formatIdr(idr)}`;
-    return `≈ ${formatCny(cny)}`;
-  };
+  const formatSecondary = () => null;
 
   const currentCategories = yasmeen.categories;
   const currentMonthTx = yasmeen.monthTx;
@@ -165,7 +160,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       <UnifiedDashboardHeader
         user={user}
         isYasmeen={true}
-        isChina={isChina}
+        isChina={false}
         onOpenEditProfile={onOpenEditProfile}
         onOpenBalanceModal={() => {
           setModalInput(Math.round(yasmeen.totalBalanceIdr).toString());
@@ -175,55 +170,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         onOpenCloudModal={onOpenCloudModal}
         onExportExcel={handleExportExcel}
         transactionCount={currentMonthTx.length}
-        currencyToggle={
-          isChina && (
-            <div
-              style={{
-                display: 'inline-flex',
-                background: 'rgba(255, 255, 255, 0.9)',
-                padding: '0.2rem',
-                borderRadius: 'var(--radius-full)',
-                border: '1.5px solid var(--pastel-pink-border)',
-                boxShadow: '0 2px 6px rgba(244, 114, 182, 0.12)'
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => setYasmeenCurrencyView('CNY')}
-                style={{
-                  border: 'none',
-                  background: isViewYuan ? '#ec4899' : 'transparent',
-                  color: isViewYuan ? '#ffffff' : '#9d174d',
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: 'var(--radius-full)',
-                  fontWeight: 800,
-                  fontSize: '0.78rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                ¥ Yuan
-              </button>
-              <button
-                type="button"
-                onClick={() => setYasmeenCurrencyView('IDR')}
-                style={{
-                  border: 'none',
-                  background: !isViewYuan ? '#ec4899' : 'transparent',
-                  color: !isViewYuan ? '#ffffff' : '#9d174d',
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: 'var(--radius-full)',
-                  fontWeight: 800,
-                  fontSize: '0.78rem',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease'
-                }}
-              >
-                Rp IDR
-              </button>
-            </div>
-          )
-        }
       />
 
       {/* Modal Edit Saldo */}
@@ -293,8 +239,8 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   autoFocus
                   required
                 />
-                <div style={{ fontSize: '0.8rem', color: '#db2777', marginTop: '0.35rem' }}>
-                  Setara: <strong>{formatCny((parseFloat(modalInput) || 0) / exchangeRate)}</strong> (Kurs Rp {exchangeRate?.toLocaleString('id-ID')})
+                <div style={{ fontSize: '0.8rem', color: '#db2777', marginTop: '0.35rem', fontWeight: 600 }}>
+                  Terbaca: {formatIdr(parseFloat(modalInput) || 0)}
                 </div>
               </div>
 
@@ -486,7 +432,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               </div>
               <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                 <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#92400e', background: '#fef3c7', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', border: '1px solid #fde68a' }}>
-                  ☕ Maks. ¥75 / Sesi
+                  ☕ Maks. Rp 206.250 / Sesi
                 </span>
                 <span style={{ fontSize: '0.74rem', fontWeight: 700, color: '#ec4899', background: '#fdf2f8', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)', border: '1px solid #fbcfe8' }}>
                   Target: 2x / minggu
@@ -499,7 +445,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               <div style={{ background: 'var(--bg-subtle)', padding: '0.6rem 0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center', border: '1px solid var(--card-border-subtle)' }}>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', fontWeight: 600 }}>Pagu per Sesi</div>
                 <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#d97706', marginTop: '0.15rem' }}>
-                  {formatPrimary(NONGKRONG_MAX_PER_SESSION, NONGKRONG_MAX_PER_SESSION * exchangeRate)}
+                  {formatIdr(NONGKRONG_MAX_PER_SESSION * exchangeRate)}
                 </div>
                 <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Maksimal</div>
               </div>
@@ -507,15 +453,15 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               <div style={{ background: 'var(--bg-subtle)', padding: '0.6rem 0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center', border: '1px solid var(--card-border-subtle)' }}>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-dim)', fontWeight: 600 }}>Pagu Mingguan</div>
                 <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#ec4899', marginTop: '0.15rem' }}>
-                  {formatPrimary(WEEKLY_NONGKRONG_BUDGET, WEEKLY_NONGKRONG_BUDGET * exchangeRate)}
+                  {formatIdr(WEEKLY_NONGKRONG_BUDGET * exchangeRate)}
                 </div>
-                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>2 sesi × ¥75</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>2 sesi per minggu</div>
               </div>
 
               <div style={{ background: isOverBudget ? '#fef2f2' : '#f0fdf4', padding: '0.6rem 0.5rem', borderRadius: 'var(--radius-sm)', textAlign: 'center', border: `1px solid ${isOverBudget ? '#fecaca' : '#bbf7d0'}` }}>
                 <div style={{ fontSize: '0.68rem', color: isOverBudget ? '#991b1b' : '#166534', fontWeight: 600 }}>Total Terpakai</div>
                 <div style={{ fontSize: '0.92rem', fontWeight: 800, color: isOverBudget ? '#dc2626' : '#15803d', marginTop: '0.15rem' }}>
-                  {formatPrimary(totalNongkrongSpentCny, totalNongkrongSpentIdr)}
+                  {formatIdr(totalNongkrongSpentIdr)}
                 </div>
                 <div style={{ fontSize: '0.65rem', color: isOverBudget ? '#b91c1c' : '#16a34a' }}>
                   {nongkrongTx.length} transaksi
@@ -528,21 +474,21 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fff1f2', border: '1px solid #fecdd3', padding: '0.5rem 0.75rem', borderRadius: '8px', marginBottom: '0.85rem' }}>
                 <AlertTriangle size={16} color="#e11d48" style={{ flexShrink: 0 }} />
                 <div style={{ fontSize: '0.74rem', color: '#9f1239', lineHeight: 1.35 }}>
-                  <strong>Perhatian:</strong> Ada sesi nongkrong yang melebihi batas <strong>¥75</strong>. Tetap disiplin yaa agar uang saku cukup!
+                  <strong>Perhatian:</strong> Ada sesi nongkrong yang melebihi batas <strong>Rp 206.250</strong>. Tetap disiplin yaa agar uang saku cukup!
                 </div>
               </div>
             ) : totalNongkrongSpentCny > 0 ? (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '0.5rem 0.75rem', borderRadius: '8px', marginBottom: '0.85rem' }}>
                 <CheckCircle2 size={16} color="#16a34a" style={{ flexShrink: 0 }} />
                 <div style={{ fontSize: '0.74rem', color: '#166534', lineHeight: 1.35 }}>
-                  <strong>Hebat & Disiplin!</strong> Seluruh sesi nongkrong bulan ini masih berada dalam batas aman (≤ ¥75 per sesi).
+                  <strong>Hebat & Disiplin!</strong> Seluruh sesi nongkrong bulan ini masih berada dalam batas aman (≤ Rp 206.250 per sesi).
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#fffbeb', border: '1px solid #fde68a', padding: '0.5rem 0.75rem', borderRadius: '8px', marginBottom: '0.85rem' }}>
                 <Coffee size={16} color="#d97706" style={{ flexShrink: 0 }} />
                 <div style={{ fontSize: '0.74rem', color: '#92400e', lineHeight: 1.35 }}>
-                  Tandai hari kamu nongkrong di bawah dan catat nominal pengeluarannya (maksimal ¥75 per sesi).
+                  Tandai hari kamu nongkrong di bawah dan catat nominal pengeluarannya (maksimal Rp 206.250 per sesi).
                 </div>
               </div>
             )}
@@ -631,7 +577,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                 }}
               >
                 <Plus size={15} />
-                <span>+ Catat Nongkrong (Pagu Maks. ¥75)</span>
+                <span>+ Catat Nongkrong (Pagu Maks. Rp 206.250)</span>
               </button>
             </div>
 
@@ -697,11 +643,11 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                   Nongkrong Kafe (Mulai November 2026)
                 </h4>
                 <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)' }}>
-                  Pagu: Maks. ¥75 / Sesi
+                  Pagu: Maks. Rp 206.250 / Sesi
                 </span>
               </div>
               <p style={{ fontSize: '0.78rem', color: '#b45309', margin: 0, lineHeight: 1.4 }}>
-                Target nongkrong kafe 2x/minggu dengan pagu maksimal <strong>75 Yuan per sekali nongkrong</strong> (total ¥150/minggu) akan aktif otomatis mulai November 2026 saat tiba di kampus Nanning.
+                Target nongkrong kafe 2x/minggu dengan pagu maksimal <strong>Rp 206.250 per sekali nongkrong</strong> (total Rp 412.500/minggu) untuk menjaga pengeluaran tetap hemat.
               </p>
             </div>
           </div>
@@ -728,16 +674,16 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.35rem' }}>
                 <h4 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#9d174d' }}>
-                  Prinsip Keuangan: Pengeluaran Mandiri Sesuai Stipend (¥1.000 / bln)
+                  Prinsip Keuangan: Pengeluaran Mandiri Sesuai Stipend (Rp 2.750.000 / bln)
                 </h4>
                 <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9d174d', background: '#fdf2f8', border: '1px solid #fbcfe8', padding: '0.2rem 0.65rem', borderRadius: 'var(--radius-full)' }}>
                   {selectedMonth === '2026-11' ? 'Nov: + Kebutuhan Awal Rp 500rb' : 'Rutin: 100% Sesuai Stipend'}
                 </span>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#831843', lineHeight: 1.55 }}>
-                Meskipun modal awal ada <strong>Rp 10.000.000</strong> (¥3.636,36), uang ini dijaga utuh sebagai tabungan aman. Pengeluaran bulanan dialokasikan pas dari stipend kampus <strong>¥1.000 / bulan</strong>.
+                Meskipun modal awal ada <strong>Rp 10.000.000</strong>, uang ini dijaga utuh sebagai tabungan aman. Pengeluaran bulanan dialokasikan pas dari stipend bulanan <strong>Rp 2.750.000 / bulan</strong>.
                 {selectedMonth === '2026-11'
-                  ? ' Khusus November terdapat pos Kebutuhan Awal sebesar Rp 500.000 (¥182) untuk persiapan tiba di China.'
+                  ? ' Khusus November terdapat pos Kebutuhan Awal sebesar Rp 500.000 untuk persiapan tiba di China.'
                   : ' Untuk bulan ini dan selanjutnya, pos Kebutuhan Awal otomatis Rp 0 (sudah tidak diperlukan).'}
               </p>
             </div>
@@ -750,10 +696,10 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
           <div>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>
-              {isChina ? `Budget Kategori Kampus Nanning (${isViewYuan ? 'Yuan ¥' : 'Rupiah Rp'})` : 'Budget Kategori Harian (Indonesia)'}
+              Budget Kategori Pos Bulanan
             </h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              {isChina ? 'Alokasi Yuan & Rupiah periode kuliah' : 'Alokasi pengeluaran Rupiah di Indonesia'}
+              Alokasi dan batas pengeluaran bulanan (Rupiah Rp)
             </p>
           </div>
 
@@ -776,14 +722,11 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         <div className="categories-grid">
           {currentCategories.map((cat) => {
             const spending = yasmeen.spending[cat.id] || { totalCny: 0, totalIdr: 0, count: 0 };
-            const spentCny = spending.totalCny;
-            const spentIdr = spending.totalIdr;
-            const budgetCny = cat.budgetCny || 0;
+            const spentIdr = spending.totalIdr || 0;
             const budgetIdr = cat.budgetIdr || 0;
-            const remainingCny = budgetCny - spentCny;
             const remainingIdr = budgetIdr - spentIdr;
-            const effectiveBudget = isChina ? budgetCny : (budgetIdr || budgetCny);
-            const effectiveSpent = isChina ? spentCny : (spentIdr || spentCny);
+            const effectiveBudget = budgetIdr;
+            const effectiveSpent = spentIdr;
             const percent = effectiveBudget > 0 ? Math.min(100, Math.round((effectiveSpent / effectiveBudget) * 100)) : (effectiveSpent > 0 ? 100 : 0);
             const isOver = effectiveBudget > 0 && effectiveSpent > effectiveBudget;
             const isWarning = percent >= 50 && !isOver;
@@ -821,8 +764,8 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                           type="number"
                           value={tempBudget}
                           onChange={(e) => setTempBudget(e.target.value)}
-                          placeholder={isViewYuan ? '¥' : 'Rp'}
-                          style={{ width: isViewYuan ? '70px' : '95px', padding: '0.2rem 0.4rem', fontSize: '0.8rem', border: '1px solid #f472b6', borderRadius: '4px' }}
+                          placeholder="Rp"
+                          style={{ width: '95px', padding: '0.2rem 0.4rem', fontSize: '0.8rem', border: '1px solid #f472b6', borderRadius: '4px' }}
                           autoFocus
                         />
                         <button
@@ -859,26 +802,21 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                     <span>
                       Terpakai:{' '}
                       <span className="spent" style={{ color: isOver ? '#f43f5e' : (isWarning ? '#d97706' : 'inherit') }}>
-                        {formatPrimary(spentCny, spentIdr)}
+                        {formatIdr(spentIdr)}
                       </span>
                     </span>
                     <span>
-                      Budget: {budgetCny > 0 || budgetIdr > 0 ? formatPrimary(budgetCny, budgetIdr) : 'Belum diatur'}
+                      Budget: {budgetIdr > 0 ? formatIdr(budgetIdr) : 'Belum diatur'}
                     </span>
                   </div>
                 </div>
 
                 <div style={{ marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid var(--bg-subtle)', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: spentCny > budgetCny && budgetCny > 0 ? '#f43f5e' : 'var(--text-muted)' }}>
-                    {spentCny > budgetCny && budgetCny > 0
-                      ? `⚠️ Lebih ${formatPrimary(spentCny - budgetCny, spentIdr - budgetIdr)}`
-                      : `Sisa ${formatPrimary(remainingCny, remainingIdr)}`}
+                  <span style={{ color: isOver ? '#f43f5e' : 'var(--text-muted)' }}>
+                    {isOver
+                      ? `⚠️ Lebih ${formatIdr(spentIdr - budgetIdr)}`
+                      : `Sisa ${formatIdr(remainingIdr)}`}
                   </span>
-                  {formatSecondary(remainingCny, remainingIdr) && (
-                    <span style={{ color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
-                      {formatSecondary(remainingCny, remainingIdr)}
-                    </span>
-                  )}
                 </div>
               </div>
             );
@@ -995,12 +933,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
                   <div className="tx-right">
                     <div className="tx-amount" style={{ color: isIncome ? '#059669' : '#db2777' }}>
-                      {isIncome
-                        ? (isViewYuan ? `+${formatCny(tx.amountCny)}` : `+${formatIdr(tx.amountIdr)}`)
-                        : (isViewYuan ? `-${formatCny(tx.amountCny)}` : `-${formatIdr(tx.amountIdr)}`)}
-                      <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontWeight: 500 }}>
-                        {isViewYuan ? `≈ ${formatIdr(tx.amountIdr)}` : `≈ ${formatCny(tx.amountCny)}`}
-                      </div>
+                      {isIncome ? `+${formatIdr(tx.amountIdr)}` : `-${formatIdr(tx.amountIdr)}`}
                     </div>
                     <div className="tx-actions">
                       <button

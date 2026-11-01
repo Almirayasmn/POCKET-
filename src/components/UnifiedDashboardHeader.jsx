@@ -94,7 +94,7 @@ export default function UnifiedDashboardHeader({
 
               <div className="udh-user-subtitle">
                 {isYasmeen
-                  ? (isChina ? 'China · Yuan (¥) & Rupiah (Rp)' : 'Indonesia · 100% Rupiah (Rp)')
+                  ? 'Nanning, China · 100% Rupiah (Rp)'
                   : 'Indonesia · 100% Rupiah (Rp)'}
               </div>
             </div>
@@ -103,9 +103,6 @@ export default function UnifiedDashboardHeader({
 
         {/* Right: Quick Action Buttons */}
         <div className="udh-right-cluster">
-          {/* Optional Currency Switcher for Yasmeen */}
-          {currencyToggle}
-
           {/* Atur Saldo Button */}
           {onOpenBalanceModal && (
             <button

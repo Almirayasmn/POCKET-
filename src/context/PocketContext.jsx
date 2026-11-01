@@ -255,12 +255,16 @@ export function PocketProvider({ children }) {
           const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
           setData(prev => {
             const merged = mergeFullState(prev, cleanRemote);
-            // If local had new transactions that cloud didn't have, push merged to cloud
-            const prevYasLen = (prev.yasmeenTransactions || []).length;
+            // If merged state differs from remote (new entries or purged deletions), update cloud
             const remYasLen = (cleanRemote.yasmeenTransactions || []).length;
-            const prevAdzLen = (prev.adziimaTransactions || []).length;
             const remAdzLen = (cleanRemote.adziimaTransactions || []).length;
-            if (merged.yasmeenTransactions.length > remYasLen || merged.adziimaTransactions.length > remAdzLen) {
+            const remDelLen = (cleanRemote.deletedTransactionIds || []).length;
+            const mergedDelLen = (merged.deletedTransactionIds || []).length;
+            if (
+              merged.yasmeenTransactions.length !== remYasLen ||
+              merged.adziimaTransactions.length !== remAdzLen ||
+              mergedDelLen !== remDelLen
+            ) {
               pushCloudData(firebaseDbUrl, merged).catch(() => {});
             }
             return merged;
@@ -597,22 +601,33 @@ export function PocketProvider({ children }) {
   };
 
   const deleteTransaction = (userId, id) => {
+    isRemoteUpdatingRef.current = true;
     const key = userId === 'adziima' ? 'adziimaTransactions' : 'yasmeenTransactions';
-    const nextList = (data[key] || []).filter(tx => tx.id !== id);
-    const nextData = {
-      ...data,
-      [key]: nextList
-    };
+    
+    setData(prev => {
+      const nextList = (prev[key] || []).filter(tx => tx.id !== id);
+      const nextDeletedIds = Array.from(new Set([...(prev.deletedTransactionIds || []), id]));
+      const nextData = {
+        ...prev,
+        deletedTransactionIds: nextDeletedIds,
+        [key]: nextList
+      };
 
-    setData(nextData);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
 
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-    } catch (e) {}
+      if (firebaseDbUrl) {
+        Promise.all([
+          pushCloudSubpath(firebaseDbUrl, key, nextList),
+          pushCloudSubpath(firebaseDbUrl, 'deletedTransactionIds', nextDeletedIds)
+        ]).catch(() => {});
+      }
 
-    if (firebaseDbUrl) {
-      pushCloudSubpath(firebaseDbUrl, key, nextList).catch(() => {});
-    }
+      return nextData;
+    });
+
+    setTimeout(() => { isRemoteUpdatingRef.current = false; }, 1200);
   };
 
   // Helper to get categories for a given month
@@ -1047,16 +1062,25 @@ export function PocketProvider({ children }) {
       const startBalanceYasmeenCny = baseInitialYasmeenCny + yasmeenCumulativeNetCny;
       const startBalanceAdziimaIdr = baseInitialAdziimaIdr + adziimaCumulativeNetIdr;
 
+      // Convert legacy Yuan budget (< 5000) to IDR
+      const normalizeToIdr = (val) => {
+        const num = parseFloat(val) || 0;
+        if (num > 0 && num < 5000) {
+          return Math.round(num * rate);
+        }
+        return num;
+      };
+
       // Helper to resolve inherited budget for a category in a given month
       const getCategoryBudget = (userId, catId, defaultBudget) => {
         const userMonthly = data?.monthlyBudgets?.[userId] || {};
         // 1. Direct match in current month
         if (userMonthly[currentMonth] && userMonthly[currentMonth][catId] !== undefined) {
-          return userMonthly[currentMonth][catId];
+          return normalizeToIdr(userMonthly[currentMonth][catId]);
         }
 
         // Special rule for Yasmeen's kebutuhan_awal:
-        // November has initial cost of Rp 500.000 (¥182). Future months default to ¥0 / Rp 0
+        // November has initial cost of Rp 500.000. Future months default to Rp 0
         if (userId === 'yasmeen' && catId === 'kebutuhan_awal') {
           return (currentMonth === '2026-10' || currentMonth === '2026-11') ? 500000 : 0;
         }
@@ -1066,11 +1090,11 @@ export function PocketProvider({ children }) {
         for (let i = sortedMonths.length - 1; i >= 0; i--) {
           const m = sortedMonths[i];
           if (userMonthly[m] && userMonthly[m][catId] !== undefined) {
-            return userMonthly[m][catId];
+            return normalizeToIdr(userMonthly[m][catId]);
           }
         }
         // 3. Fallback to default
-        return defaultBudget || 0;
+        return normalizeToIdr(defaultBudget || 0);
       };
 
       // 1. Yasmeen Monthly Calculations for currentMonth (Stipend dicatat manual di Pemasukan)
@@ -1107,10 +1131,11 @@ export function PocketProvider({ children }) {
         : currentAdziimaCategories;
 
       const activeCategories = baseYasmeenCats.map(c => {
-        const defaultBudgetIdr = (c.budgetIdr !== undefined && c.budgetIdr !== null && c.budgetIdr > 0)
+        const rawBudget = (c.budgetIdr !== undefined && c.budgetIdr !== null && c.budgetIdr > 0)
           ? c.budgetIdr
           : ((c.budgetCny || 0) * rate);
-        const resolvedBudget = getCategoryBudget('yasmeen', c.id, defaultBudgetIdr);
+        const defaultBudgetIdr = normalizeToIdr(rawBudget);
+        const resolvedBudget = normalizeToIdr(getCategoryBudget('yasmeen', c.id, defaultBudgetIdr));
         return {
           ...c,
           budgetIdr: resolvedBudget,

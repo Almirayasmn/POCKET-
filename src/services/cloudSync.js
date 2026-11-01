@@ -101,16 +101,16 @@ export async function pushCloudSubpath(baseUrl, subpath, data) {
 }
 
 // Merge transactions safely by ID without losing local unpushed or remote new entries
-export function mergeTransactions(local = [], remote = []) {
+export function mergeTransactions(local = [], remote = [], deletedIds = []) {
   const map = new Map();
-  const DUMMY_IDS = new Set(['tx-y1', 'tx-y2', 'tx-y3']);
+  const deletedSet = new Set([...(deletedIds || []), 'tx-y1', 'tx-y2', 'tx-y3']);
   // Remote entries first
   (remote || []).forEach(tx => {
-    if (tx && tx.id && !DUMMY_IDS.has(tx.id)) map.set(tx.id, tx);
+    if (tx && tx.id && !deletedSet.has(tx.id)) map.set(tx.id, tx);
   });
   // Local overlay: preserves local entries that haven't reached cloud yet
   (local || []).forEach(tx => {
-    if (tx && tx.id && !DUMMY_IDS.has(tx.id)) {
+    if (tx && tx.id && !deletedSet.has(tx.id)) {
       if (!map.has(tx.id)) {
         map.set(tx.id, tx);
       } else {
@@ -130,8 +130,13 @@ export function mergeFullState(local, remote) {
   if (!remote || typeof remote !== 'object') return local;
   if (!local || typeof local !== 'object') return remote;
 
-  const yasmeenTransactions = mergeTransactions(local.yasmeenTransactions, remote.yasmeenTransactions);
-  const adziimaTransactions = mergeTransactions(local.adziimaTransactions, remote.adziimaTransactions);
+  const deletedTransactionIds = Array.from(new Set([
+    ...(local.deletedTransactionIds || []),
+    ...(remote.deletedTransactionIds || [])
+  ]));
+
+  const yasmeenTransactions = mergeTransactions(local.yasmeenTransactions, remote.yasmeenTransactions, deletedTransactionIds);
+  const adziimaTransactions = mergeTransactions(local.adziimaTransactions, remote.adziimaTransactions, deletedTransactionIds);
 
   const mergedUsers = {
     yasmeen: {
@@ -188,6 +193,7 @@ export function mergeFullState(local, remote) {
     ...local,
     ...remote,
     securityPin,
+    deletedTransactionIds,
     users: mergedUsers,
     yasmeenTransactions,
     adziimaTransactions,
