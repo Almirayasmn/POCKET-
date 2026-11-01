@@ -50,7 +50,8 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     setYasmeenCurrencyView,
     isCloudConnected,
     isCloudSyncing,
-    yasmeenTransactions
+    yasmeenTransactions,
+    getCategoriesForMonth
   } = usePocket();
 
   const { yasmeen } = calculations;
@@ -106,33 +107,71 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   };
 
 
-  // Export to Excel handler
+  // Export to Excel handler with genuine multi-sheet tabs (e.g. November 2026, Oktober 2026)
   const handleExportExcel = () => {
-    // Collect all transactions up to current selectedMonth so October and previous months are fully preserved
-    const allTxUpToMonth = (yasmeenTransactions || []).filter(tx => {
-      const txMonth = (tx?.date || '').slice(0, 7);
-      return txMonth && txMonth <= selectedMonth;
+    const pastAndCurrentMonths = ['2026-10', '2026-11', '2026-12', '2027-01', '2027-02', '2027-03']
+      .filter(m => m <= selectedMonth);
+
+    // Active selected month first, then previous months in reverse order
+    const orderedMonths = [
+      selectedMonth,
+      ...pastAndCurrentMonths.filter(m => m !== selectedMonth).reverse()
+    ];
+
+    const sheets = orderedMonths.map(m => {
+      const label = ALL_MONTH_OPTIONS.find(opt => opt.value === m)?.label || m;
+      const mTx = (yasmeenTransactions || []).filter(tx => (tx?.date || '').startsWith(m));
+      const mCats = getCategoriesForMonth ? getCategoriesForMonth('yasmeen', m) : (m === selectedMonth ? (yasmeen.categories || currentCategories) : []);
+
+      const mSpending = {};
+      mCats.forEach(c => { mSpending[c.id] = { totalIdr: 0, count: 0 }; });
+      mTx.forEach(tx => {
+        if (tx?.type !== 'Masuk' && mSpending[tx?.category]) {
+          mSpending[tx.category].totalIdr += (tx.amountIdr || 0);
+          mSpending[tx.category].count += 1;
+        }
+      });
+
+      let mIncome = 0;
+      let mOutflow = 0;
+      mTx.forEach(tx => {
+        if (tx?.type === 'Masuk') mIncome += (tx.amountIdr || 0);
+        else mOutflow += (tx.amountIdr || 0);
+      });
+
+      const totalBudget = mCats.reduce((sum, c) => sum + (c.budgetIdr || c.budget || 0), 0);
+      const remainingBudget = Math.max(0, totalBudget - mOutflow);
+
+      const isCur = m === selectedMonth;
+      const startBalance = isCur ? yasmeen.startBalanceIdr : 0;
+      const totalInflow = startBalance + mIncome;
+      const netBalance = isCur ? yasmeen.totalBalanceIdr : (mIncome - mOutflow);
+      const plannedSavings = Math.max(0, totalInflow - totalBudget);
+
+      return {
+        sheetName: label.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 31),
+        monthLabel: label,
+        transactions: mTx,
+        categories: mCats,
+        categorySpending: mSpending,
+        summary: {
+          startBalance: formatIdr(startBalance),
+          monthIncome: formatIdr(mIncome),
+          totalInflow: formatIdr(totalInflow),
+          totalBudget: formatIdr(totalBudget),
+          totalOutflow: formatIdr(mOutflow),
+          remainingBudget: formatIdr(remainingBudget),
+          plannedSavings: formatIdr(plannedSavings),
+          netBalance: formatIdr(netBalance)
+        }
+      };
     });
 
     exportMonthToExcel({
       userName: user.name || 'Yasmeen',
       monthLabel,
       selectedMonth,
-      transactions: currentMonthTx,
-      allTransactions: allTxUpToMonth,
-      categories: yasmeen.categories || currentCategories,
-      categorySpending: yasmeen.spending,
-      currency: 'IDR',
-      summary: {
-        startBalance: formatIdr(yasmeen.startBalanceIdr),
-        monthIncome: formatIdr(yasmeen.monthIncomeIdr),
-        totalInflow: formatIdr(yasmeen.totalInflowIdr),
-        totalBudget: formatIdr(yasmeen.totalAllBudgetIdr),
-        totalOutflow: formatIdr(yasmeen.totalOutflowIdr),
-        remainingBudget: formatIdr(yasmeen.remainingAllBudgetIdr),
-        plannedSavings: formatIdr(yasmeen.plannedSavingsIdr),
-        netBalance: formatIdr(yasmeen.totalBalanceIdr)
-      }
+      sheets
     });
   };
 

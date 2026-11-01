@@ -1,28 +1,18 @@
-// Utility for Exporting Monthly Financial Reports to Excel (.xls) compatible with Microsoft Excel and Google Sheets
-// 100% Pure Rupiah (Rp) - Zero Yuan / CNY mentions
+// Utility for Exporting Monthly Financial Reports to Multi-Sheet Excel (.xls) compatible with Microsoft Excel and Google Sheets
+// 100% Pure Rupiah (Rp) - Zero Yuan / CNY mentions - Full Multi-Sheet (Tab) Support
 
-export function exportMonthToExcel({
+// Helper formatting in pure Rupiah
+const formatVal = (v) => `Rp ${Math.round(Number(v || 0)).toLocaleString('id-ID')}`;
+
+function generateSheetTableHtml({
   userName,
   monthLabel,
-  selectedMonth,
   transactions = [],
-  allTransactions = [],
   categories = [],
   categorySpending = {},
   summary = {},
-  currency = 'IDR'
+  exportDate
 }) {
-  const safeFileName = `Laporan_Keuangan_${userName}_${monthLabel.replace(/[^a-zA-Z0-9]/g, '_')}.xls`;
-  const exportDate = new Date().toLocaleDateString('id-ID', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-
-  // Pure Rupiah formatting with standard space
-  const formatVal = (v) => `Rp ${Math.round(Number(v || 0)).toLocaleString('id-ID')}`;
-
   // 1. Generate Category Budget vs Actual Evaluation Rows (8-column aligned)
   let catRowsHtml = '';
   let grandTotalBudget = 0;
@@ -62,66 +52,37 @@ export function exportMonthToExcel({
 
   const grandRemaining = grandTotalBudget - grandTotalSpent;
 
-  // Helper to generate transaction rows cleanly in 100% Rupiah
-  const buildTxRows = (txList) => {
-    if (!txList || txList.length === 0) return '';
-    return txList.map((tx, idx) => {
-      const cat = categories.find(c => c.id === tx.category)?.name || tx.category || '-';
-      const isIncome = tx.type === 'Masuk';
-      const typeLabel = isIncome ? 'Pemasukan' : 'Pengeluaran';
-      const amountStr = `Rp ${Math.round(tx.amountIdr || 0).toLocaleString('id-ID')}`;
-      const rowBg = idx % 2 === 0 ? '#ffffff' : '#f0f9ff';
+  // 2. Generate Transaction Rows
+  let txRowsHtml = '';
+  transactions.forEach((tx, idx) => {
+    const cat = categories.find(c => c.id === tx.category)?.name || tx.category || '-';
+    const isIncome = tx.type === 'Masuk';
+    const typeLabel = isIncome ? 'Pemasukan' : 'Pengeluaran';
+    const amountStr = `Rp ${Math.round(tx.amountIdr || 0).toLocaleString('id-ID')}`;
+    const rowBg = idx % 2 === 0 ? '#ffffff' : '#f0f9ff';
 
-      return `
-        <tr style="background-color: ${rowBg};">
-          <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 6px; mso-number-format:'\\@';">${idx + 1}</td>
-          <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 6px; mso-number-format:'yyyy\\-mm\\-dd';">${tx.date || '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 7px 10px; font-weight: 500;">${tx.title || '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${cat}</td>
-          <td style="text-align: center; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#e11d48'}; background-color: ${isIncome ? '#dcfce7' : '#ffe4e6'}; padding: 7px 6px;">
-            ${typeLabel}
-          </td>
-          <td style="text-align: right; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#be185d'}; padding: 7px 8px; white-space: nowrap; mso-number-format:'\\@';">
-            ${amountStr}
-          </td>
-          <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${tx.paymentMethod || '-'}</td>
-          <td style="border: 1px solid #cbd5e1; padding: 7px 10px; color: #475569;">${tx.notes || '-'}</td>
-        </tr>
-      `;
-    }).join('');
-  };
-
-  // 2. Separate current month transactions & previous months (e.g. October)
-  const currentMonthTx = transactions || [];
-  const currentMonthStr = selectedMonth || (currentMonthTx[0]?.date || '').slice(0, 7) || '2026-11';
-  
-  // Earlier transactions (e.g. October) that user wants preserved/carried over in the report
-  const earlierTx = (allTransactions || []).filter(tx => {
-    const txMonth = (tx?.date || '').slice(0, 7);
-    return txMonth && txMonth < currentMonthStr;
+    txRowsHtml += `
+      <tr style="background-color: ${rowBg};">
+        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 6px; mso-number-format:'\\@';">${idx + 1}</td>
+        <td style="text-align: center; border: 1px solid #cbd5e1; padding: 7px 6px; mso-number-format:'yyyy\\-mm\\-dd';">${tx.date || '-'}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 7px 10px; font-weight: 500;">${tx.title || '-'}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${cat}</td>
+        <td style="text-align: center; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#e11d48'}; background-color: ${isIncome ? '#dcfce7' : '#ffe4e6'}; padding: 7px 6px;">
+          ${typeLabel}
+        </td>
+        <td style="text-align: right; border: 1px solid #cbd5e1; font-weight: bold; color: ${isIncome ? '#15803d' : '#be185d'}; padding: 7px 8px; white-space: nowrap; mso-number-format:'\\@';">
+          ${amountStr}
+        </td>
+        <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${tx.paymentMethod || '-'}</td>
+        <td style="border: 1px solid #cbd5e1; padding: 7px 10px; color: #475569;">${tx.notes || '-'}</td>
+      </tr>
+    `;
   });
 
-  const txRowsHtml = buildTxRows(currentMonthTx);
-  const earlierTxRowsHtml = buildTxRows(earlierTx);
-
-  const excelTemplate = `
+  return `
     <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
     <head>
-      <!--[if gte mso 9]>
-      <xml>
-        <x:ExcelWorkbook>
-          <x:ExcelWorksheets>
-            <x:ExcelWorksheet>
-              <x:Name>${userName} - ${monthLabel}</x:Name>
-              <x:WorksheetOptions>
-                <x:DisplayGridlines/>
-              </x:WorksheetOptions>
-            </x:ExcelWorksheet>
-          </x:ExcelWorksheets>
-        </x:ExcelWorkbook>
-      </xml>
-      <![endif]-->
-      <meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
       <style>
         body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; font-size: 10pt; color: #1e293b; background-color: #ffffff; }
         table { border-collapse: collapse; table-layout: fixed; width: 100%; margin-bottom: 20px; }
@@ -147,7 +108,7 @@ export function exportMonthToExcel({
         <tr>
           <td colspan="8" style="background-color: #fdf2f8; border: 1.5px solid #f472b6; padding: 14px 18px; text-align: left;">
             <div style="font-size: 15pt; font-weight: bold; color: #be185d; letter-spacing: 0.5px;">
-              🌸 POCKET DUO · LAPORAN KEUANGAN
+              🌸 POCKET DUO · LAPORAN KEUANGAN BULANAN
             </div>
             <div style="font-size: 12pt; font-weight: bold; color: #0284c7; margin-top: 3px;">
               ${userName.toUpperCase()} · PERIODE ${monthLabel.toUpperCase()}
@@ -164,7 +125,7 @@ export function exportMonthToExcel({
         <!-- 2. CATATAN RINGKAS ROLLING BALANCE -->
         <tr>
           <td colspan="8" style="background-color: #f0f9ff; border: 1px solid #bae6fd; padding: 9px 14px; font-size: 9pt; color: #0369a1; line-height: 1.5;">
-            💡 <b>LOGIKA PERGANTIAN BULAN (ROLLING BALANCE):</b> Sisa saldo kas akhir bulan sebelumnya otomatis terbawa menjadi <b>Saldo Awal Kas</b> di bulan ini. Seluruh riwayat transaksi masa lalu tetap tersimpan utuh dan terbawa dalam pembukuan.
+            💡 <b>LOGIKA PERGANTIAN BULAN (ROLLING BALANCE):</b> Sisa saldo kas akhir bulan sebelumnya otomatis terbawa menjadi <b>Saldo Awal Kas</b> di bulan ini.
           </td>
         </tr>
 
@@ -265,35 +226,109 @@ export function exportMonthToExcel({
           <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Catatan</th>
         </tr>
         ${txRowsHtml || '<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 14px; border: 1px solid #cbd5e1;">Belum ada transaksi tercatat di bulan ini.</td></tr>'}
-
-        ${earlierTxRowsHtml ? `
-        <!-- SPACING ROW -->
-        <tr style="height: 16px;"><td colspan="8" style="border: none;"></td></tr>
-
-        <!-- 6. SECTION 4: RIWAYAT TRANSAKSI BULAN SEBELUMNYA (TERMASUK OKTOBER DST.) -->
-        <tr>
-          <th colspan="8" style="background-color: #fed7aa; color: #9a3412; border: 1.5px solid #f97316; text-align: left; font-size: 11pt; padding: 9px 12px;">
-            4. RIWAYAT TRANSAKSI BULAN SEBELUMNYA (TERMASUK OKTOBER DST. KUMULATIF)
-          </th>
-        </tr>
-        <tr style="background-color: #ffedd5; color: #9a3412; font-weight: bold;">
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">No</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Tanggal</th>
-          <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Keterangan</th>
-          <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Pos Kategori</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 6px;">Tipe</th>
-          <th style="border: 1px solid #cbd5e1; text-align: right; padding: 8px 8px;">Nominal (Rp)</th>
-          <th style="border: 1px solid #cbd5e1; padding: 8px 10px;">Akun / Metode</th>
-          <th style="border: 1px solid #cbd5e1; text-align: left; padding: 8px 10px;">Catatan</th>
-        </tr>
-        ${earlierTxRowsHtml}
-        ` : ''}
       </table>
     </body>
     </html>
   `;
+}
 
-  const blob = new Blob(['\ufeff' + excelTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
+export function exportMonthToExcel({
+  userName,
+  monthLabel,
+  selectedMonth,
+  sheets = [],
+  // Fallbacks if single sheet parameters passed
+  transactions = [],
+  categories = [],
+  categorySpending = {},
+  summary = {}
+}) {
+  const safeFileName = `Laporan_Keuangan_${userName}_${monthLabel.replace(/[^a-zA-Z0-9]/g, '_')}.xls`;
+  const exportDate = new Date().toLocaleDateString('id-ID', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
+  // Prepare sheet list (if sheets array provided, use it; otherwise fallback to single sheet)
+  const sheetList = (sheets && sheets.length > 0)
+    ? sheets
+    : [{
+        sheetName: monthLabel.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 31),
+        monthLabel,
+        transactions,
+        categories,
+        categorySpending,
+        summary
+      }];
+
+  const boundary = "----=_NextPart_PocketDuoWorkbook";
+
+  // Build the master manifest with <x:ExcelWorksheets>
+  const worksheetsXml = sheetList.map((s, idx) => `
+    <x:ExcelWorksheet>
+      <x:Name>${s.sheetName}</x:Name>
+      <x:WorksheetSource HRef="sheet${idx + 1}.htm"/>
+      <x:WorksheetOptions>
+        <x:DisplayGridlines/>
+      </x:WorksheetOptions>
+    </x:ExcelWorksheet>
+  `).join('\n');
+
+  const mainHtm = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <!--[if gte mso 9]>
+  <xml>
+    <x:ExcelWorkbook>
+      <x:ExcelWorksheets>
+        ${worksheetsXml}
+      </x:ExcelWorksheets>
+    </x:ExcelWorkbook>
+  </xml>
+  <![endif]-->
+</head>
+<body></body>
+</html>`;
+
+  // For each sheet, build its full HTML content as a separate MIME part
+  const sheetParts = sheetList.map((s, idx) => {
+    const tableHtml = generateSheetTableHtml({
+      userName,
+      monthLabel: s.monthLabel,
+      transactions: s.transactions,
+      categories: s.categories,
+      categorySpending: s.categorySpending,
+      summary: s.summary,
+      exportDate
+    });
+
+    return `
+--${boundary}
+Content-Location: file:///C:/sheet${idx + 1}.htm
+Content-Transfer-Encoding: text/html
+Content-Type: text/html; charset="utf-8"
+
+${tableHtml}
+`;
+  }).join('\n');
+
+  const mhtmlContent = `MIME-Version: 1.0
+X-Document-Type: Workbook
+Content-Type: multipart/related; boundary="${boundary}"
+
+--${boundary}
+Content-Location: file:///C:/main.htm
+Content-Transfer-Encoding: text/html
+Content-Type: text/html; charset="utf-8"
+
+${mainHtm}
+${sheetParts}
+--${boundary}--
+`;
+
+  const blob = new Blob(['\ufeff' + mhtmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
