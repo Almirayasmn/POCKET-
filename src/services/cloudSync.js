@@ -125,6 +125,59 @@ export function mergeTransactions(local = [], remote = [], deletedIds = []) {
   });
 }
 
+// Merge monthly categories safely across devices
+export function mergeMonthlyCategories(localUserCats = {}, remoteUserCats = {}) {
+  const allMonths = new Set([
+    ...Object.keys(remoteUserCats || {}),
+    ...Object.keys(localUserCats || {})
+  ]);
+  const result = {};
+
+  allMonths.forEach(m => {
+    const localList = Array.isArray(localUserCats?.[m]) ? localUserCats[m] : null;
+    const remoteList = Array.isArray(remoteUserCats?.[m]) ? remoteUserCats[m] : null;
+
+    if (remoteList && remoteList.length > 0 && (!localList || localList.length === 0)) {
+      result[m] = remoteList;
+    } else if (localList && localList.length > 0 && (!remoteList || remoteList.length === 0)) {
+      result[m] = localList;
+    } else if (remoteList && localList) {
+      const map = new Map();
+      remoteList.forEach(c => { if (c && c.id) map.set(c.id, c); });
+      localList.forEach(c => {
+        if (c && c.id) {
+          if (!map.has(c.id)) {
+            map.set(c.id, c);
+          } else {
+            map.set(c.id, { ...map.get(c.id), ...c });
+          }
+        }
+      });
+      result[m] = Array.from(map.values());
+    } else {
+      result[m] = remoteList || localList || [];
+    }
+  });
+
+  return result;
+}
+
+// Merge monthly budgets safely across devices
+export function mergeMonthlyBudgets(localBudgets = {}, remoteBudgets = {}) {
+  const allMonths = new Set([
+    ...Object.keys(remoteBudgets || {}),
+    ...Object.keys(localBudgets || {})
+  ]);
+  const result = {};
+  allMonths.forEach(m => {
+    result[m] = {
+      ...(localBudgets?.[m] || {}),
+      ...(remoteBudgets?.[m] || {})
+    };
+  });
+  return result;
+}
+
 // Merge complete state safely preserving all unique transactions and settings
 export function mergeFullState(local, remote) {
   if (!remote || typeof remote !== 'object') return local;
@@ -161,25 +214,13 @@ export function mergeFullState(local, remote) {
   };
 
   const monthlyBudgets = {
-    yasmeen: {
-      ...(local.monthlyBudgets?.yasmeen || {}),
-      ...(remote.monthlyBudgets?.yasmeen || {})
-    },
-    adziima: {
-      ...(local.monthlyBudgets?.adziima || {}),
-      ...(remote.monthlyBudgets?.adziima || {})
-    }
+    yasmeen: mergeMonthlyBudgets(local.monthlyBudgets?.yasmeen, remote.monthlyBudgets?.yasmeen),
+    adziima: mergeMonthlyBudgets(local.monthlyBudgets?.adziima, remote.monthlyBudgets?.adziima)
   };
 
   const monthlyCategories = {
-    yasmeen: {
-      ...(remote.monthlyCategories?.yasmeen || {}),
-      ...(local.monthlyCategories?.yasmeen || {})
-    },
-    adziima: {
-      ...(remote.monthlyCategories?.adziima || {}),
-      ...(local.monthlyCategories?.adziima || {})
-    }
+    yasmeen: mergeMonthlyCategories(local.monthlyCategories?.yasmeen, remote.monthlyCategories?.yasmeen),
+    adziima: mergeMonthlyCategories(local.monthlyCategories?.adziima, remote.monthlyCategories?.adziima)
   };
 
   const nongkrongChecklist = {

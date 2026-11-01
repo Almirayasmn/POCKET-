@@ -286,7 +286,7 @@ export function PocketProvider({ children }) {
       firebaseDbUrl,
       (remote) => {
         if (!isMounted || !remote) return;
-        if (remote.users || remote.yasmeenTransactions || remote.adziimaTransactions) {
+        if (remote.users || remote.yasmeenTransactions || remote.adziimaTransactions || remote.monthlyCategories) {
           isRemoteUpdatingRef.current = true;
           const { activeView: _av, selectedMonth: _sm, yasmeenCurrencyView: _ycv, ...cleanRemote } = remote;
           setData(prev => mergeFullState(prev, cleanRemote));
