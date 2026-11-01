@@ -26,7 +26,10 @@ export default function EditProfileModal({ isOpen, onClose, targetUserId = 'yasm
         setReserveVal((user.emergencyReserveIdr || 0).toString());
       } else {
         setFundIdr((user.initialFundIdr || 10000000).toString());
-        setReserveVal((user.emergencyReserveCny || 1000).toString());
+        const resIdr = user.emergencyReserveIdr != null
+          ? user.emergencyReserveIdr
+          : (user.emergencyReserveCny ? Math.round(user.emergencyReserveCny * exchangeRate) : 0);
+        setReserveVal(resIdr.toString());
       }
     }
   }, [user, isOpen, targetUserId]);
@@ -78,8 +81,8 @@ export default function EditProfileModal({ isOpen, onClose, targetUserId = 'yasm
         avatarInitials: initials,
         initialFundIdr: parsedIdr,
         initialFundCny: Math.round((parsedIdr / exchangeRate) * 100) / 100,
-        emergencyReserveCny: parsedReserve,
-        emergencyReserveIdr: Math.round(parsedReserve * exchangeRate)
+        emergencyReserveIdr: parsedReserve,
+        emergencyReserveCny: Math.round((parsedReserve / exchangeRate) * 100) / 100
       });
     }
 
@@ -211,7 +214,7 @@ export default function EditProfileModal({ isOpen, onClose, targetUserId = 'yasm
 
             <div className="form-group">
               <label className="form-label">
-                {targetUserId === 'adziima' ? 'Cadangan Aman (Rp)' : 'Dana Cadangan (¥)'}
+                {targetUserId === 'adziima' ? 'Cadangan Aman (Rp)' : 'Dana Cadangan (Rp)'}
               </label>
               <input
                 type="number"

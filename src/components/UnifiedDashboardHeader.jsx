@@ -84,18 +84,13 @@ export default function UnifiedDashboardHeader({
             <div className="udh-user-info">
               <div className="udh-user-name-row">
                 <span className="udh-user-name">{user.name || (isYasmeen ? 'Yasmeen Almira' : 'Adziima')}</span>
-                <span className="udh-country-pill" style={{ background: tagBg, color: tagText }}>
-                  {isYasmeen ? (isChina ? '🇨🇳 Nanning' : '🇮🇩 Indo') : '🇮🇩 Indonesia'}
-                </span>
                 <span className="udh-settings-btn" title="Pengaturan Profil">
                   <Settings size={13} />
                 </span>
               </div>
 
               <div className="udh-user-subtitle">
-                {isYasmeen
-                  ? 'Nanning, China · 100% Rupiah (Rp)'
-                  : 'Indonesia · 100% Rupiah (Rp)'}
+                {user.bio || user.status || (isYasmeen ? 'Catatan Keuangan Pribadi' : 'Catatan Keuangan')}
               </div>
             </div>
           </div>

@@ -56,6 +56,7 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
     addCategory,
     updateCategory,
     deleteCategory,
+    resetCategoriesForMonth,
     exchangeRate,
     selectedMonth
   } = usePocket();
@@ -92,7 +93,7 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
     setName(cat.name || '');
     setIconName(cat.iconName || 'Tag');
     setColor(cat.color || (isAdziima ? '#0284c7' : '#db2777'));
-    setBudget(isAdziima ? (cat.budgetIdr || 0).toString() : (cat.budgetCny || 0).toString());
+    setBudget((cat.budgetIdr || 0).toString());
     setNote(cat.note || '');
     setMode('edit');
   };
@@ -184,33 +185,76 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)' }}>
                 Daftar Pos ({categories.length} Pos Aktif)
               </span>
-              <button
-                type="button"
-                onClick={handleOpenAdd}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  background: isAdziima ? '#0284c7' : '#db2777',
-                  color: '#ffffff',
-                  border: 'none',
-                  padding: '0.45rem 0.9rem',
-                  borderRadius: 'var(--radius-full)',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: 'var(--shadow-xs)'
-                }}
-              >
-                <Plus size={14} />
-                <span>Tambah Pos Baru</span>
-              </button>
+              <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                {categories.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm(`Yakin ingin mengosongkan semua pos di bulan ${selectedMonth}? Catatan riwayat transaksi kamu tetap aman.`)) {
+                        resetCategoriesForMonth(userId, selectedMonth);
+                      }
+                    }}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.3rem',
+                      background: '#fff1f2',
+                      color: '#e11d48',
+                      border: '1px solid #fecdd3',
+                      padding: '0.45rem 0.75rem',
+                      borderRadius: 'var(--radius-full)',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      cursor: 'pointer'
+                    }}
+                    title="Kosongkan seluruh pos bulan ini"
+                  >
+                    <Trash2 size={13} />
+                    <span>Kosongkan Pos</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleOpenAdd}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    background: isAdziima ? '#0284c7' : '#db2777',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '0.45rem 0.9rem',
+                    borderRadius: 'var(--radius-full)',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: 'var(--shadow-xs)'
+                  }}
+                >
+                  <Plus size={14} />
+                  <span>Tambah Pos Baru</span>
+                </button>
+              </div>
             </div>
+
+            {/* Empty notice if no categories */}
+            {categories.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '2.5rem 1rem', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1.5px dashed var(--card-border-subtle)', marginBottom: '1rem' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.4rem' }}>✨</div>
+                <div style={{ fontWeight: 800, color: 'var(--text-main)', fontSize: '0.95rem', marginBottom: '0.25rem' }}>
+                  Belum ada pos pengeluaran di bulan ini
+                </div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Klik tombol "+ Tambah Pos Baru" di atas untuk membuat pos anggaran baru.
+                </div>
+              </div>
+            )}
 
             {/* Category Cards List */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', maxHeight: '55vh', overflowY: 'auto', paddingRight: '0.2rem' }}>
               {categories.map((cat) => {
-                const bVal = isAdziima ? (cat.budgetIdr || 0) : (cat.budgetCny || 0);
+                const bVal = cat.budgetIdr || 0;
                 return (
                   <div
                     key={cat.id}
@@ -246,7 +290,7 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
                         </div>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                           <span style={{ fontWeight: 700, color: themeColor }}>
-                            Budget: {isAdziima ? formatIdr(bVal) : formatCny(bVal)}
+                            Budget: {formatIdr(bVal)}
                           </span>
                           {cat.note && <span>• {cat.note}</span>}
                         </div>
@@ -340,13 +384,13 @@ export default function ManageCategoriesModal({ isOpen, onClose, userId = 'yasme
             {/* Budget Anggaran */}
             <div className="form-group">
               <label className="form-label">
-                Alokasi Budget Bulanan {isAdziima ? '(Rupiah Rp)' : '(Yuan ¥)'}
+                Alokasi Budget Bulanan (Rupiah Rp)
               </label>
               <input
                 type="number"
                 step="any"
                 className="form-input"
-                placeholder={isAdziima ? 'Contoh: 150000' : 'Contoh: 150'}
+                placeholder={isAdziima ? 'Contoh: 150000' : 'Contoh: 500000'}
                 value={budget}
                 onChange={(e) => setBudget(e.target.value)}
               />

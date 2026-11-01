@@ -47,26 +47,19 @@ export function resolveCategories(catsState, userId, targetMonth) {
   const userMonthlyCats = catsState?.monthlyCategories?.[userId];
 
   // 1. Direct match for this specific month
-  if (userMonthlyCats?.[month] && Array.isArray(userMonthlyCats[month]) && userMonthlyCats[month].length > 0) {
-    return userMonthlyCats[month];
+  if (userMonthlyCats && userMonthlyCats[month] !== undefined) {
+    return Array.isArray(userMonthlyCats[month]) ? userMonthlyCats[month] : [];
   }
 
-  // 2. Look back through earlier months in chronological order
-  if (userMonthlyCats) {
-    const earlierMonths = Object.keys(userMonthlyCats)
-      .filter(m => m < month && Array.isArray(userMonthlyCats[m]) && userMonthlyCats[m].length > 0)
-      .sort();
-    if (earlierMonths.length > 0) {
-      const latestEarlierMonth = earlierMonths[earlierMonths.length - 1];
-      return userMonthlyCats[latestEarlierMonth];
-    }
+  // 2. For Yasmeen: user explicitly requested:
+  // "tiap bulan baru itu kosongin aja pos nya biar dibikin ulang dari awal"
+  // Do NOT copy from earlier months! Every new month starts empty [] so she can create pos from scratch!
+  if (userId === 'yasmeen') {
+    return [];
   }
 
-  // 3. Fallback to default base categories
-  if (userId === 'adziima') {
-    return catsState?.adziimaCategories || ADZIIMA_CATEGORIES;
-  }
-  return catsState?.yasmeenCategories || YASMEEN_CATEGORIES;
+  // Fallback for Adziima
+  return catsState?.adziimaCategories || ADZIIMA_CATEGORIES;
 }
 
 const PocketContext = createContext(null);
@@ -185,8 +178,23 @@ export function PocketProvider({ children }) {
             users,
             securityPin: (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || parsed.securityPin || '123456',
             adziimaCategories: parsed.adziimaCategories || ADZIIMA_CATEGORIES,
-            yasmeenCategories: parsed.yasmeenCategories || YASMEEN_CATEGORIES,
-            monthlyCategories: parsed.monthlyCategories || { yasmeen: {}, adziima: {} },
+            yasmeenCategories: [],
+            monthlyCategories: (() => {
+              const mc = { ...(parsed.monthlyCategories || { yasmeen: {}, adziima: {} }) };
+              if (mc.yasmeen) {
+                const cleanedYas = { ...mc.yasmeen };
+                Object.keys(cleanedYas).forEach(m => {
+                  if (m > '2026-10') {
+                    const list = cleanedYas[m];
+                    if (Array.isArray(list) && list.some(c => ['jajan', 'pos_tambahan', 'tiket_pesawat', 'visa', 'tarik_tunai', 'hal_lain', 'co_shopee'].includes(c.id) || ['CO Shopee', 'Tiket Pesawat', 'Visa', 'Tarik Tunai', 'Hal Lain'].includes(c.name))) {
+                      cleanedYas[m] = [];
+                    }
+                  }
+                });
+                mc.yasmeen = cleanedYas;
+              }
+              return mc;
+            })(),
             yasmeenTransactions: cleanYasTx,
             adziimaTransactions: parsed.adziimaTransactions || [],
             goldSavings: {
@@ -693,13 +701,14 @@ export function PocketProvider({ children }) {
     const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
     const id = (newCat.id || newCat.name || '').toLowerCase().replace(/[^a-z0-9]/g, '_') || `pos_${Date.now()}`;
     const budget = parseFloat(newCat.budget) || 0;
+    const rate = data?.exchangeRate || DEFAULT_EXCHANGE_RATE;
     const catObj = {
       id,
       name: newCat.name || 'Pos Baru',
       iconName: newCat.iconName || 'Tag',
       color: newCat.color || (userId === 'adziima' ? '#0284c7' : '#db2777'),
-      budgetCny: userId === 'yasmeen' ? budget : 0,
-      budgetIdr: userId === 'adziima' ? budget : 0,
+      budgetIdr: budget,
+      budgetCny: Math.round((budget / rate) * 100) / 100,
       note: newCat.note || ''
     };
 
@@ -736,6 +745,7 @@ export function PocketProvider({ children }) {
   const updateCategory = (userId, catId, updates, targetMonth = null) => {
     const month = targetMonth || selectedMonth || '2026-10';
     const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
+    const rate = data?.exchangeRate || DEFAULT_EXCHANGE_RATE;
     setData(prev => {
       const currentList = resolveCategories(prev, userId, month);
       const updatedList = currentList.map(c => {
@@ -743,8 +753,8 @@ export function PocketProvider({ children }) {
         const merged = { ...c, ...updates };
         if (updates.budget !== undefined) {
           const num = parseFloat(updates.budget) || 0;
-          if (userId === 'adziima') merged.budgetIdr = num;
-          else merged.budgetCny = num;
+          merged.budgetIdr = num;
+          merged.budgetCny = Math.round((num / rate) * 100) / 100;
         }
         return merged;
       });
@@ -814,6 +824,39 @@ export function PocketProvider({ children }) {
         monthlyCategories,
         monthlyBudgets
       };
+    });
+  };
+
+  // Reset all categories for targetMonth to empty []
+  const resetCategoriesForMonth = (userId, targetMonth = null) => {
+    const month = targetMonth || selectedMonth || '2026-10';
+    setData(prev => {
+      const monthlyCategories = { ...(prev.monthlyCategories || {}) };
+      const userMonthlyCats = { ...(monthlyCategories[userId] || {}) };
+      userMonthlyCats[month] = [];
+      monthlyCategories[userId] = userMonthlyCats;
+
+      const monthlyBudgets = { ...(prev.monthlyBudgets || {}) };
+      const userBudgets = { ...(monthlyBudgets[userId] || {}) };
+      userBudgets[month] = {};
+      monthlyBudgets[userId] = userBudgets;
+
+      const nextData = {
+        ...prev,
+        monthlyCategories,
+        monthlyBudgets
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'monthlyCategories', monthlyCategories).catch(() => {});
+        pushCloudSubpath(firebaseDbUrl, 'monthlyBudgets', monthlyBudgets).catch(() => {});
+      }
+
+      return nextData;
     });
   };
 
@@ -1126,9 +1169,7 @@ export function PocketProvider({ children }) {
       const safeYasmeenIdr = Math.max(0, netMonthYasmeenIdr - reserveYasmeenIdr);
 
       // Categories spending for selected month with inherited budget (Baseline in IDR)
-      const baseYasmeenCats = isYasmeenInChina
-        ? currentYasmeenCategories
-        : currentAdziimaCategories;
+      const baseYasmeenCats = currentYasmeenCategories;
 
       const activeCategories = baseYasmeenCats.map(c => {
         const rawBudget = (c.budgetIdr !== undefined && c.budgetIdr !== null && c.budgetIdr > 0)
@@ -1474,6 +1515,7 @@ export function PocketProvider({ children }) {
         addCategory,
         updateCategory,
         deleteCategory,
+        resetCategoriesForMonth,
         addGoldDeposit,
         deleteGoldDeposit,
         updateGoldPrice,

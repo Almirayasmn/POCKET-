@@ -265,7 +265,7 @@ export default function QuickAddModal({
                 >
                   <CategoryIcon name={p.iconName} size={13} color="currentColor" />
                   <span>
-                    {p.title} ({p.currency === 'IDR' ? `Rp ${p.amount.toLocaleString('id-ID')}` : `¥${p.amount}`}{p.noteCny ? ` • ${p.noteCny}` : ''})
+                    {p.title} ({p.currency === 'IDR' ? `Rp ${p.amount.toLocaleString('id-ID')}` : `¥${p.amount}`})
                   </span>
                 </button>
               ))}
@@ -404,18 +404,24 @@ export default function QuickAddModal({
           {type === 'Keluar' ? (
             <div className="form-group">
               <label className="form-label">Kategori Pos Anggaran</label>
-              <select
-                className="form-select"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                style={{ fontWeight: 700 }}
-              >
-                {currentCategories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.budgetCny ? `(Budget: ¥${c.budgetCny})` : c.budgetIdr ? `(Budget: Rp ${c.budgetIdr.toLocaleString('id-ID')})` : ''}
-                  </option>
-                ))}
-              </select>
+              {currentCategories.length === 0 ? (
+                <div style={{ fontSize: '0.8rem', color: '#db2777', background: '#fdf2f8', padding: '0.6rem 0.8rem', borderRadius: '8px', border: '1px solid #fbcfe8' }}>
+                  Belum ada pos kategori di bulan ini. Pengeluaran akan dicatat sebagai pos umum. Kamu bisa buat pos di menu "Kelola / Tambah Pos".
+                </div>
+              ) : (
+                <select
+                  className="form-select"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  style={{ fontWeight: 700 }}
+                >
+                  {currentCategories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} {c.budgetIdr ? `(Budget: Rp ${c.budgetIdr.toLocaleString('id-ID')})` : ''}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           ) : (
             <div style={{ background: '#ecfdf5', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid #a7f3d0', fontSize: '0.78rem', color: '#065f46', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
