@@ -48,14 +48,7 @@ export function resolveCategories(catsState, userId, targetMonth) {
 
   // 1. Direct match for this specific month
   if (userMonthlyCats && userMonthlyCats[month] !== undefined) {
-    const list = Array.isArray(userMonthlyCats[month]) ? userMonthlyCats[month] : [];
-    if (userId === 'yasmeen' && month > '2026-10') {
-      const isLegacyPreset = list.length === 6 &&
-        list.some(c => c.id === 'co_shopee' || c.name === 'CO Shopee') &&
-        list.some(c => c.id === 'tiket_pesawat' || c.name === 'Tiket Pesawat');
-      if (isLegacyPreset) return [];
-    }
-    return list;
+    return Array.isArray(userMonthlyCats[month]) ? userMonthlyCats[month] : [];
   }
 
   // 2. For Yasmeen: user explicitly requested:
@@ -186,24 +179,7 @@ export function PocketProvider({ children }) {
             securityPin: (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || parsed.securityPin || '123456',
             adziimaCategories: parsed.adziimaCategories || ADZIIMA_CATEGORIES,
             yasmeenCategories: [],
-            monthlyCategories: (() => {
-              const mc = { ...(parsed.monthlyCategories || { yasmeen: {}, adziima: {} }) };
-              if (mc.yasmeen) {
-                const cleanedYas = { ...mc.yasmeen };
-                Object.keys(cleanedYas).forEach(m => {
-                  if (m > '2026-10') {
-                    const list = cleanedYas[m];
-                    if (Array.isArray(list) && list.length === 6 &&
-                      list.some(c => c.id === 'co_shopee' || c.name === 'CO Shopee') &&
-                      list.some(c => c.id === 'tiket_pesawat' || c.name === 'Tiket Pesawat')) {
-                      cleanedYas[m] = [];
-                    }
-                  }
-                });
-                mc.yasmeen = cleanedYas;
-              }
-              return mc;
-            })(),
+            monthlyCategories: parsed.monthlyCategories || { yasmeen: {}, adziima: {} },
             yasmeenTransactions: cleanYasTx,
             adziimaTransactions: parsed.adziimaTransactions || [],
             goldSavings: {

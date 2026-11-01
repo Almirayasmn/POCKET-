@@ -171,43 +171,11 @@ export function mergeFullState(local, remote) {
     }
   };
 
-  // Sanitize Yasmeen monthly categories so legacy categories never resurrect from Firebase
-  const isLegacyPreset = (list) => {
-    return Array.isArray(list) && list.length === 6 &&
-      list.some(c => c.id === 'co_shopee' || c.name === 'CO Shopee') &&
-      list.some(c => c.id === 'tiket_pesawat' || c.name === 'Tiket Pesawat');
-  };
-
-  const sanitizeYasCats = (userCats) => {
-    if (!userCats || typeof userCats !== 'object') return {};
-    const res = {};
-    for (const [m, list] of Object.entries(userCats)) {
-      if (m > '2026-10') {
-        if (isLegacyPreset(list)) {
-          res[m] = [];
-          continue;
-        }
-      }
-      res[m] = Array.isArray(list) ? list : [];
-    }
-    return res;
-  };
-
-  const cleanLocalYas = sanitizeYasCats(local.monthlyCategories?.yasmeen);
-  const cleanRemoteYas = sanitizeYasCats(remote.monthlyCategories?.yasmeen);
-  const mergedYasCats = {
-    ...cleanRemoteYas,
-    ...cleanLocalYas
-  };
-  // Ensure November 2026 and future months with legacy categories stay empty
-  Object.keys(mergedYasCats).forEach(m => {
-    if (m > '2026-10' && isLegacyPreset(mergedYasCats[m])) {
-      mergedYasCats[m] = [];
-    }
-  });
-
   const monthlyCategories = {
-    yasmeen: mergedYasCats,
+    yasmeen: {
+      ...(remote.monthlyCategories?.yasmeen || {}),
+      ...(local.monthlyCategories?.yasmeen || {})
+    },
     adziima: {
       ...(remote.monthlyCategories?.adziima || {}),
       ...(local.monthlyCategories?.adziima || {})
