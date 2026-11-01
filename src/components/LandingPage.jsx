@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePocket } from '../context/PocketContext';
 import { formatCny, formatIdr } from '../utils/formatters';
 import UserAvatar from './UserAvatar';
