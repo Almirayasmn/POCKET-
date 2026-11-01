@@ -9,6 +9,7 @@ import {
   Cloud,
   RefreshCw,
   Download,
+  FolderUp,
   Calendar,
   ChevronLeft,
   ChevronRight,
@@ -22,6 +23,7 @@ export default function UnifiedDashboardHeader({
   onOpenEditProfile,
   onOpenBalanceModal,
   onOpenCloudModal,
+  onOpenDriveModal,
   onExportExcel,
   currencyToggle = null,
   transactionCount = 0
@@ -138,6 +140,19 @@ export default function UnifiedDashboardHeader({
             >
               <Download size={15} />
               <span>Unduh XLS</span>
+            </button>
+          )}
+
+          {/* Google Drive Archive Button */}
+          {onOpenDriveModal && (
+            <button
+              type="button"
+              className="udh-btn-action udh-btn-drive"
+              onClick={onOpenDriveModal}
+              title="Folder Arsip Google Drive Rekapan Bulanan"
+            >
+              <FolderUp size={15} />
+              <span>Drive Arsip</span>
             </button>
           )}
         </div>

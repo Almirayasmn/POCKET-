@@ -194,7 +194,8 @@ export function PocketProvider({ children }) {
               lastUpdatedLabel: parsed.goldSavings?.lastUpdatedLabel || DEFAULT_GOLD_SAVINGS.lastUpdatedLabel,
               valuationMode: parsed.goldSavings?.valuationMode || 'sell'
             },
-            monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} }
+            monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
+            googleDriveUrl: parsed.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null) || 'https://drive.google.com/drive/my-drive'
           };
         }
       }
@@ -211,7 +212,8 @@ export function PocketProvider({ children }) {
       yasmeenTransactions: [],
       adziimaTransactions: SAMPLE_ADZIIMA_TRANSACTIONS,
       goldSavings: DEFAULT_GOLD_SAVINGS,
-      monthlyBudgets: { yasmeen: {}, adziima: {} }
+      monthlyBudgets: { yasmeen: {}, adziima: {} },
+      googleDriveUrl: (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null) || 'https://drive.google.com/drive/my-drive'
     };
   });
 
@@ -378,6 +380,21 @@ export function PocketProvider({ children }) {
     }));
     if (firebaseDbUrl) {
       pushCloudSubpath(firebaseDbUrl, 'securityPin', clean).catch(() => {});
+    }
+  };
+
+  // Update Google Drive folder URL for monthly recap archives
+  const updateGoogleDriveUrl = (url) => {
+    const clean = (url || '').trim() || 'https://drive.google.com/drive/my-drive';
+    try {
+      localStorage.setItem('pocket_gdrive_url', clean);
+    } catch (e) {}
+    setData(prev => ({
+      ...prev,
+      googleDriveUrl: clean
+    }));
+    if (firebaseDbUrl) {
+      pushCloudSubpath(firebaseDbUrl, 'googleDriveUrl', clean).catch(() => {});
     }
   };
 
@@ -1563,7 +1580,9 @@ export function PocketProvider({ children }) {
         unlockApp,
         lockApp,
         securityPin: (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || data?.securityPin || '123456',
-        updateSecurityPin
+        updateSecurityPin,
+        googleDriveUrl: data?.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null) || 'https://drive.google.com/drive/my-drive',
+        updateGoogleDriveUrl
       }}
     >
       {children}

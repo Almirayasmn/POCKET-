@@ -27,9 +27,12 @@ import {
   PieChart,
   PiggyBank,
   AlertCircle,
-  Lock
+  Lock,
+  FolderUp
 } from 'lucide-react';
 import ManageCategoriesModal from './ManageCategoriesModal';
+import GoogleDriveModal from './GoogleDriveModal';
+import PostExportDrivePrompt from './PostExportDrivePrompt';
 
 export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, onOpenCloudModal }) {
   const {
@@ -59,6 +62,8 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
   const [isManageCatOpen, setIsManageCatOpen] = useState(false);
+  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
+  const [drivePromptInfo, setDrivePromptInfo] = useState({ isOpen: false, fileName: '', monthLabel: '' });
 
   const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
 
@@ -78,70 +83,60 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     setEditingCatId(null);
   };
 
-  // Export to Excel handler with genuine multi-sheet tabs
-  const handleExportExcel = () => {
-    const pastAndCurrentMonths = ['2026-10', '2026-11', '2026-12', '2027-01', '2027-02', '2027-03']
-      .filter(m => m <= selectedMonth);
+  // Export to Excel handler (1 single month per file, clean 100% Rupiah)
+  const handleExportExcel = (targetMonth = selectedMonth) => {
+    const label = ALL_MONTH_OPTIONS.find(opt => opt.value === targetMonth)?.label || targetMonth;
+    const mTx = (adziimaTransactions || []).filter(tx => (tx?.date || '').startsWith(targetMonth));
+    const mCats = getCategoriesForMonth ? getCategoriesForMonth('adziima', targetMonth) : (targetMonth === selectedMonth ? (adziima.categories || adziimaCategories) : []);
 
-    const orderedMonths = [
-      selectedMonth,
-      ...pastAndCurrentMonths.filter(m => m !== selectedMonth).reverse()
-    ];
-
-    const sheets = orderedMonths.map(m => {
-      const label = ALL_MONTH_OPTIONS.find(opt => opt.value === m)?.label || m;
-      const mTx = (adziimaTransactions || []).filter(tx => (tx?.date || '').startsWith(m));
-      const mCats = getCategoriesForMonth ? getCategoriesForMonth('adziima', m) : (m === selectedMonth ? (adziima.categories || adziimaCategories) : []);
-
-      const mSpending = {};
-      mCats.forEach(c => { mSpending[c.id] = { totalIdr: 0, count: 0 }; });
-      mTx.forEach(tx => {
-        if (tx?.type !== 'Masuk' && mSpending[tx?.category]) {
-          mSpending[tx.category].totalIdr += (tx.amountIdr || 0);
-          mSpending[tx.category].count += 1;
-        }
-      });
-
-      let mIncome = 0;
-      let mOutflow = 0;
-      mTx.forEach(tx => {
-        if (tx?.type === 'Masuk') mIncome += (tx.amountIdr || 0);
-        else mOutflow += (tx.amountIdr || 0);
-      });
-
-      const totalBudget = mCats.reduce((sum, c) => sum + (c.budgetIdr || c.budget || 0), 0);
-      const remainingBudget = Math.max(0, totalBudget - mOutflow);
-
-      const isCur = m === selectedMonth;
-      const startBalance = isCur ? adziima.initialIdr : 0;
-      const totalInflow = startBalance + mIncome;
-      const netBalance = isCur ? adziima.totalBalanceIdr : (mIncome - mOutflow);
-      const plannedSavings = Math.max(0, totalInflow - totalBudget);
-
-      return {
-        sheetName: label.replace(/[^a-zA-Z0-9 ]/g, '').slice(0, 31),
-        monthLabel: label,
-        transactions: mTx,
-        categories: mCats,
-        categorySpending: mSpending,
-        summary: {
-          startBalance: formatIdr(startBalance),
-          monthIncome: formatIdr(mIncome),
-          totalInflow: formatIdr(totalInflow),
-          totalBudget: formatIdr(totalBudget),
-          totalOutflow: formatIdr(mOutflow),
-          remainingBudget: formatIdr(remainingBudget),
-          plannedSavings: formatIdr(plannedSavings),
-          netBalance: formatIdr(netBalance)
-        }
-      };
+    const mSpending = {};
+    mCats.forEach(c => { mSpending[c.id] = { totalIdr: 0, count: 0 }; });
+    mTx.forEach(tx => {
+      if (tx?.type !== 'Masuk' && mSpending[tx?.category]) {
+        mSpending[tx.category].totalIdr += (tx.amountIdr || 0);
+        mSpending[tx.category].count += 1;
+      }
     });
 
-    exportMonthToExcel({
+    let mIncome = 0;
+    let mOutflow = 0;
+    mTx.forEach(tx => {
+      if (tx?.type === 'Masuk') mIncome += (tx.amountIdr || 0);
+      else mOutflow += (tx.amountIdr || 0);
+    });
+
+    const totalBudget = mCats.reduce((sum, c) => sum + (c.budgetIdr || c.budget || 0), 0);
+    const remainingBudget = Math.max(0, totalBudget - mOutflow);
+
+    const isCur = targetMonth === selectedMonth;
+    const startBalance = isCur ? adziima.initialIdr : 0;
+    const totalInflow = startBalance + mIncome;
+    const netBalance = isCur ? adziima.totalBalanceIdr : (mIncome - mOutflow);
+    const plannedSavings = Math.max(0, totalInflow - totalBudget);
+
+    const fileName = exportMonthToExcel({
       userName: user.name || 'Adziima',
-      monthLabel,
-      selectedMonth,
-      sheets
+      monthLabel: label,
+      selectedMonth: targetMonth,
+      transactions: mTx,
+      categories: mCats,
+      categorySpending: mSpending,
+      summary: {
+        startBalance: formatIdr(startBalance),
+        monthIncome: formatIdr(mIncome),
+        totalInflow: formatIdr(totalInflow),
+        totalBudget: formatIdr(totalBudget),
+        totalOutflow: formatIdr(mOutflow),
+        remainingBudget: formatIdr(remainingBudget),
+        plannedSavings: formatIdr(plannedSavings),
+        netBalance: formatIdr(netBalance)
+      }
+    });
+
+    setDrivePromptInfo({
+      isOpen: true,
+      monthLabel: label,
+      fileName
     });
   };
 
@@ -170,6 +165,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           setIsEditingMoney(true);
         }}
         onOpenCloudModal={onOpenCloudModal}
+        onOpenDriveModal={() => setIsDriveModalOpen(true)}
         onExportExcel={handleExportExcel}
         transactionCount={currentMonthTx.length}
       />
@@ -592,11 +588,22 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <div style={{ display: 'flex', gap: '0.5rem' }}>
             <button
               className="btn-back-home"
-              onClick={handleExportExcel}
+              onClick={() => handleExportExcel(selectedMonth)}
               style={{ background: 'var(--pastel-green-soft)', borderColor: '#a7f3d0', color: '#047857' }}
+              title={`Unduh Rekapan Excel Bulan ${monthLabel}`}
             >
               <Download size={14} />
               <span>Unduh XLS</span>
+            </button>
+
+            <button
+              className="btn-back-home"
+              onClick={() => setIsDriveModalOpen(true)}
+              style={{ background: '#ecfdf5', borderColor: '#6ee7b7', color: '#047857' }}
+              title="Folder Arsip Google Drive Rekapan Bulanan"
+            >
+              <FolderUp size={14} />
+              <span>Drive Arsip</span>
             </button>
           </div>
         </div>
@@ -719,6 +726,24 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         isOpen={isManageCatOpen}
         onClose={() => setIsManageCatOpen(false)}
         userId="adziima"
+      />
+
+      {/* Google Drive Archive Modal */}
+      <GoogleDriveModal
+        isOpen={isDriveModalOpen}
+        onClose={() => setIsDriveModalOpen(false)}
+        userName={user.name || 'Adziima'}
+        userId="adziima"
+        transactions={adziimaTransactions}
+        currentMonth={selectedMonth}
+      />
+
+      {/* Post-Download Google Drive Reminder Prompt */}
+      <PostExportDrivePrompt
+        isOpen={drivePromptInfo.isOpen}
+        onClose={() => setDrivePromptInfo(prev => ({ ...prev, isOpen: false }))}
+        fileName={drivePromptInfo.fileName}
+        monthLabel={drivePromptInfo.monthLabel}
       />
     </div>
   );

@@ -879,6 +879,18 @@ button, input, select, textarea {
   border-color: #db2777;
 }
 
+/* Google Drive Archive Button */
+.udh-btn-drive {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+  color: #047857;
+}
+.udh-btn-drive:hover {
+  background: #d1fae5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
 /* BOTTOM TOOLBAR */
 .udh-bottom-toolbar {
   display: flex;

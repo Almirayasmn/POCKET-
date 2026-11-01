@@ -229,12 +229,14 @@ export function mergeFullState(local, remote) {
   };
 
   const securityPin = remote?.securityPin || local?.securityPin || (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || '123456';
+  const googleDriveUrl = remote?.googleDriveUrl || local?.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : '') || 'https://drive.google.com/drive/my-drive';
 
   return {
     ...local,
     ...remote,
     yasmeenCategories: [],
     securityPin,
+    googleDriveUrl,
     deletedTransactionIds,
     users: mergedUsers,
     yasmeenTransactions,

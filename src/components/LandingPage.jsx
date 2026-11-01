@@ -11,8 +11,10 @@ import {
   RefreshCw,
   Sparkles,
   Lock,
-  KeyRound
+  KeyRound,
+  FolderUp
 } from 'lucide-react';
+import GoogleDriveModal from './GoogleDriveModal';
 
 export default function LandingPage({
   onOpenEditProfile,
@@ -27,8 +29,12 @@ export default function LandingPage({
     yasmeenCurrencyView,
     exchangeRate,
     isCloudConnected,
-    isCloudSyncing
+    isCloudSyncing,
+    selectedMonth,
+    yasmeenTransactions
   } = usePocket();
+
+  const [isDriveModalOpen, setIsDriveModalOpen] = useState(false);
 
   const { yasmeen, adziima, gold } = calculations;
   const isYasmeenIdr = yasmeenCurrencyView === 'IDR';
@@ -117,6 +123,30 @@ export default function LandingPage({
           >
             <KeyRound size={12} color="#db2777" />
             <span>PIN</span>
+          </button>
+
+          {/* Google Drive Archive Button */}
+          <button
+            onClick={() => setIsDriveModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              background: '#ecfdf5',
+              border: '1.5px solid #a7f3d0',
+              color: '#047857',
+              padding: '0.38rem 0.75rem',
+              borderRadius: 'var(--radius-full)',
+              fontSize: '0.74rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
+              transition: 'all 0.2s ease'
+            }}
+            title="Buka Folder Arsip Google Drive Rekapan Bulanan"
+          >
+            <FolderUp size={13} color="#059669" />
+            <span>Drive</span>
           </button>
 
           <button
@@ -641,6 +671,16 @@ export default function LandingPage({
           <span>Cloud: <strong style={{ color: isCloudConnected ? '#15803d' : '#d97706' }}>{isCloudConnected ? 'Aktif' : 'Siap'}</strong></span>
         </div>
       </div>
+
+      {/* Google Drive Archive Modal */}
+      <GoogleDriveModal
+        isOpen={isDriveModalOpen}
+        onClose={() => setIsDriveModalOpen(false)}
+        userName="Yasmeen & Adziima"
+        userId="yasmeen"
+        transactions={yasmeenTransactions}
+        currentMonth={selectedMonth}
+      />
     </div>
   );
 }
