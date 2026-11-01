@@ -91,9 +91,9 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     if (isViewYuan) {
       // Inputted as CNY, convert to IDR
       const asIdr = Math.round(val * exchangeRate);
-      updateCategoryBudget('yasmeen', catId, asIdr);
+      updateCategoryBudget('yasmeen', catId, asIdr, selectedMonth);
     } else {
-      updateCategoryBudget('yasmeen', catId, val);
+      updateCategoryBudget('yasmeen', catId, val, selectedMonth);
     }
     setEditingCatId(null);
   };

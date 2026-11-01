@@ -72,7 +72,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   };
 
   const handleSaveCatBudget = (catId) => {
-    updateCategoryBudget('adziima', catId, catBudgetInput);
+    updateCategoryBudget('adziima', catId, catBudgetInput, selectedMonth);
     setEditingCatId(null);
   };
 

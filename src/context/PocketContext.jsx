@@ -646,6 +646,7 @@ export function PocketProvider({ children }) {
     const month = targetMonth || selectedMonth || '2026-10';
     const num = parseFloat(newBudget) || 0;
     const key = userId === 'adziima' ? 'adziimaCategories' : 'yasmeenCategories';
+    const rate = data?.exchangeRate || DEFAULT_EXCHANGE_RATE;
 
     setData(prev => {
       const userMonthly = { ...(prev.monthlyBudgets?.[userId] || {}) };
@@ -653,33 +654,46 @@ export function PocketProvider({ children }) {
       currentMonthBudget[catId] = num;
       userMonthly[month] = currentMonthBudget;
 
+      const monthlyBudgets = {
+        ...(prev.monthlyBudgets || {}),
+        [userId]: userMonthly
+      };
+
       // Also ensure this month's custom categories list reflects the new budget
       const currentList = resolveCategories(prev, userId, month);
       const updatedList = currentList.map(c => {
         if (c.id !== catId) return c;
         const asIdr = num;
         const asCny = Math.round((num / rate) * 100) / 100;
-        return { ...c, budgetIdr: asIdr, budgetCny: asCny };
+        return { ...c, budgetIdr: asIdr, budgetCny: asCny, budget: asIdr };
       });
       const monthlyCategories = { ...(prev.monthlyCategories || {}) };
       const userMonthlyCats = { ...(monthlyCategories[userId] || {}) };
       userMonthlyCats[month] = updatedList;
       monthlyCategories[userId] = userMonthlyCats;
 
-      return {
+      const nextData = {
         ...prev,
-        monthlyBudgets: {
-          ...(prev.monthlyBudgets || {}),
-          [userId]: userMonthly
-        },
+        monthlyBudgets,
         monthlyCategories,
         [key]: (prev[key] || []).map(c => {
           if (c.id !== catId) return c;
           const asIdr = num;
           const asCny = Math.round((num / rate) * 100) / 100;
-          return { ...c, budgetIdr: asIdr, budgetCny: asCny };
+          return { ...c, budgetIdr: asIdr, budgetCny: asCny, budget: asIdr };
         })
       };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'monthlyCategories', monthlyCategories).catch(() => {});
+        pushCloudSubpath(firebaseDbUrl, 'monthlyBudgets', monthlyBudgets).catch(() => {});
+      }
+
+      return nextData;
     });
   };
 
@@ -749,6 +763,7 @@ export function PocketProvider({ children }) {
         const merged = { ...c, ...updates };
         if (updates.budget !== undefined) {
           const num = parseFloat(updates.budget) || 0;
+          merged.budget = num;
           merged.budgetIdr = num;
           merged.budgetCny = Math.round((num / rate) * 100) / 100;
         }
@@ -779,6 +794,7 @@ export function PocketProvider({ children }) {
           const merged = { ...c, ...updates };
           if (updates.budget !== undefined) {
             const num = parseFloat(updates.budget) || 0;
+            merged.budget = num;
             merged.budgetIdr = num;
             merged.budgetCny = Math.round((num / rate) * 100) / 100;
           }
