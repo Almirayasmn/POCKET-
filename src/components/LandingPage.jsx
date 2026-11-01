@@ -125,7 +125,7 @@ export default function LandingPage({
 
           {/* Google Drive Direct Link */}
           <a
-            href={googleDriveUrl || 'https://drive.google.com'}
+            href={googleDriveUrl || 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing'}
             target="_blank"
             rel="noopener noreferrer"
             style={{
