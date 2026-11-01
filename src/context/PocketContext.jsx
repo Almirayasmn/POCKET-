@@ -1382,6 +1382,9 @@ export function PocketProvider({ children }) {
       const totalAllBudgetYasmeenIdr = activeCategories.reduce((sum, c) => sum + (c.budgetIdr || 0), 0);
       const remainingAllBudgetYasmeenIdr = Math.max(0, totalAllBudgetYasmeenIdr - monthOutflowYasmeenIdr);
       const plannedSavingsYasmeenIdr = Math.max(0, totalInflowYasmeenIdr - totalAllBudgetYasmeenIdr);
+      const isOverAllocatedYasmeen = totalAllBudgetYasmeenIdr > totalInflowYasmeenIdr && totalInflowYasmeenIdr > 0;
+      const overAllocatedAmountYasmeenIdr = isOverAllocatedYasmeen ? (totalAllBudgetYasmeenIdr - totalInflowYasmeenIdr) : 0;
+
       // --- 4. Actual Live Balances per Hari Ini (Strictly for Landing Page & Global Wealth) ---
       const actualMonthStr = getLocalDateString().slice(0, 7);
       const resolvedActualMonth = actualMonthStr >= '2026-10' ? actualMonthStr : '2026-10';
@@ -1419,7 +1422,7 @@ export function PocketProvider({ children }) {
       const actualYasmeenBalanceIdr = actualYasmeenBalanceCny * rate;
       const actualAdziimaBalanceIdr = baseInitialAdziimaIdr + actualAdziimaNetIdr;
 
-      const actualGoldAssetValueIdr = activeValuationPrice * totalGrams;
+      const actualGoldAssetValueIdr = currentAssetValueIdr || 0;
       const actualTotalJointWealthIdr = actualYasmeenBalanceIdr + actualAdziimaBalanceIdr + actualGoldAssetValueIdr;
 
       const actualSafeTotal = actualTotalJointWealthIdr > 0 ? actualTotalJointWealthIdr : 1;
