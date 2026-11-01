@@ -50,11 +50,10 @@ export function resolveCategories(catsState, userId, targetMonth) {
   if (userMonthlyCats && userMonthlyCats[month] !== undefined) {
     const list = Array.isArray(userMonthlyCats[month]) ? userMonthlyCats[month] : [];
     if (userId === 'yasmeen' && month > '2026-10') {
-      const hasLegacy = list.some(c =>
-        ['jajan', 'pos_tambahan', 'tiket_pesawat', 'visa', 'tarik_tunai', 'hal_lain', 'co_shopee'].includes(c.id) ||
-        ['CO Shopee', 'Tiket Pesawat', 'Visa', 'Tarik Tunai', 'Hal Lain'].includes(c.name)
-      );
-      if (hasLegacy) return [];
+      const isLegacyPreset = list.length === 6 &&
+        list.some(c => c.id === 'co_shopee' || c.name === 'CO Shopee') &&
+        list.some(c => c.id === 'tiket_pesawat' || c.name === 'Tiket Pesawat');
+      if (isLegacyPreset) return [];
     }
     return list;
   }
@@ -194,7 +193,9 @@ export function PocketProvider({ children }) {
                 Object.keys(cleanedYas).forEach(m => {
                   if (m > '2026-10') {
                     const list = cleanedYas[m];
-                    if (Array.isArray(list) && list.some(c => ['jajan', 'pos_tambahan', 'tiket_pesawat', 'visa', 'tarik_tunai', 'hal_lain', 'co_shopee'].includes(c.id) || ['CO Shopee', 'Tiket Pesawat', 'Visa', 'Tarik Tunai', 'Hal Lain'].includes(c.name))) {
+                    if (Array.isArray(list) && list.length === 6 &&
+                      list.some(c => c.id === 'co_shopee' || c.name === 'CO Shopee') &&
+                      list.some(c => c.id === 'tiket_pesawat' || c.name === 'Tiket Pesawat')) {
                       cleanedYas[m] = [];
                     }
                   }
@@ -742,12 +743,20 @@ export function PocketProvider({ children }) {
       userBudgets[month] = currentMonthBudgets;
       monthlyBudgets[userId] = userBudgets;
 
-      return {
+      const nextData = {
         ...prev,
         monthlyCategories,
         monthlyBudgets,
         [key]: [...(prev[key] || []), catObj]
       };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'monthlyCategories', monthlyCategories).catch(() => {});
+        pushCloudSubpath(firebaseDbUrl, 'monthlyBudgets', monthlyBudgets).catch(() => {});
+      }
+      return nextData;
     });
     return catObj;
   };
@@ -785,7 +794,7 @@ export function PocketProvider({ children }) {
         monthlyBudgets[userId] = userBudgets;
       }
 
-      return {
+      const nextData = {
         ...prev,
         monthlyCategories,
         monthlyBudgets,
@@ -794,12 +803,20 @@ export function PocketProvider({ children }) {
           const merged = { ...c, ...updates };
           if (updates.budget !== undefined) {
             const num = parseFloat(updates.budget) || 0;
-            if (userId === 'adziima') merged.budgetIdr = num;
-            else merged.budgetCny = num;
+            merged.budgetIdr = num;
+            merged.budgetCny = Math.round((num / rate) * 100) / 100;
           }
           return merged;
         })
       };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'monthlyCategories', monthlyCategories).catch(() => {});
+        pushCloudSubpath(firebaseDbUrl, 'monthlyBudgets', monthlyBudgets).catch(() => {});
+      }
+      return nextData;
     });
   };
 
@@ -829,12 +846,20 @@ export function PocketProvider({ children }) {
       // Also remove from base categories so it never resurrects
       const updatedBase = (prev[key] || []).filter(c => c.id !== catId);
 
-      return {
+      const nextData = {
         ...prev,
         [key]: updatedBase,
         monthlyCategories,
         monthlyBudgets
       };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'monthlyCategories', monthlyCategories).catch(() => {});
+        pushCloudSubpath(firebaseDbUrl, 'monthlyBudgets', monthlyBudgets).catch(() => {});
+      }
+      return nextData;
     });
   };
 
