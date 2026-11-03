@@ -60,8 +60,9 @@ export default function BusinessView({ onOpenCloudModal }) {
   const activeProject = calc.activeProject || projects[0] || {};
 
   // View state: 'hub' (Daftar Semua Bisnis & Buat Baru) vs 'detail' (Halaman Khusus Bisnis Terpilih)
-  const [viewMode, setViewMode] = useState(projects.length > 0 ? 'detail' : 'hub');
-  const [isCreatingNew, setIsCreatingNew] = useState(projects.length === 0);
+  // Default to 'hub' so entering from Landing Page always opens the main business hub first
+  const [viewMode, setViewMode] = useState('hub');
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   // New Project Form State
   const [newCategory, setNewCategory] = useState('fashion');
