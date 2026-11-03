@@ -104,7 +104,7 @@ export async function fetchLiveGoldPrices() {
           dateLabel,
           sellPrice: sellPricePerGram,
           buybackPrice: buybackPricePerGram,
-          sellPricePer001g,
+          sellPricePer001g: sellPer001g,
           buybackPer001g,
           priceTable,
           spread: sellPricePerGram - buybackPricePerGram,
