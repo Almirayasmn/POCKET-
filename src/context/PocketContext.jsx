@@ -194,13 +194,18 @@ export function PocketProvider({ children }) {
             goldSavings: {
               ...DEFAULT_GOLD_SAVINGS,
               ...(parsed.goldSavings || {}),
-              pricePerGramIdr: (!parsed.goldSavings?.pricePerGramIdr || parsed.goldSavings?.pricePerGramIdr === 1500000)
+              pricePerGramIdr: (!parsed.goldSavings?.pricePerGramIdr || parsed.goldSavings?.pricePerGramIdr === 1500000 || parsed.goldSavings?.pricePerGramIdr === 2383000)
                 ? DEFAULT_GOLD_SAVINGS.pricePerGramIdr
                 : parsed.goldSavings.pricePerGramIdr,
-              buybackPerGramIdr: parsed.goldSavings?.buybackPerGramIdr || DEFAULT_GOLD_SAVINGS.buybackPerGramIdr,
-              priceTable: parsed.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
+              buybackPerGramIdr: (!parsed.goldSavings?.buybackPerGramIdr || parsed.goldSavings?.buybackPerGramIdr === 2299000)
+                ? DEFAULT_GOLD_SAVINGS.buybackPerGramIdr
+                : parsed.goldSavings.buybackPerGramIdr,
+              priceTable: parsed.goldSavings?.priceTable || GALERI24_DEFAULT_PRICE_TABLE,
+              brand: 'Emas Batangan Galeri 24',
               lastUpdated: parsed.goldSavings?.lastUpdated || DEFAULT_GOLD_SAVINGS.lastUpdated,
-              lastUpdatedLabel: parsed.goldSavings?.lastUpdatedLabel || DEFAULT_GOLD_SAVINGS.lastUpdatedLabel,
+              lastUpdatedLabel: (parsed.goldSavings?.lastUpdatedLabel && !parsed.goldSavings.lastUpdatedLabel.includes('Pegadaian'))
+                ? parsed.goldSavings.lastUpdatedLabel
+                : DEFAULT_GOLD_SAVINGS.lastUpdatedLabel,
               valuationMode: parsed.goldSavings?.valuationMode || 'sell'
             },
             monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
@@ -970,10 +975,10 @@ export function PocketProvider({ children }) {
       ...prev,
       goldSavings: {
         ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
-        brand: 'Galeri 24 (Pegadaian)',
-        pricePerGramIdr: parseFloat(sell) || prev.goldSavings?.pricePerGramIdr || 2510000,
-        buybackPerGramIdr: parseFloat(buyback) || prev.goldSavings?.buybackPerGramIdr || 2363000,
-        priceTable: table || prev.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
+        brand: 'Emas Batangan Galeri 24',
+        pricePerGramIdr: parseFloat(sell) || prev.goldSavings?.pricePerGramIdr || 2467000,
+        buybackPerGramIdr: parseFloat(buyback) || prev.goldSavings?.buybackPerGramIdr || 2322000,
+        priceTable: table || prev.goldSavings?.priceTable || GALERI24_DEFAULT_PRICE_TABLE,
         lastUpdated: new Date().toISOString().split('T')[0],
         lastUpdatedLabel: dateLabel || 'Acuan Resmi Galeri 24',
         sourceUrl: 'https://galeri24.co.id/harga-emas'
@@ -981,14 +986,14 @@ export function PocketProvider({ children }) {
     }));
   };
 
-  const updatePegadaianChartHistory = ({ history, pricePer001g, buybackPer001g, dateLabel, date }) => {
+  const updatePegadaianChartHistory = ({ history, sellPrice, buybackPrice, pricePer001g, buybackPer001g, priceTable, dateLabel, date }) => {
     const nowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
     const todayStr = date || nowWib.toISOString().split('T')[0];
-    const todayLabel = dateLabel || `${nowWib.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
-    const price001g = parseFloat(pricePer001g) || 24300;
-    const buyback001g = parseFloat(buybackPer001g) || 23440;
-    const sellPricePerGram = price001g * 100;
-    const buybackPricePerGram = buyback001g * 100;
+    const todayLabel = dateLabel || `${nowWib.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Galeri 24 Resmi)`;
+    const sellPricePerGram = parseFloat(sellPrice) || (parseFloat(pricePer001g) ? parseFloat(pricePer001g) * 100 : 2467000);
+    const buybackPricePerGram = parseFloat(buybackPrice) || (parseFloat(buybackPer001g) ? parseFloat(buybackPer001g) * 100 : 2322000);
+    const price001g = Math.round(sellPricePerGram / 100);
+    const buyback001g = Math.round(buybackPricePerGram / 100);
 
     setData(prev => {
       const prevHistory = prev.goldSavings?.pegadaianHistory || DEFAULT_GOLD_SAVINGS.pegadaianHistory || [];
@@ -1000,6 +1005,8 @@ export function PocketProvider({ children }) {
         if (!hasToday) {
           merged.push({
             date: todayStr,
+            sellPrice: sellPricePerGram,
+            buybackPrice: buybackPricePerGram,
             sellPer001g: price001g,
             buybackPer001g: buyback001g,
             sellPerGram: sellPricePerGram,
@@ -1012,6 +1019,8 @@ export function PocketProvider({ children }) {
           ...withoutToday,
           {
             date: todayStr,
+            sellPrice: sellPricePerGram,
+            buybackPrice: buybackPricePerGram,
             sellPer001g: price001g,
             buybackPer001g: buyback001g,
             sellPerGram: sellPricePerGram,
@@ -1026,6 +1035,8 @@ export function PocketProvider({ children }) {
         ...prev,
         goldSavings: {
           ...(prev.goldSavings || DEFAULT_GOLD_SAVINGS),
+          brand: 'Emas Batangan Galeri 24',
+          priceTable: priceTable || prev.goldSavings?.priceTable || GALERI24_DEFAULT_PRICE_TABLE,
           pegadaianHistory: merged,
           pegadaianLastPrice001g: price001g,
           pegadaianLastBuyback001g: buyback001g,
@@ -1034,7 +1045,8 @@ export function PocketProvider({ children }) {
           pricePerGramIdr: sellPricePerGram,
           buybackPerGramIdr: buybackPricePerGram,
           lastUpdated: todayStr,
-          lastUpdatedLabel: todayLabel
+          lastUpdatedLabel: todayLabel,
+          sourceUrl: 'https://galeri24.co.id/harga-emas'
         }
       };
     });
@@ -1067,8 +1079,11 @@ export function PocketProvider({ children }) {
       if (res && res.success) {
         updatePegadaianChartHistory({
           history: res.history,
+          sellPrice: res.sellPrice,
+          buybackPrice: res.buybackPrice,
           pricePer001g: res.sellPricePer001g,
           buybackPer001g: res.buybackPricePer001g,
+          priceTable: res.priceTable,
           date: res.date,
           dateLabel: res.dateLabel
         });
@@ -1076,7 +1091,7 @@ export function PocketProvider({ children }) {
       }
       return { success: false };
     } catch (err) {
-      console.warn('Auto refresh Pegadaian chart history failed:', err);
+      console.warn('Auto refresh Galeri 24 live prices failed:', err);
       return { success: false, error: err.message };
     } finally {
       setIsFetchingGoldPrice(false);
@@ -1449,8 +1464,8 @@ export function PocketProvider({ children }) {
       // 3. Gold Savings Calculations (Emas Batangan Galeri 24)
       const goldTx = data?.goldSavings?.transactions || [];
       const valuationMode = data?.goldSavings?.valuationMode || 'sell';
-      const pricePerGram = data?.goldSavings?.pricePerGramIdr || 2510000;
-      const buybackPerGram = data?.goldSavings?.buybackPerGramIdr || 2363000;
+      const pricePerGram = data?.goldSavings?.pricePerGramIdr || 2467000;
+      const buybackPerGram = data?.goldSavings?.buybackPerGramIdr || 2322000;
       const activeValuationPrice = valuationMode === 'buyback' ? buybackPerGram : pricePerGram;
       const priceTable = data?.goldSavings?.priceTable || GALERI24_DEFAULT_PRICE_TABLE;
 
@@ -1691,16 +1706,16 @@ export function PocketProvider({ children }) {
           pricePerGram,
           buybackPerGram,
           pegadaianHistory: data?.goldSavings?.pegadaianHistory || DEFAULT_GOLD_SAVINGS.pegadaianHistory,
-          pegadaianPrice001g: data?.goldSavings?.pegadaianLastPrice001g || 24300,
-          pegadaianBuyback001g: data?.goldSavings?.pegadaianLastBuyback001g || 23440,
-          pegadaianDateLabel: data?.goldSavings?.pegadaianLastDateLabel || `${new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`,
-          brand: 'Galeri 24 (Pegadaian)',
+          pegadaianPrice001g: data?.goldSavings?.pegadaianLastPrice001g || 24670,
+          pegadaianBuyback001g: data?.goldSavings?.pegadaianLastBuyback001g || 23220,
+          pegadaianDateLabel: data?.goldSavings?.pegadaianLastDateLabel || `${new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Galeri 24 Resmi)`,
+          brand: 'Emas Batangan Galeri 24',
           sourceUrl: 'https://galeri24.co.id/harga-emas',
           activeValuationPrice,
           valuationMode,
           lastUpdated: data?.goldSavings?.lastUpdated || DEFAULT_GOLD_SAVINGS.lastUpdated,
           lastUpdatedLabel: data?.goldSavings?.lastUpdatedLabel || 'Acuan Resmi Galeri 24',
-          priceTable: data?.goldSavings?.priceTable || DEFAULT_GOLD_SAVINGS.priceTable,
+          priceTable: data?.goldSavings?.priceTable || GALERI24_DEFAULT_PRICE_TABLE,
           profitLossIdr,
           profitLossPercent,
           avgBuyPricePerGram: totalGrams > 0 ? (totalGoldSpentIdr / totalGrams) : 0

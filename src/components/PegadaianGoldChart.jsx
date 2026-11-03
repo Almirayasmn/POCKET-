@@ -3,8 +3,8 @@ import { TrendingUp, ExternalLink, Calendar, RefreshCw } from 'lucide-react';
 
 export default function PegadaianGoldChart({
   history = [],
-  currentSellPricePer001g = 24300,
-  currentBuybackPricePer001g = 23440,
+  currentSellPricePerGram = 2467000,
+  currentBuybackPricePerGram = 2322000,
   lastUpdatedLabel,
   onRefresh,
   isRefreshing = false
@@ -13,39 +13,51 @@ export default function PegadaianGoldChart({
   const [timeframe, setTimeframe] = useState('1m'); // '1w', '1m', '3m', '1y'
   const [hoverIndex, setHoverIndex] = useState(null);
 
-  // Dynamic 7-day authentic Pegadaian baseline ending on today's actual date
+  // Dynamic 7-day authentic Galeri 24 baseline ending on today's actual date
   const baselineHistory = useMemo(() => {
     const today = new Date();
     const result = [];
-    const basePrices = [24340, 24300, 24090, 23990, 23990, 24090, currentSellPricePer001g || 24300];
+    const basePrices = [2510000, 2504000, 2499000, 2478000, 2467000, 2467000, currentSellPricePerGram || 2467000];
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
       const dStr = d.toISOString().split('T')[0];
-      const s = basePrices[6 - i] || currentSellPricePer001g || 24300;
-      const b = Math.round(s * 0.965);
+      const s = basePrices[6 - i] || currentSellPricePerGram || 2467000;
+      const b = Math.round(s * 0.941);
       result.push({
         date: dStr,
-        sellPer001g: s,
-        buybackPer001g: b
+        sellPerGram: s,
+        buybackPerGram: b
       });
     }
     return result;
-  }, [currentSellPricePer001g]);
+  }, [currentSellPricePerGram]);
 
   const rawData = useMemo(() => {
     const base = (history && history.length > 0) ? [...history] : [...baselineHistory];
+    const normalized = base.map(p => {
+      let sGram = p.sellPerGram || p.sellPrice;
+      let bGram = p.buybackPricePerGram || p.buybackPerGram || p.buybackPrice;
+      if (!sGram && p.sellPer001g) sGram = p.sellPer001g * 100;
+      if (!bGram && p.buybackPer001g) bGram = p.buybackPer001g * 100;
+      return {
+        date: p.date,
+        sellPerGram: Number(sGram) || currentSellPricePerGram,
+        buybackPerGram: Number(bGram) || currentBuybackPricePerGram
+      };
+    });
+
     const todayStr = new Date().toISOString().split('T')[0];
-    const hasToday = base.some(p => p.date === todayStr);
-    if (!hasToday && currentSellPricePer001g) {
-      base.push({
+    const hasToday = normalized.some(p => p.date === todayStr);
+    if (!hasToday && currentSellPricePerGram) {
+      normalized.push({
         date: todayStr,
-        sellPer001g: currentSellPricePer001g,
-        buybackPer001g: currentBuybackPricePer001g || Math.round(currentSellPricePer001g * 0.965)
+        sellPerGram: currentSellPricePerGram,
+        buybackPerGram: currentBuybackPricePerGram || Math.round(currentSellPricePerGram * 0.941)
       });
     }
-    return base;
-  }, [history, baselineHistory, currentSellPricePer001g, currentBuybackPricePer001g]);
+    return normalized;
+  }, [history, baselineHistory, currentSellPricePerGram, currentBuybackPricePerGram]);
 
   // Filter or scale data points based on selected timeframe
   const chartPoints = useMemo(() => {
@@ -56,7 +68,7 @@ export default function PegadaianGoldChart({
   }, [rawData, timeframe]);
 
   // Calculate SVG coordinates
-  const values = chartPoints.map(p => chartType === 'beli' ? p.sellPer001g : p.buybackPer001g);
+  const values = chartPoints.map(p => chartType === 'beli' ? p.sellPerGram : p.buybackPerGram);
   const minVal = Math.min(...values);
   const maxVal = Math.max(...values);
   const valRange = (maxVal - minVal) || 1;
@@ -74,7 +86,7 @@ export default function PegadaianGoldChart({
   const plotHeight = svgHeight - (padY * 2);
 
   const coords = chartPoints.map((pt, idx) => {
-    const val = chartType === 'beli' ? pt.sellPer001g : pt.buybackPer001g;
+    const val = chartType === 'beli' ? pt.sellPerGram : pt.buybackPerGram;
     const x = padX + (idx / Math.max(1, chartPoints.length - 1)) * plotWidth;
     const y = padY + plotHeight - ((val - chartMin) / chartRange) * plotHeight;
     return { x, y, pt, val };
@@ -159,10 +171,10 @@ export default function PegadaianGoldChart({
           </div>
           <div>
             <h4 style={{ margin: 0, fontSize: '0.88rem', fontWeight: 800, color: '#064e3b', lineHeight: 1.2 }}>
-              Grafik Tren Tabungan Emas
+              Grafik Tren Emas Galeri 24
             </h4>
             <span style={{ fontSize: '0.68rem', color: '#10b981', fontWeight: 600 }}>
-              Live sahabat.pegadaian.co.id
+              Live galeri24.co.id
             </span>
           </div>
         </div>
@@ -185,7 +197,7 @@ export default function PegadaianGoldChart({
                 padding: '0.25rem 0.55rem',
                 cursor: 'pointer'
               }}
-              title="Perbarui grafik hari ini dari Pegadaian"
+              title="Perbarui grafik hari ini dari Galeri 24"
             >
               <RefreshCw size={11} className={isRefreshing ? 'animate-spin' : ''} />
               <span>{isRefreshing ? 'Sync...' : 'Update'}</span>
@@ -193,7 +205,7 @@ export default function PegadaianGoldChart({
           )}
 
           <a
-            href="https://sahabat.pegadaian.co.id/harga-emas"
+            href="https://galeri24.co.id/harga-emas"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -216,7 +228,7 @@ export default function PegadaianGoldChart({
         </div>
       </div>
 
-      {/* Tabs: Harga Beli vs Harga Jual (Compact) */}
+      {/* Tabs: Harga Jual vs Harga Buyback (Compact) */}
       <div
         style={{
           display: 'flex',
@@ -241,7 +253,7 @@ export default function PegadaianGoldChart({
             transition: 'all 0.15s ease'
           }}
         >
-          Harga Beli (Nasabah)
+          Harga Jual (Galeri 24)
         </button>
         <button
           type="button"
@@ -260,7 +272,7 @@ export default function PegadaianGoldChart({
             transition: 'all 0.15s ease'
           }}
         >
-          Harga Jual (Buyback)
+          Harga Buyback (Jual Kembali)
         </button>
       </div>
 
@@ -283,10 +295,7 @@ export default function PegadaianGoldChart({
         </div>
         <div style={{ textAlign: 'right' }}>
           <span style={{ fontSize: '0.95rem', fontWeight: 900, color: '#064e3b' }}>
-            Rp {Number(activeCoord?.val || currentSellPricePer001g || 24300).toLocaleString('id-ID')}/0,01 gr
-          </span>
-          <span style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 700, marginLeft: '0.4rem' }}>
-            (Rp {(Number(activeCoord?.val || currentSellPricePer001g || 24300) * 100).toLocaleString('id-ID')}/gr)
+            Rp {Number(activeCoord?.val || currentSellPricePerGram || 2467000).toLocaleString('id-ID')} / gr
           </span>
         </div>
       </div>

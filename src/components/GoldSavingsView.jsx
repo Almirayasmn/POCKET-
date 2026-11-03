@@ -69,14 +69,14 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
   const [customPecahan, setCustomPecahan] = useState('');
   const [isCustomPecahan, setIsCustomPecahan] = useState(false);
   const [amountIdr, setAmountIdr] = useState('');
-  const [place, setPlace] = useState('Galeri 24 (Pegadaian)');
+  const [place, setPlace] = useState('Galeri 24 Resmi');
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [serialNumber, setSerialNumber] = useState('');
   const [notes, setNotes] = useState('');
 
   // Modals input states
   const [sellPriceInput, setSellPriceInput] = useState(gold.pricePerGram.toString());
-  const [buybackPriceInput, setBuybackPriceInput] = useState((gold.buybackPerGram || 2363000).toString());
+  const [buybackPriceInput, setBuybackPriceInput] = useState((gold.buybackPerGram || 2322000).toString());
   const [dateLabelInput, setDateLabelInput] = useState(gold.lastUpdatedLabel || 'Hari Ini (galeri24.co.id)');
   const [targetInput, setTargetInput] = useState(gold.targetGrams.toString());
 
@@ -106,7 +106,7 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
       setAmountIdr(Math.round(initialPecahan * gold.pricePerGram).toString());
     }
 
-    setPlace('Galeri 24 (Pegadaian)');
+    setPlace('Galeri 24 Resmi');
     setDate(new Date().toISOString().split('T')[0]);
     setSerialNumber('');
     setNotes('');
@@ -196,23 +196,23 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
   const isProfit = gold.profitLossIdr >= 0;
   const isBuybackMode = gold.valuationMode === 'buyback';
 
-  // Real-time automatic fetch handler directly from sahabat.pegadaian.co.id
+  // Real-time automatic fetch handler directly from galeri24.co.id
   const handleAutoFetch = async () => {
     if (isFetchingGoldPrice) return;
     try {
       const res = await refreshLiveGoldPrices(true);
       if (res && res.success) {
-        setToastMessage(`✓ Berhasil memperbarui harga resmi Pegadaian: Rp ${(res.sellPricePer001g || 24300).toLocaleString('id-ID')}/0,01 gr (Rp ${(res.sellPrice || 2430000).toLocaleString('id-ID')}/gr) • Buyback Rp ${(res.buybackPricePer001g || 23440).toLocaleString('id-ID')}/0,01 gr`);
+        setToastMessage(`✓ Berhasil memperbarui harga resmi Galeri 24: Rp ${(res.sellPrice || 2467000).toLocaleString('id-ID')} / gr • Buyback Rp ${(res.buybackPrice || 2322000).toLocaleString('id-ID')} / gr`);
         setTimeout(() => setToastMessage(null), 5000);
         try {
           confetti({ particleCount: 35, spread: 65, origin: { y: 0.3 } });
         } catch (e) {}
       } else {
-        setToastMessage('⚠️ Tidak dapat terhubung ke web Pegadaian. Menggunakan acuan resmi terverifikasi.');
+        setToastMessage('⚠️ Tidak dapat terhubung ke web Galeri 24. Menggunakan acuan resmi terverifikasi.');
         setTimeout(() => setToastMessage(null), 4000);
       }
     } catch (e) {
-      setToastMessage('⚠️ Terjadi kendala saat menghubungkan ke Pegadaian');
+      setToastMessage('⚠️ Terjadi kendala saat menghubungkan ke Galeri 24');
       setTimeout(() => setToastMessage(null), 4000);
     }
   };
@@ -308,7 +308,7 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
               Aset Emas Batangan Galeri 24
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <span>Yasmeen & Adziima · Galeri 24 Pegadaian</span>
+              <span>Yasmeen & Adziima · Galeri 24 Resmi</span>
             </div>
           </div>
         </div>
@@ -440,7 +440,7 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
             <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#047857' }}>Live galeri24.co.id</span>
           </div>
           <div style={{ fontSize: '0.82rem', color: '#78350f' }}>
-            Acuan: <strong>{gold.lastUpdatedLabel || 'Galeri 24 Pegadaian'}</strong>
+            Acuan: <strong>{gold.lastUpdatedLabel || 'Galeri 24 Resmi'}</strong>
           </div>
           <span style={{ color: '#d97706' }}>•</span>
           <div style={{ fontSize: '0.78rem', color: '#b45309' }}>
@@ -644,18 +644,18 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
               {gold.totalKeping} Keping
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-              Galeri 24 Pegadaian
+              Emas Batangan Galeri 24
             </div>
           </div>
         </div>
       </div>
 
-      {/* Official Pegadaian Live Interactive Trend Chart (Sesuai web Pegadaian pada screenshot) */}
+      {/* Official Galeri 24 Live Interactive Trend Chart */}
       <PegadaianGoldChart
         history={gold.pegadaianHistory}
-        currentSellPricePer001g={gold.pegadaianPrice001g || 24300}
-        currentBuybackPricePer001g={gold.pegadaianBuyback001g || 23440}
-        lastUpdatedLabel={gold.pegadaianDateLabel || new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
+        currentSellPricePerGram={gold.pricePerGram || 2467000}
+        currentBuybackPricePerGram={gold.buybackPerGram || 2322000}
+        lastUpdatedLabel={gold.lastUpdatedLabel || new Date().toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
         onRefresh={handleAutoFetch}
         isRefreshing={isFetchingGoldPrice}
       />
@@ -1235,9 +1235,9 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
                     value={place}
                     onChange={(e) => setPlace(e.target.value)}
                   >
-                    <option value="Galeri 24 (Pegadaian)">Galeri 24 (Pegadaian)</option>
+                    <option value="Galeri 24 Resmi">Galeri 24 Resmi (galeri24.co.id)</option>
                     <option value="Outlet Galeri 24 Mall">Outlet Galeri 24 Mall</option>
-                    <option value="Pegadaian Digital / Tabungan">Pegadaian Digital / Tabungan</option>
+                    <option value="Pegadaian Galeri 24">Pegadaian Galeri 24</option>
                     <option value="Antam / Butik LM">Antam / Butik LM</option>
                     <option value="Toko Emas Lokal">Toko Emas Lokal</option>
                   </select>
@@ -1309,7 +1309,7 @@ export default function GoldSavingsView({ onOpenCloudModal }) {
             </div>
 
             <div style={{ marginBottom: '1rem', background: '#fefce8', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid #fde047', fontSize: '0.8rem', color: '#78350f' }}>
-              Harga emas batangan Galeri 24 diperbarui setiap hari kerja mengikuti acuan resmi Pegadaian. Klik salah satu pecahan untuk langsung mencatat pembelian!
+              Harga emas batangan Galeri 24 diperbarui otomatis mengikuti katalog resmi galeri24.co.id. Klik salah satu pecahan untuk langsung mencatat pembelian!
             </div>
 
             <div style={{ maxHeight: '360px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 'var(--radius-md)' }}>

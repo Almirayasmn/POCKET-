@@ -68,24 +68,24 @@ export const SAMPLE_YASMEEN_TRANSACTIONS = [];
 export const SAMPLE_ADZIIMA_TRANSACTIONS = [];
 
 export const GALERI24_DEFAULT_PRICE_TABLE = [
-  { grams: 0.5, sell: 1316000, buyback: 1179000 },
-  { grams: 1, sell: 2510000, buyback: 2363000 },
-  { grams: 2, sell: 4960000, buyback: 4718000 },
-  { grams: 5, sell: 12307000, buyback: 11795000 },
-  { grams: 10, sell: 24549000, buyback: 23591000 },
-  { grams: 25, sell: 61040000, buyback: 58688000 },
-  { grams: 50, sell: 121984000, buyback: 117377000 },
-  { grams: 100, sell: 243849000, buyback: 234755000 }
+  { grams: 0.5, sell: 1294000, buyback: 1158000 },
+  { grams: 1, sell: 2467000, buyback: 2322000 },
+  { grams: 2, sell: 4874000, buyback: 4635000 },
+  { grams: 5, sell: 12096000, buyback: 11588000 },
+  { grams: 10, sell: 24127000, buyback: 23177000 },
+  { grams: 25, sell: 59990000, buyback: 57657000 },
+  { grams: 50, sell: 119885000, buyback: 115314000 },
+  { grams: 100, sell: 239652000, buyback: 230628000 }
 ];
 
 const defaultNowWib = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }));
 const defaultTodayStr = defaultNowWib.toISOString().split('T')[0];
-const defaultTodayLabel = `${defaultNowWib.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Pegadaian Resmi)`;
+const defaultTodayLabel = `${defaultNowWib.toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} (Galeri 24 Resmi)`;
 
 export const DEFAULT_GOLD_SAVINGS = {
-  brand: 'Galeri 24 (Pegadaian)',
-  pricePerGramIdr: 2430000,
-  buybackPerGramIdr: 2344000,
+  brand: 'Emas Batangan Galeri 24',
+  pricePerGramIdr: 2467000,
+  buybackPerGramIdr: 2322000,
   valuationMode: 'sell', // 'sell' or 'buyback'
   lastUpdated: defaultTodayStr,
   lastUpdatedLabel: defaultTodayLabel,
@@ -93,18 +93,17 @@ export const DEFAULT_GOLD_SAVINGS = {
   priceTable: GALERI24_DEFAULT_PRICE_TABLE,
   targetGrams: 25,
   transactions: [],
-  pegadaianLastPrice001g: 24300,
-  pegadaianLastBuyback001g: 23440,
+  pegadaianLastPrice001g: 24670,
+  pegadaianLastBuyback001g: 23220,
   pegadaianLastDate: defaultTodayStr,
   pegadaianLastDateLabel: defaultTodayLabel,
   pegadaianHistory: [
-    { date: '2026-10-23', sellPer001g: 24090, buybackPer001g: 23240 },
-    { date: '2026-10-24', sellPer001g: 23990, buybackPer001g: 23150 },
-    { date: '2026-10-25', sellPer001g: 23990, buybackPer001g: 23150 },
-    { date: '2026-10-26', sellPer001g: 23990, buybackPer001g: 23150 },
-    { date: '2026-10-27', sellPer001g: 24090, buybackPer001g: 23240 },
-    { date: '2026-10-28', sellPer001g: 24300, buybackPer001g: 23440 },
-    { date: defaultTodayStr, sellPer001g: 24300, buybackPer001g: 23440 }
+    { date: '2026-10-24', sellPrice: 2467000, buybackPrice: 2326000, sellPer001g: 24670, buybackPer001g: 23260 },
+    { date: '2026-10-25', sellPrice: 2467000, buybackPrice: 2326000, sellPer001g: 24670, buybackPer001g: 23260 },
+    { date: '2026-10-26', sellPrice: 2467000, buybackPrice: 2326000, sellPer001g: 24670, buybackPer001g: 23260 },
+    { date: '2026-10-27', sellPrice: 2478000, buybackPrice: 2335000, sellPer001g: 24780, buybackPer001g: 23350 },
+    { date: '2026-10-28', sellPrice: 2499000, buybackPrice: 2354000, sellPer001g: 24990, buybackPer001g: 23540 },
+    { date: defaultTodayStr, sellPrice: 2467000, buybackPrice: 2322000, sellPer001g: 24670, buybackPer001g: 23220 }
   ]
 };
 
