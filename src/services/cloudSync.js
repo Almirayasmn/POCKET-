@@ -228,6 +228,23 @@ export function mergeFullState(local, remote) {
     ...(remote.nongkrongChecklist || {})
   };
 
+  const deletedBusinessProjectIds = Array.from(new Set([
+    ...(local.deletedBusinessProjectIds || []),
+    ...(remote.deletedBusinessProjectIds || [])
+  ]));
+
+  const deletedBusinessSaleIds = Array.from(new Set([
+    ...(local.deletedBusinessSaleIds || []),
+    ...(remote.deletedBusinessSaleIds || [])
+  ]));
+
+  const business = mergeBusinessData(
+    local.business,
+    remote.business,
+    deletedBusinessProjectIds,
+    deletedBusinessSaleIds
+  );
+
   const securityPin = remote?.securityPin || local?.securityPin || (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null) || '123456';
   const rawDrive = remote?.googleDriveUrl || local?.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : '') || 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing';
   const googleDriveUrl = (!rawDrive || rawDrive.includes('/my-drive') || rawDrive === 'https://drive.google.com' || rawDrive === 'https://drive.google.com/')
@@ -241,6 +258,9 @@ export function mergeFullState(local, remote) {
     securityPin,
     googleDriveUrl,
     deletedTransactionIds,
+    deletedBusinessProjectIds,
+    deletedBusinessSaleIds,
+    business,
     users: mergedUsers,
     yasmeenTransactions,
     adziimaTransactions,
@@ -248,6 +268,57 @@ export function mergeFullState(local, remote) {
     monthlyBudgets,
     monthlyCategories,
     nongkrongChecklist
+  };
+}
+
+// Merge business projects safely, strictly purging any deleted projects and deleted sales
+export function mergeBusinessData(localBusiness, remoteBusiness, deletedProjectIds = [], deletedSaleIds = []) {
+  const deletedProjSet = new Set(deletedProjectIds || []);
+  const deletedSaleSet = new Set(deletedSaleIds || []);
+
+  const localProjects = Array.isArray(localBusiness?.projects) ? localBusiness.projects : [];
+  const remoteProjects = Array.isArray(remoteBusiness?.projects) ? remoteBusiness.projects : [];
+
+  const projectMap = new Map();
+
+  // Process remote projects first
+  remoteProjects.forEach(p => {
+    if (p && p.id && !deletedProjSet.has(p.id)) {
+      const cleanSales = (p.sales || []).filter(s => s && s.id && !deletedSaleSet.has(s.id));
+      projectMap.set(p.id, { ...p, sales: cleanSales });
+    }
+  });
+
+  // Local overlay: preserves local edits / new projects
+  localProjects.forEach(p => {
+    if (p && p.id && !deletedProjSet.has(p.id)) {
+      const cleanLocalSales = (p.sales || []).filter(s => s && s.id && !deletedSaleSet.has(s.id));
+      if (!projectMap.has(p.id)) {
+        projectMap.set(p.id, { ...p, sales: cleanLocalSales });
+      } else {
+        const existing = projectMap.get(p.id);
+        const salesMap = new Map();
+        (existing.sales || []).forEach(s => { if (s && s.id && !deletedSaleSet.has(s.id)) salesMap.set(s.id, s); });
+        cleanLocalSales.forEach(s => { if (s && s.id && !deletedSaleSet.has(s.id)) salesMap.set(s.id, s); });
+        projectMap.set(p.id, {
+          ...existing,
+          ...p,
+          sales: Array.from(salesMap.values())
+        });
+      }
+    }
+  });
+
+  const mergedProjects = Array.from(projectMap.values());
+  const activeProjectId = (localBusiness?.activeProjectId && projectMap.has(localBusiness.activeProjectId))
+    ? localBusiness.activeProjectId
+    : (remoteBusiness?.activeProjectId && projectMap.has(remoteBusiness.activeProjectId))
+      ? remoteBusiness.activeProjectId
+      : (mergedProjects[0]?.id || null);
+
+  return {
+    activeProjectId,
+    projects: mergedProjects
   };
 }
 

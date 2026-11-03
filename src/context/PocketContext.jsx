@@ -210,8 +210,13 @@ export function PocketProvider({ children }) {
             },
             monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
             googleDriveUrl: resolveDriveUrl(parsed.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null)),
+            deletedBusinessProjectIds: parsed.deletedBusinessProjectIds || [],
+            deletedBusinessSaleIds: parsed.deletedBusinessSaleIds || [],
             business: (parsed.business && Array.isArray(parsed.business.projects))
-              ? parsed.business
+              ? {
+                  ...parsed.business,
+                  projects: (parsed.business.projects || []).filter(p => !(parsed.deletedBusinessProjectIds || []).includes(p.id))
+                }
               : DEFAULT_BUSINESS_DATA
           };
         }
@@ -231,6 +236,8 @@ export function PocketProvider({ children }) {
       goldSavings: DEFAULT_GOLD_SAVINGS,
       monthlyBudgets: { yasmeen: {}, adziima: {} },
       googleDriveUrl: DEFAULT_GOOGLE_DRIVE_FOLDER_URL,
+      deletedBusinessProjectIds: [],
+      deletedBusinessSaleIds: [],
       business: DEFAULT_BUSINESS_DATA
     };
   });
@@ -1149,14 +1156,25 @@ export function PocketProvider({ children }) {
 
     setData(prev => {
       const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
-      return {
-        ...prev,
-        business: {
-          ...(prev.business || {}),
-          activeProjectId: id,
-          projects: [...prevProjects, newProj]
-        }
+      const nextBusiness = {
+        ...(prev.business || {}),
+        activeProjectId: id,
+        projects: [...prevProjects, newProj]
       };
+      const nextData = {
+        ...prev,
+        business: nextBusiness
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'business', nextBusiness).catch(() => {});
+      }
+
+      return nextData;
     });
     return id;
   };
@@ -1170,40 +1188,75 @@ export function PocketProvider({ children }) {
         }
         return p;
       });
-      return {
-        ...prev,
-        business: {
-          ...(prev.business || {}),
-          projects: updated
-        }
+      const nextBusiness = {
+        ...(prev.business || {}),
+        projects: updated
       };
+      const nextData = {
+        ...prev,
+        business: nextBusiness
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'business', nextBusiness).catch(() => {});
+      }
+
+      return nextData;
     });
   };
 
   const deleteBusinessProject = (projectId) => {
+    isRemoteUpdatingRef.current = true;
     setData(prev => {
       const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
       const filtered = prevProjects.filter(p => p.id !== projectId);
       const nextActiveId = filtered.length > 0 ? filtered[0].id : null;
-      return {
-        ...prev,
-        business: {
-          ...(prev.business || {}),
-          activeProjectId: nextActiveId,
-          projects: filtered
-        }
+      const nextDeletedIds = Array.from(new Set([...(prev.deletedBusinessProjectIds || []), projectId]));
+      const nextBusiness = {
+        ...(prev.business || {}),
+        activeProjectId: nextActiveId,
+        projects: filtered
       };
+      const nextData = {
+        ...prev,
+        deletedBusinessProjectIds: nextDeletedIds,
+        business: nextBusiness
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        Promise.all([
+          pushCloudSubpath(firebaseDbUrl, 'business', nextBusiness),
+          pushCloudSubpath(firebaseDbUrl, 'deletedBusinessProjectIds', nextDeletedIds)
+        ]).catch(() => {});
+      }
+
+      return nextData;
     });
+    setTimeout(() => { isRemoteUpdatingRef.current = false; }, 800);
   };
 
   const setActiveBusinessProject = (projectId) => {
-    setData(prev => ({
-      ...prev,
-      business: {
-        ...(prev.business || {}),
-        activeProjectId: projectId
-      }
-    }));
+    setData(prev => {
+      const nextData = {
+        ...prev,
+        business: {
+          ...(prev.business || {}),
+          activeProjectId: projectId
+        }
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+      return nextData;
+    });
   };
 
   const recordBusinessSale = (saleData) => {
@@ -1231,17 +1284,29 @@ export function PocketProvider({ children }) {
         }
         return p;
       });
-      return {
-        ...prev,
-        business: {
-          ...(prev.business || {}),
-          projects: updated
-        }
+      const nextBusiness = {
+        ...(prev.business || {}),
+        projects: updated
       };
+      const nextData = {
+        ...prev,
+        business: nextBusiness
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, 'business', nextBusiness).catch(() => {});
+      }
+
+      return nextData;
     });
   };
 
   const deleteBusinessSale = (saleId, projectId) => {
+    isRemoteUpdatingRef.current = true;
     setData(prev => {
       const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
       const updated = prevProjects.map(p => {
@@ -1253,14 +1318,31 @@ export function PocketProvider({ children }) {
         }
         return p;
       });
-      return {
-        ...prev,
-        business: {
-          ...(prev.business || {}),
-          projects: updated
-        }
+      const nextDeletedSaleIds = Array.from(new Set([...(prev.deletedBusinessSaleIds || []), saleId]));
+      const nextBusiness = {
+        ...(prev.business || {}),
+        projects: updated
       };
+      const nextData = {
+        ...prev,
+        deletedBusinessSaleIds: nextDeletedSaleIds,
+        business: nextBusiness
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        Promise.all([
+          pushCloudSubpath(firebaseDbUrl, 'business', nextBusiness),
+          pushCloudSubpath(firebaseDbUrl, 'deletedBusinessSaleIds', nextDeletedSaleIds)
+        ]).catch(() => {});
+      }
+
+      return nextData;
     });
+    setTimeout(() => { isRemoteUpdatingRef.current = false; }, 800);
   };
 
   // Bulletproof Calculations per selectedMonth
