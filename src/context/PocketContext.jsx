@@ -210,7 +210,9 @@ export function PocketProvider({ children }) {
             },
             monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
             googleDriveUrl: resolveDriveUrl(parsed.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null)),
-            business: parsed.business || DEFAULT_BUSINESS_DATA
+            business: (parsed.business && Array.isArray(parsed.business.projects))
+              ? parsed.business
+              : DEFAULT_BUSINESS_DATA
           };
         }
       }
@@ -1120,178 +1122,142 @@ export function PocketProvider({ children }) {
     };
   }, []);
 
-  // Business Action Methods
+  // Multi-Project Business Action Methods
+  const addBusinessProject = (newProjectData) => {
+    const id = `biz-${Date.now()}`;
+    const weight = parseFloat(newProjectData.weightKg) || 0;
+    const shipKg = parseFloat(newProjectData.shippingCostPerKg) || 0;
+    const newProj = {
+      id,
+      name: newProjectData.name || 'Bisnis Baru',
+      category: newProjectData.category || 'fashion',
+      customCategoryName: newProjectData.customCategoryName || '',
+      createdAt: new Date().toISOString().split('T')[0],
+      productName: newProjectData.productName || 'Produk Perdana',
+      totalUnits: parseInt(newProjectData.totalUnits, 10) || 50,
+      itemCostTotal: parseFloat(newProjectData.itemCostTotal) || 0,
+      weightKg: weight,
+      shippingCostPerKg: shipKg,
+      otherCostTotal: parseFloat(newProjectData.otherCostTotal) || 0,
+      targetPricePerUnit: parseFloat(newProjectData.targetPricePerUnit) || 100000,
+      notes: newProjectData.notes || '',
+      selectedSalesMethods: newProjectData.selectedSalesMethods || ['ready_stock', 'pre_order', 'online_shop'],
+      partnerProfitSplit: newProjectData.partnerProfitSplit || { yasmeen: 50, adziima: 50 },
+      sales: [],
+      expenses: []
+    };
+
+    setData(prev => {
+      const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
+      return {
+        ...prev,
+        business: {
+          ...(prev.business || {}),
+          activeProjectId: id,
+          projects: [...prevProjects, newProj]
+        }
+      };
+    });
+    return id;
+  };
+
+  const updateBusinessProject = (projectId, updates) => {
+    setData(prev => {
+      const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
+      const updated = prevProjects.map(p => {
+        if (p.id === projectId) {
+          return { ...p, ...updates };
+        }
+        return p;
+      });
+      return {
+        ...prev,
+        business: {
+          ...(prev.business || {}),
+          projects: updated
+        }
+      };
+    });
+  };
+
+  const deleteBusinessProject = (projectId) => {
+    setData(prev => {
+      const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
+      const filtered = prevProjects.filter(p => p.id !== projectId);
+      const nextActiveId = filtered.length > 0 ? filtered[0].id : null;
+      return {
+        ...prev,
+        business: {
+          ...(prev.business || {}),
+          activeProjectId: nextActiveId,
+          projects: filtered
+        }
+      };
+    });
+  };
+
+  const setActiveBusinessProject = (projectId) => {
+    setData(prev => ({
+      ...prev,
+      business: {
+        ...(prev.business || {}),
+        activeProjectId: projectId
+      }
+    }));
+  };
+
   const recordBusinessSale = (saleData) => {
     const newSale = {
       id: `bsale-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      batchId: saleData.batchId || 'batch-1',
-      channel: saleData.channel || 'cfd',
       date: saleData.date || getLocalDateString(),
+      method: saleData.method || saleData.channel || 'ready_stock',
       pcs: parseInt(saleData.pcs, 10) || 1,
-      pricePerPcs: parseFloat(saleData.pricePerPcs) || 120000,
-      totalAmountIdr: (parseInt(saleData.pcs, 10) || 1) * (parseFloat(saleData.pricePerPcs) || 120000),
+      pricePerPcs: parseFloat(saleData.pricePerPcs) || 100000,
+      totalAmountIdr: (parseInt(saleData.pcs, 10) || 1) * (parseFloat(saleData.pricePerPcs) || 100000),
       buyerOrNote: saleData.buyerOrNote || '',
       seller: saleData.seller || 'berdua',
       createdAt: new Date().toISOString()
     };
 
     setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      return {
-        ...prev,
-        business: {
-          ...prevBiz,
-          sales: [newSale, ...(prevBiz.sales || [])]
-        }
-      };
-    });
-  };
-
-  const deleteBusinessSale = (saleId) => {
-    setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      return {
-        ...prev,
-        business: {
-          ...prevBiz,
-          sales: (prevBiz.sales || []).filter(s => s.id !== saleId)
-        }
-      };
-    });
-  };
-
-  const addBusinessExpense = (expenseData) => {
-    const newExp = {
-      id: `bexp-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-      batchId: expenseData.batchId || 'batch-1',
-      channel: expenseData.channel || 'operasional',
-      date: expenseData.date || getLocalDateString(),
-      category: expenseData.category || 'operasional',
-      amountIdr: parseFloat(expenseData.amountIdr) || 0,
-      notes: expenseData.notes || '',
-      createdAt: new Date().toISOString()
-    };
-
-    setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      return {
-        ...prev,
-        business: {
-          ...prevBiz,
-          expenses: [newExp, ...(prevBiz.expenses || [])]
-        }
-      };
-    });
-  };
-
-  const deleteBusinessExpense = (expenseId) => {
-    setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      return {
-        ...prev,
-        business: {
-          ...prevBiz,
-          expenses: (prevBiz.expenses || []).filter(e => e.id !== expenseId)
-        }
-      };
-    });
-  };
-
-  const updateConsignmentStock = ({ consignmentId, deltaGiven = 0, deltaSold = 0, deltaReturned = 0, deltaPaid = 0, notes }) => {
-    setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      const prevConsignments = prevBiz.consignments || [];
-      const updated = prevConsignments.map(c => {
-        if (c.id === consignmentId) {
-          const newGiven = Math.max(0, (c.givenPcs || 0) + deltaGiven);
-          const newSold = Math.max(0, (c.soldPcs || 0) + deltaSold);
-          const newReturned = Math.max(0, (c.returnedPcs || 0) + deltaReturned);
-          const newPaid = Math.max(0, (c.paidAmount || 0) + deltaPaid);
+      const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
+      const targetId = saleData.projectId || prev.business?.activeProjectId || prevProjects[0]?.id;
+      const updated = prevProjects.map(p => {
+        if (p.id === targetId) {
           return {
-            ...c,
-            givenPcs: newGiven,
-            soldPcs: newSold,
-            returnedPcs: newReturned,
-            paidAmount: newPaid,
-            notes: notes !== undefined ? notes : c.notes
+            ...p,
+            sales: [newSale, ...(p.sales || [])]
           };
         }
-        return c;
+        return p;
       });
-
       return {
         ...prev,
         business: {
-          ...prevBiz,
-          consignments: updated
+          ...(prev.business || {}),
+          projects: updated
         }
       };
     });
   };
 
-  const updateBusinessBatch = (batchId, batchUpdates) => {
+  const deleteBusinessSale = (saleId, projectId) => {
     setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      const batches = (prevBiz.batches || []).map(b => {
-        if (b.id === batchId) {
-          const updated = { ...b, ...batchUpdates };
-          const pcs = parseInt(updated.totalPcs, 10) || 50;
-          const weight = parseFloat(updated.weightKg) || 35;
-          const priceChina = parseFloat(updated.pricePerPcsChina) || 63200;
-          const shipKg = parseFloat(updated.shippingCostPerKg) || 3700;
-          const other = parseFloat(updated.otherCosts) || 0;
-          const itemCost = pcs * priceChina;
-          const shipCost = weight * shipKg;
-          const totalCapital = itemCost + shipCost + other;
-          const hpp = pcs > 0 ? Math.round(totalCapital / pcs) : 0;
+      const prevProjects = prev.business?.projects || DEFAULT_BUSINESS_DATA.projects;
+      const updated = prevProjects.map(p => {
+        if (!projectId || p.id === projectId) {
           return {
-            ...updated,
-            totalItemCostChina: itemCost,
-            totalShippingCost: shipCost,
-            totalCapitalCost: totalCapital,
-            hppPerPcs: hpp
+            ...p,
+            sales: (p.sales || []).filter(s => s.id !== saleId)
           };
         }
-        return b;
+        return p;
       });
-
       return {
         ...prev,
         business: {
-          ...prevBiz,
-          batches
-        }
-      };
-    });
-  };
-
-  const updateBusinessPlan = (planUpdates) => {
-    setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      return {
-        ...prev,
-        business: {
-          ...prevBiz,
-          plan: {
-            ...(prevBiz.plan || DEFAULT_BUSINESS_DATA.plan),
-            ...planUpdates
-          }
-        }
-      };
-    });
-  };
-
-  const updateBusinessSettings = (newSettings) => {
-    setData(prev => {
-      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
-      return {
-        ...prev,
-        business: {
-          ...prevBiz,
-          settings: {
-            ...prevBiz.settings,
-            ...newSettings
-          }
+          ...(prev.business || {}),
+          projects: updated
         }
       };
     });
@@ -1806,80 +1772,53 @@ export function PocketProvider({ children }) {
     }
   }, [data, selectedMonth]);
 
-  // Business Calculations Memo
+  // Multi-Project Business Calculations Memo
   const businessCalculations = useMemo(() => {
     const biz = data?.business || DEFAULT_BUSINESS_DATA;
-    const plan = biz?.plan || {
-      productName: biz?.batches?.[0]?.name || 'Produk / Paket Perdana',
-      totalUnits: parseInt(biz?.batches?.[0]?.totalPcs, 10) || 50,
-      itemCostTotal: parseFloat(biz?.batches?.[0]?.totalItemCostChina) || 3000000,
-      shippingCostTotal: parseFloat(biz?.batches?.[0]?.totalShippingCost) || 250000,
-      otherCostTotal: parseFloat(biz?.batches?.[0]?.otherCosts) || 50000,
-      targetPricePerUnit: parseFloat(biz?.batches?.[0]?.targetSellPrice) || 100000,
-      notes: biz?.batches?.[0]?.notes || ''
-    };
-    const settings = biz?.settings || DEFAULT_BUSINESS_DATA.settings;
+    const projectsList = Array.isArray(biz?.projects) && biz.projects.length > 0
+      ? biz.projects
+      : DEFAULT_BUSINESS_DATA.projects;
+    const activeId = biz?.activeProjectId || projectsList[0]?.id || 'biz-1';
 
-    const totalUnits = parseInt(plan.totalUnits, 10) || 50;
-    const itemCostTotal = parseFloat(plan.itemCostTotal) || 0;
-    const shippingCostTotal = parseFloat(plan.shippingCostTotal) || 0;
-    const otherCostTotal = parseFloat(plan.otherCostTotal) || 0;
-    const targetPricePerUnit = parseFloat(plan.targetPricePerUnit) || 100000;
+    const calculatedProjects = projectsList.map(p => {
+      const totalUnits = parseInt(p.totalUnits, 10) || 50;
+      const itemCostTotal = parseFloat(p.itemCostTotal) || 0;
+      const weightKg = parseFloat(p.weightKg) || 0;
+      const shippingCostPerKg = parseFloat(p.shippingCostPerKg) || 0;
+      const totalShippingCost = weightKg * shippingCostPerKg;
+      const otherCostTotal = parseFloat(p.otherCostTotal) || 0;
+      const targetPricePerUnit = parseFloat(p.targetPricePerUnit) || 100000;
 
-    const totalCapitalCost = itemCostTotal + shippingCostTotal + otherCostTotal;
-    const hppPerUnit = totalUnits > 0 ? Math.round(totalCapitalCost / totalUnits) : 0;
-    const profitPerUnit = targetPricePerUnit - hppPerUnit;
-    const marginPercent = targetPricePerUnit > 0 ? Math.round(((targetPricePerUnit - hppPerUnit) / targetPricePerUnit) * 1000) / 10 : 0;
-    const totalEstimatedRevenue = targetPricePerUnit * totalUnits;
-    const totalEstimatedNetProfit = Math.max(0, totalEstimatedRevenue - totalCapitalCost);
-    const bepUnits = targetPricePerUnit > 0 ? Math.ceil(totalCapitalCost / targetPricePerUnit) : 0;
+      const totalCapitalCost = itemCostTotal + totalShippingCost + otherCostTotal;
+      const hppPerUnit = totalUnits > 0 ? Math.round(totalCapitalCost / totalUnits) : 0;
+      const profitPerUnit = targetPricePerUnit - hppPerUnit;
+      const marginPercent = targetPricePerUnit > 0 ? Math.round(((targetPricePerUnit - hppPerUnit) / targetPricePerUnit) * 1000) / 10 : 0;
+      const totalEstimatedRevenue = targetPricePerUnit * totalUnits;
+      const totalEstimatedNetProfit = Math.max(0, totalEstimatedRevenue - totalCapitalCost);
+      const bepUnits = targetPricePerUnit > 0 ? Math.ceil(totalCapitalCost / targetPricePerUnit) : 0;
 
-    // Sales Breakdown
-    const sales = biz?.sales || [];
-    let totalPcsSold = 0;
-    let totalActualRevenue = 0;
-    const salesByMethod = {};
+      const sales = p.sales || [];
+      let totalPcsSold = 0;
+      let totalActualRevenue = 0;
+      sales.forEach(s => {
+        const qty = parseInt(s.pcs, 10) || 0;
+        const amt = parseFloat(s.totalAmountIdr) || (qty * (parseFloat(s.pricePerPcs) || targetPricePerUnit));
+        totalPcsSold += qty;
+        totalActualRevenue += amt;
+      });
 
-    sales.forEach(s => {
-      const p = parseInt(s.pcs, 10) || 0;
-      const amt = parseFloat(s.totalAmountIdr) || (p * (parseFloat(s.pricePerPcs) || targetPricePerUnit));
-      totalPcsSold += p;
-      totalActualRevenue += amt;
+      const bepPercent = totalCapitalCost > 0 ? Math.min(100, Math.round((totalActualRevenue / totalCapitalCost) * 100)) : 0;
+      const isCapitalRecovered = totalActualRevenue >= totalCapitalCost;
+      const remainingUnits = Math.max(0, totalUnits - totalPcsSold);
+      const actualGrossProfit = totalActualRevenue - (totalPcsSold * hppPerUnit);
 
-      const mKey = s.method || s.channel || 'ready_stock';
-      if (!salesByMethod[mKey]) salesByMethod[mKey] = { pcs: 0, revenue: 0 };
-      salesByMethod[mKey].pcs += p;
-      salesByMethod[mKey].revenue += amt;
-    });
-
-    // Expenses
-    const expenses = biz?.expenses || [];
-    let totalExpenses = 0;
-    expenses.forEach(e => {
-      totalExpenses += (parseFloat(e.amountIdr) || 0);
-    });
-
-    // Profitability & BEP
-    const bepPercent = totalCapitalCost > 0 ? Math.min(100, Math.round((totalActualRevenue / totalCapitalCost) * 100)) : 0;
-    const isCapitalRecovered = totalActualRevenue >= totalCapitalCost;
-
-    const totalHppSold = totalPcsSold * hppPerUnit;
-    const grossProfit = totalActualRevenue - totalHppSold;
-    const netProfit = Math.max(0, grossProfit - totalExpenses);
-    const remainingUnits = Math.max(0, totalUnits - totalPcsSold);
-
-    const distributableProfit = Math.max(0, totalActualRevenue - totalCapitalCost - totalExpenses);
-    const splitRatio = settings?.partnerProfitSplit || { yasmeen: 50, adziima: 50 };
-    const profitYasmeen = Math.round(distributableProfit * ((splitRatio.yasmeen || 50) / 100));
-    const profitAdziima = Math.round(distributableProfit * ((splitRatio.adziima || 50) / 100));
-
-    return {
-      settings,
-      plan: {
-        ...plan,
+      return {
+        ...p,
         totalUnits,
         itemCostTotal,
-        shippingCostTotal,
+        weightKg,
+        shippingCostPerKg,
+        totalShippingCost,
         otherCostTotal,
         targetPricePerUnit,
         totalCapitalCost,
@@ -1888,39 +1827,48 @@ export function PocketProvider({ children }) {
         marginPercent,
         totalEstimatedRevenue,
         totalEstimatedNetProfit,
-        bepUnits
+        bepUnits,
+        totalPcsSold,
+        totalActualRevenue,
+        bepPercent,
+        isCapitalRecovered,
+        remainingUnits,
+        actualGrossProfit
+      };
+    });
+
+    const activeProject = calculatedProjects.find(cp => cp.id === activeId) || calculatedProjects[0] || {};
+
+    const totalAllEstimatedRevenue = calculatedProjects.reduce((sum, cp) => sum + cp.totalEstimatedRevenue, 0);
+    const totalAllActualRevenue = calculatedProjects.reduce((sum, cp) => sum + cp.totalActualRevenue, 0);
+    const totalAllCapitalCost = calculatedProjects.reduce((sum, cp) => sum + cp.totalCapitalCost, 0);
+
+    return {
+      projects: calculatedProjects,
+      activeProject,
+      activeProjectId: activeId,
+      settings: {
+        businessName: activeProject.name || 'Bisnis & Usaha',
+        businessType: activeProject.category || 'fashion',
+        selectedSalesMethods: activeProject.selectedSalesMethods || ['ready_stock', 'pre_order', 'online_shop']
       },
-      currentBatch: {
-        id: 'plan-1',
-        name: plan.productName,
-        totalPcs: totalUnits,
-        totalCapitalCost,
-        hppPerPcs: hppPerUnit,
-        targetSellPrice: targetPricePerUnit
-      },
-      totalUnits,
-      totalStock: totalUnits,
-      totalCapitalCost,
-      hppPerUnit,
-      profitPerUnit,
-      marginPercent,
-      totalEstimatedRevenue,
-      totalEstimatedNetProfit,
-      bepUnits,
-      bepPcs: bepUnits,
-      bepPercent,
-      totalPcsSold,
-      totalRevenue: totalActualRevenue,
-      salesByMethod,
-      totalExpenses,
-      isCapitalRecovered,
-      remainingUnits,
-      remainingReadyStock: remainingUnits,
-      grossProfit,
-      netProfit,
-      distributableProfit,
-      profitYasmeen,
-      profitAdziima
+      totalUnits: activeProject.totalUnits || 0,
+      totalCapitalCost: activeProject.totalCapitalCost || 0,
+      hppPerUnit: activeProject.hppPerUnit || 0,
+      profitPerUnit: activeProject.profitPerUnit || 0,
+      marginPercent: activeProject.marginPercent || 0,
+      totalEstimatedRevenue: activeProject.totalEstimatedRevenue || 0,
+      totalEstimatedNetProfit: activeProject.totalEstimatedNetProfit || 0,
+      bepUnits: activeProject.bepUnits || 0,
+      bepPcs: activeProject.bepUnits || 0,
+      totalPcsSold: activeProject.totalPcsSold || 0,
+      totalRevenue: activeProject.totalActualRevenue || 0,
+      bepPercent: activeProject.bepPercent || 0,
+      isCapitalRecovered: activeProject.isCapitalRecovered || false,
+      remainingUnits: activeProject.remainingUnits || 0,
+      totalAllEstimatedRevenue,
+      totalAllActualRevenue,
+      totalAllCapitalCost
     };
   }, [data?.business]);
 
@@ -1930,14 +1878,12 @@ export function PocketProvider({ children }) {
         ...data,
         business: data?.business || DEFAULT_BUSINESS_DATA,
         businessCalculations,
+        addBusinessProject,
+        updateBusinessProject,
+        deleteBusinessProject,
+        setActiveBusinessProject,
         recordBusinessSale,
         deleteBusinessSale,
-        addBusinessExpense,
-        deleteBusinessExpense,
-        updateConsignmentStock,
-        updateBusinessBatch,
-        updateBusinessPlan,
-        updateBusinessSettings,
         activeView,
         setActiveView,
         selectedMonth,

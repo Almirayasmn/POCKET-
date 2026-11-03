@@ -163,25 +163,31 @@ export const SALES_METHODS_LIST = [
   { id: 'event_bazar', label: 'Event / Bazar / Lapak CFD', desc: 'Buka booth lapak di acara keramaian atau bazar' }
 ];
 
-export const DEFAULT_BUSINESS_DATA = {
-  settings: {
-    businessName: 'Rencana Usaha Bersama',
-    tagline: 'Perencanaan Modal, HPP & Penjualan · Yasmeen & Adziima',
-    businessType: 'fashion', // 'fashion' | 'jastip_impor' | 'fnb' | 'beauty' | etc.
-    customTypeName: '',
+export const DEFAULT_BUSINESS_PROJECTS = [
+  {
+    id: 'biz-1',
+    name: 'Jastip & Fashion Impor',
+    category: 'fashion', // 'fashion' | 'jastip_impor' | 'fnb' | 'beauty' | etc.
+    customCategoryName: '',
+    createdAt: '2026-11-01',
+    productName: 'Koleksi Baju Batch 1',
+    totalUnits: 50,
+    itemCostTotal: 3160000,
+    // Ongkir dihitung per Kg
+    weightKg: 35,
+    shippingCostPerKg: 3700,
+    otherCostTotal: 50000,
+    targetPricePerUnit: 120000,
+    notes: 'Kargo Bandung ke Padang 35 kg (@Rp 3.700/kg).',
     selectedSalesMethods: ['ready_stock', 'pre_order', 'online_shop'],
-    partnerProfitSplit: { yasmeen: 50, adziima: 50 } // Bagi hasil 50:50
-  },
-  plan: {
-    productName: 'Koleksi / Produk Batch 1',
-    totalUnits: 50,             // Jumlah pcs / unit
-    itemCostTotal: 3000000,     // Total modal beli barang (Rp)
-    shippingCostTotal: 250000,  // Total ongkir & kargo (Rp)
-    otherCostTotal: 50000,      // Biaya packing / admin / operasional lain (Rp)
-    targetPricePerUnit: 100000, // Target harga jual per unit (Rp)
-    notes: 'Perencanaan modal awal dan estimasi HPP produk.'
-  },
-  sales: [],
-  expenses: []
+    partnerProfitSplit: { yasmeen: 50, adziima: 50 },
+    sales: [],
+    expenses: []
+  }
+];
+
+export const DEFAULT_BUSINESS_DATA = {
+  activeProjectId: 'biz-1',
+  projects: DEFAULT_BUSINESS_PROJECTS
 };
 

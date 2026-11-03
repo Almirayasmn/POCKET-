@@ -618,10 +618,12 @@ export default function LandingPage({
             </div>
 
             <div className="profile-name" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#581c87' }}>
-              {bizCalc.settings?.businessName || 'Rencana Bisnis Bersama'}
+              {bizCalc.projects?.length > 1 ? `${bizCalc.projects.length} Proyek Bisnis Berdua` : (bizCalc.settings?.businessName || 'Rencana Bisnis Bersama')}
             </div>
             <div className="profile-desc" style={{ fontSize: '0.74rem', minHeight: '18px', color: '#6d28d9' }}>
-              {BUSINESS_TYPES.find(b => b.id === (bizCalc.settings?.businessType || 'fashion'))?.label || 'Perencanaan HPP & Usaha'}
+              {bizCalc.projects?.length > 1
+                ? `${bizCalc.projects.map(p => p.name).join(' · ')}`
+                : (BUSINESS_TYPES.find(b => b.id === (bizCalc.settings?.businessType || 'fashion'))?.label || 'Perencanaan HPP & Usaha')}
             </div>
           </div>
 
@@ -631,10 +633,12 @@ export default function LandingPage({
                 ESTIMASI POTENSI OMZET
               </div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 900, color: '#581c87', marginTop: '0.1rem' }}>
-                {formatIdr(bizCalc.totalEstimatedRevenue || 0)}
+                {formatIdr(bizCalc.totalAllEstimatedRevenue || bizCalc.totalEstimatedRevenue || 0)}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#7c3aed', marginTop: '0.15rem', fontWeight: 700 }}>
-                {bizCalc.totalUnits || 0} unit · HPP {formatIdr(bizCalc.hppPerUnit || 0)}/unit
+                {bizCalc.projects?.length > 1
+                  ? `${bizCalc.projects.length} Kategori Bisnis Mandiri`
+                  : `${bizCalc.totalUnits || 0} unit · HPP ${formatIdr(bizCalc.hppPerUnit || 0)}/unit`}
               </div>
 
               {/* BEP / Margin Mini Progress Bar */}
