@@ -308,7 +308,18 @@ export default function BusinessView({ onOpenCloudModal }) {
       )}
 
       {/* TOP HEADER CONTROLS */}
-      <div className="section-header">
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          marginBottom: '1.25rem',
+          paddingBottom: '0.65rem',
+          borderBottom: '1px solid #f3e8ff'
+        }}
+      >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
           <button
             className="btn-back-home"
@@ -333,7 +344,7 @@ export default function BusinessView({ onOpenCloudModal }) {
                 background: '#faf5ff',
                 border: '1.5px solid #d8b4fe',
                 color: '#6b21a8',
-                padding: '0.4rem 0.8rem',
+                padding: '0.45rem 0.85rem',
                 borderRadius: 'var(--radius-full)',
                 fontSize: '0.76rem',
                 fontWeight: 800,
@@ -346,7 +357,7 @@ export default function BusinessView({ onOpenCloudModal }) {
             </button>
           )}
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
             <div
               style={{
                 width: 38,
@@ -357,13 +368,14 @@ export default function BusinessView({ onOpenCloudModal }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#7c3aed'
+                color: '#7c3aed',
+                flexShrink: 0
               }}
             >
               {viewMode === 'detail' ? getBizIcon(activeProject?.category) : <Briefcase size={18} />}
             </div>
             <div>
-              <h2 style={{ fontSize: '1.2rem', fontWeight: 900, color: '#581c87', margin: 0, lineHeight: 1.2 }}>
+              <h2 style={{ fontSize: '1.15rem', fontWeight: 900, color: '#581c87', margin: 0, lineHeight: 1.2 }}>
                 {viewMode === 'detail' ? (activeProject?.name || 'Halaman Bisnis') : 'Manajemen Bisnis Berdua'}
               </h2>
               <div style={{ fontSize: '0.74rem', color: '#6d28d9', marginTop: '0.1rem', fontWeight: 600 }}>
@@ -375,8 +387,8 @@ export default function BusinessView({ onOpenCloudModal }) {
           </div>
         </div>
 
-        {/* Action Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }}>
+        {/* Action Controls Aligned on the Right */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'nowrap' }}>
           {viewMode === 'hub' && (
             <button
               type="button"
@@ -393,7 +405,8 @@ export default function BusinessView({ onOpenCloudModal }) {
                 fontWeight: 800,
                 fontSize: '0.78rem',
                 cursor: 'pointer',
-                boxShadow: isCreatingNew ? 'none' : '0 2px 8px rgba(124, 58, 237, 0.25)'
+                boxShadow: isCreatingNew ? 'none' : '0 2px 8px rgba(124, 58, 237, 0.25)',
+                whiteSpace: 'nowrap'
               }}
             >
               {isCreatingNew ? <X size={15} /> : <Plus size={15} />}
@@ -410,11 +423,12 @@ export default function BusinessView({ onOpenCloudModal }) {
               background: isCloudConnected ? '#f0fdf4' : '#ffffff',
               border: isCloudConnected ? '1.5px solid #86efac' : '1.5px dashed #cbd5e1',
               color: isCloudConnected ? '#166534' : '#64748b',
-              padding: '0.35rem 0.75rem',
+              padding: '0.4rem 0.75rem',
               borderRadius: 'var(--radius-full)',
               fontSize: '0.74rem',
               fontWeight: 800,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
             }}
           >
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: isCloudConnected ? '#22c55e' : '#f59e0b' }} />
