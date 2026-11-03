@@ -144,7 +144,7 @@ export function exportMonthToExcel({
         <tr>
           <td colspan="8" style="background-color: #fdf2f8; border: 2px solid #db2777; padding: 16px 20px; text-align: left;">
             <div style="font-size: 16pt; font-weight: bold; color: #be185d; letter-spacing: 0.5px;">
-              🌸 POCKET DUO · LAPORAN KEUANGAN BULANAN
+              🌸 ZIMEIRA · LAPORAN KEUANGAN BULANAN
             </div>
             <div style="font-size: 12pt; font-weight: bold; color: #0284c7; margin-top: 4px;">
               ${userName.toUpperCase()} · BULAN: ${monthLabel.toUpperCase()}

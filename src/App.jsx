@@ -109,9 +109,8 @@ function PocketAppContent() {
 
       {/* Footer */}
       <footer style={{ marginTop: '3.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <span>Pocket Duo · Yasmeen & Adziima</span>
+        <span>Zimeira · Adziima & Almira</span>
         <Heart size={13} color="#f472b6" fill="#f472b6" />
-        <span>Pelacak Keuangan Pribadi</span>
         <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
         <button
           onClick={() => setIsCloudModalOpen(true)}

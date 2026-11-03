@@ -154,10 +154,10 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
         </div>
 
         <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem' }}>
-          Pocket Duo
+          Zimeira
         </h2>
         <p style={{ fontSize: '0.84rem', color: '#64748b', margin: '0 0 1.6rem', lineHeight: 1.5 }}>
-          Khusus Yasmeen & Adziima. Masukkan 6 angka PIN rahasia untuk membuka catatan keuangan.
+          Masukkan 6 digit PIN untuk membuka catatan.
         </p>
 
         {/* 6 Pastel Dots PIN Display */}

@@ -40,9 +40,9 @@ export default function Navbar({ onOpenSettings, onOpenAdd }) {
         </div>
         <div className="brand-info">
           <h1>
-            Pocket Duo <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>🌸 & 🦊</span>
+            Zimeira <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>🌸 & 🦊</span>
           </h1>
-          <p>{users.yasmeen?.name || 'Yasmeen'} & {users.cowoku?.name || 'Cowoku'} · Money & Jajan Tracker</p>
+          <p>Adziima & Almira</p>
         </div>
       </div>
 

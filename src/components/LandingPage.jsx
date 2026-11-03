@@ -75,7 +75,7 @@ export default function LandingPage({
         <div className="landing-couple-pill">
           <Heart size={14} color="#ec4899" fill="#ec4899" style={{ animation: 'pulseHeart 2.5s infinite' }} />
           <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#be185d', letterSpacing: '0.01em' }}>
-            Pocket Duo · Yasmeen & Adziima
+            Zimeira · Adziima & Almira
           </span>
         </div>
 
