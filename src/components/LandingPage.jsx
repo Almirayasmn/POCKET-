@@ -3,6 +3,10 @@ import { usePocket } from '../context/PocketContext';
 import { formatIdr, formatCny } from '../utils/formatters';
 import UserAvatar from './UserAvatar';
 import {
+  DEFAULT_BUSINESS_DATA,
+  BUSINESS_TYPES
+} from '../data/initialData';
+import {
   Heart,
   TrendingUp,
   Coins,
@@ -208,14 +212,14 @@ export default function LandingPage({
           </div>
         </div>
 
-        {/* 4 Wealth Chips */}
+        {/* 3 Symmetrical Wealth Chips (Yasmeen, Adziima, Emas 24K) */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: '0.5rem',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gap: '0.65rem',
             width: '100%',
-            marginTop: '0.25rem'
+            marginTop: '0.35rem'
           }}
         >
           <div
@@ -278,27 +282,6 @@ export default function LandingPage({
             </div>
             <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#92400e', marginTop: '0.1rem' }}>
               {formatIdr(goldAssetValueIdr)}
-            </div>
-          </div>
-
-          <div
-            onClick={() => setActiveView('business')}
-            style={{
-              background: '#faf5ff',
-              padding: '0.45rem 0.75rem',
-              borderRadius: '12px',
-              border: '1.5px solid #e9d5ff',
-              cursor: 'pointer',
-              textAlign: 'center',
-              transition: 'all 0.15s ease'
-            }}
-            title="Klik untuk buka catatan bisnis baju"
-          >
-            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>
-              👗 Bisnis Baju
-            </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#581c87', marginTop: '0.1rem' }}>
-              {formatIdr(bizCalc.totalRevenue || 0)}
             </div>
           </div>
         </div>
@@ -612,7 +595,7 @@ export default function LandingPage({
           </div>
         </div>
 
-        {/* Card 4: Bisnis Baju Kita */}
+        {/* Card 4: Rencana Usaha Bersama */}
         <div className="profile-select-card purple">
           <div>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
@@ -630,35 +613,35 @@ export default function LandingPage({
                   boxShadow: '0 3px 10px rgba(124, 58, 237, 0.12)'
                 }}
               >
-                👗
+                💼
               </div>
             </div>
 
             <div className="profile-name" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#581c87' }}>
-              Bisnis Baju Kita
+              {bizCalc.settings?.businessName || 'Rencana Bisnis Bersama'}
             </div>
             <div className="profile-desc" style={{ fontSize: '0.74rem', minHeight: '18px', color: '#6d28d9' }}>
-              Jastip & Impor China ➔ Padang
+              {BUSINESS_TYPES.find(b => b.id === (bizCalc.settings?.businessType || 'fashion'))?.label || 'Perencanaan HPP & Usaha'}
             </div>
           </div>
 
           <div>
             <div className="profile-amount-box" style={{ border: '1.5px solid #d8b4fe' }}>
               <div style={{ fontSize: '0.66rem', color: '#6b21a8', fontWeight: 800, letterSpacing: '0.04em' }}>
-                OMZET PENJUALAN BAL #1
+                ESTIMASI POTENSI OMZET
               </div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 900, color: '#581c87', marginTop: '0.1rem' }}>
-                {formatIdr(bizCalc.totalRevenue || 0)}
+                {formatIdr(bizCalc.totalEstimatedRevenue || 0)}
               </div>
               <div style={{ fontSize: '0.72rem', color: '#7c3aed', marginTop: '0.15rem', fontWeight: 700 }}>
-                {bizCalc.totalPcsSold || 0} terjual · {bizCalc.remainingReadyStock || 0} pcs ready
+                {bizCalc.totalUnits || 0} unit · HPP {formatIdr(bizCalc.hppPerUnit || 0)}/unit
               </div>
 
-              {/* BEP Mini Progress Bar */}
+              {/* BEP / Margin Mini Progress Bar */}
               <div style={{ marginTop: '0.35rem', paddingTop: '0.35rem', borderTop: '1px dashed #d8b4fe' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', fontWeight: 800, color: '#6b21a8', marginBottom: '0.2rem' }}>
-                  <span>Balik Modal: 28 pcs</span>
-                  <span>{bizCalc.bepPercent || 0}% Terpenuhi</span>
+                  <span>Balik Modal: {bizCalc.bepUnits || 0} unit</span>
+                  <span>{bizCalc.marginPercent || 0}% Margin</span>
                 </div>
                 <div style={{ width: '100%', height: 6, background: '#ede9fe', borderRadius: 99, overflow: 'hidden' }}>
                   <div
@@ -688,7 +671,7 @@ export default function LandingPage({
                   boxShadow: '0 3px 10px rgba(124, 58, 237, 0.25)'
                 }}
               >
-                <span>Catatan Bisnis</span>
+                <span>Kelola Rencana & HPP</span>
                 <ArrowRight size={15} />
               </button>
             </div>

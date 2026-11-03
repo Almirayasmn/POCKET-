@@ -1265,6 +1265,22 @@ export function PocketProvider({ children }) {
     });
   };
 
+  const updateBusinessPlan = (planUpdates) => {
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          plan: {
+            ...(prevBiz.plan || DEFAULT_BUSINESS_DATA.plan),
+            ...planUpdates
+          }
+        }
+      };
+    });
+  };
+
   const updateBusinessSettings = (newSettings) => {
     setData(prev => {
       const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
@@ -1793,120 +1809,115 @@ export function PocketProvider({ children }) {
   // Business Calculations Memo
   const businessCalculations = useMemo(() => {
     const biz = data?.business || DEFAULT_BUSINESS_DATA;
-    const batch = (biz?.batches && biz.batches[0]) || DEFAULT_BUSINESS_DATA.batches[0];
+    const plan = biz?.plan || {
+      productName: biz?.batches?.[0]?.name || 'Produk / Paket Perdana',
+      totalUnits: parseInt(biz?.batches?.[0]?.totalPcs, 10) || 50,
+      itemCostTotal: parseFloat(biz?.batches?.[0]?.totalItemCostChina) || 3000000,
+      shippingCostTotal: parseFloat(biz?.batches?.[0]?.totalShippingCost) || 250000,
+      otherCostTotal: parseFloat(biz?.batches?.[0]?.otherCosts) || 50000,
+      targetPricePerUnit: parseFloat(biz?.batches?.[0]?.targetSellPrice) || 100000,
+      notes: biz?.batches?.[0]?.notes || ''
+    };
+    const settings = biz?.settings || DEFAULT_BUSINESS_DATA.settings;
 
-    const totalPcs = parseInt(batch.totalPcs, 10) || 50;
-    const weightKg = parseFloat(batch.weightKg) || 35;
-    const pricePerPcsChina = parseFloat(batch.pricePerPcsChina) || 63200;
-    const shippingCostPerKg = parseFloat(batch.shippingCostPerKg) || 3700;
-    const otherCosts = parseFloat(batch.otherCosts) || 0;
+    const totalUnits = parseInt(plan.totalUnits, 10) || 50;
+    const itemCostTotal = parseFloat(plan.itemCostTotal) || 0;
+    const shippingCostTotal = parseFloat(plan.shippingCostTotal) || 0;
+    const otherCostTotal = parseFloat(plan.otherCostTotal) || 0;
+    const targetPricePerUnit = parseFloat(plan.targetPricePerUnit) || 100000;
 
-    const totalItemCostChina = totalPcs * pricePerPcsChina;
-    const totalShippingCost = weightKg * shippingCostPerKg;
-    const totalCapitalCost = totalItemCostChina + totalShippingCost + otherCosts;
-    const hppPerPcs = totalPcs > 0 ? Math.round(totalCapitalCost / totalPcs) : 65790;
-    const targetSellPrice = parseFloat(batch.targetSellPrice) || 120000;
+    const totalCapitalCost = itemCostTotal + shippingCostTotal + otherCostTotal;
+    const hppPerUnit = totalUnits > 0 ? Math.round(totalCapitalCost / totalUnits) : 0;
+    const profitPerUnit = targetPricePerUnit - hppPerUnit;
+    const marginPercent = targetPricePerUnit > 0 ? Math.round(((targetPricePerUnit - hppPerUnit) / targetPricePerUnit) * 1000) / 10 : 0;
+    const totalEstimatedRevenue = targetPricePerUnit * totalUnits;
+    const totalEstimatedNetProfit = Math.max(0, totalEstimatedRevenue - totalCapitalCost);
+    const bepUnits = targetPricePerUnit > 0 ? Math.ceil(totalCapitalCost / targetPricePerUnit) : 0;
 
     // Sales Breakdown
     const sales = biz?.sales || [];
     let totalPcsSold = 0;
-    let totalRevenue = 0;
-    let cfdPcsSold = 0;
-    let cfdRevenue = 0;
-    let livePcsSold = 0;
-    let liveRevenue = 0;
-    let saudaraPcsSold = 0;
-    let saudaraRevenue = 0;
+    let totalActualRevenue = 0;
+    const salesByMethod = {};
 
     sales.forEach(s => {
       const p = parseInt(s.pcs, 10) || 0;
-      const amt = parseFloat(s.totalAmountIdr) || (p * (parseFloat(s.pricePerPcs) || 120000));
+      const amt = parseFloat(s.totalAmountIdr) || (p * (parseFloat(s.pricePerPcs) || targetPricePerUnit));
       totalPcsSold += p;
-      totalRevenue += amt;
+      totalActualRevenue += amt;
 
-      if (s.channel === 'cfd') {
-        cfdPcsSold += p;
-        cfdRevenue += amt;
-      } else if (s.channel === 'live') {
-        livePcsSold += p;
-        liveRevenue += amt;
-      } else if (s.channel === 'saudara') {
-        saudaraPcsSold += p;
-        saudaraRevenue += amt;
-      }
+      const mKey = s.method || s.channel || 'ready_stock';
+      if (!salesByMethod[mKey]) salesByMethod[mKey] = { pcs: 0, revenue: 0 };
+      salesByMethod[mKey].pcs += p;
+      salesByMethod[mKey].revenue += amt;
     });
-
-    // Consignment
-    const consignments = biz?.consignments || [];
-    const consignment1 = consignments[0] || {};
-    const givenToSaudara = consignment1.givenPcs || 15;
-    const soldBySaudara = consignment1.soldPcs || saudaraPcsSold;
-    const returnedBySaudara = consignment1.returnedPcs || 0;
-    const remainingAtSaudara = Math.max(0, givenToSaudara - soldBySaudara - returnedBySaudara);
 
     // Expenses
     const expenses = biz?.expenses || [];
     let totalExpenses = 0;
-    let cfdExpenses = 0;
-    let liveExpenses = 0;
-
     expenses.forEach(e => {
-      const amt = parseFloat(e.amountIdr) || 0;
-      totalExpenses += amt;
-      if (e.channel === 'cfd') cfdExpenses += amt;
-      else if (e.channel === 'live') liveExpenses += amt;
+      totalExpenses += (parseFloat(e.amountIdr) || 0);
     });
 
     // Profitability & BEP
-    const bepPcs = Math.ceil(totalCapitalCost / targetSellPrice);
-    const bepPercent = Math.min(100, Math.round((totalPcsSold / (bepPcs || 1)) * 100));
-    const isCapitalRecovered = totalRevenue >= totalCapitalCost;
+    const bepPercent = totalCapitalCost > 0 ? Math.min(100, Math.round((totalActualRevenue / totalCapitalCost) * 100)) : 0;
+    const isCapitalRecovered = totalActualRevenue >= totalCapitalCost;
 
-    const totalHppSold = totalPcsSold * hppPerPcs;
-    const grossProfit = totalRevenue - totalHppSold;
+    const totalHppSold = totalPcsSold * hppPerUnit;
+    const grossProfit = totalActualRevenue - totalHppSold;
     const netProfit = Math.max(0, grossProfit - totalExpenses);
+    const remainingUnits = Math.max(0, totalUnits - totalPcsSold);
 
-    const restockFund = Math.min(totalCapitalCost, totalRevenue);
-    const distributableProfit = Math.max(0, totalRevenue - totalCapitalCost - totalExpenses);
-    const profitYasmeen = Math.round(distributableProfit * 0.5);
-    const profitAdziima = Math.round(distributableProfit * 0.5);
-
-    const remainingReadyStock = Math.max(0, totalPcs - totalPcsSold - remainingAtSaudara);
+    const distributableProfit = Math.max(0, totalActualRevenue - totalCapitalCost - totalExpenses);
+    const splitRatio = settings?.partnerProfitSplit || { yasmeen: 50, adziima: 50 };
+    const profitYasmeen = Math.round(distributableProfit * ((splitRatio.yasmeen || 50) / 100));
+    const profitAdziima = Math.round(distributableProfit * ((splitRatio.adziima || 50) / 100));
 
     return {
-      currentBatch: {
-        ...batch,
-        totalPcs,
-        weightKg,
-        pricePerPcsChina,
-        shippingCostPerKg,
-        otherCosts,
-        totalItemCostChina,
-        totalShippingCost,
+      settings,
+      plan: {
+        ...plan,
+        totalUnits,
+        itemCostTotal,
+        shippingCostTotal,
+        otherCostTotal,
+        targetPricePerUnit,
         totalCapitalCost,
-        hppPerPcs,
-        targetSellPrice
+        hppPerUnit,
+        profitPerUnit,
+        marginPercent,
+        totalEstimatedRevenue,
+        totalEstimatedNetProfit,
+        bepUnits
       },
-      totalStock: totalPcs,
-      totalPcsSold,
-      totalRevenue,
-      cfdPcsSold,
-      cfdRevenue,
-      cfdExpenses,
-      livePcsSold,
-      liveRevenue,
-      liveExpenses,
-      saudaraPcsSold,
-      saudaraRevenue,
-      remainingAtSaudara,
-      remainingReadyStock,
-      totalExpenses,
-      bepPcs,
+      currentBatch: {
+        id: 'plan-1',
+        name: plan.productName,
+        totalPcs: totalUnits,
+        totalCapitalCost,
+        hppPerPcs: hppPerUnit,
+        targetSellPrice: targetPricePerUnit
+      },
+      totalUnits,
+      totalStock: totalUnits,
+      totalCapitalCost,
+      hppPerUnit,
+      profitPerUnit,
+      marginPercent,
+      totalEstimatedRevenue,
+      totalEstimatedNetProfit,
+      bepUnits,
+      bepPcs: bepUnits,
       bepPercent,
+      totalPcsSold,
+      totalRevenue: totalActualRevenue,
+      salesByMethod,
+      totalExpenses,
       isCapitalRecovered,
+      remainingUnits,
+      remainingReadyStock: remainingUnits,
       grossProfit,
       netProfit,
-      restockFund,
       distributableProfit,
       profitYasmeen,
       profitAdziima
@@ -1925,6 +1936,7 @@ export function PocketProvider({ children }) {
         deleteBusinessExpense,
         updateConsignmentStock,
         updateBusinessBatch,
+        updateBusinessPlan,
         updateBusinessSettings,
         activeView,
         setActiveView,

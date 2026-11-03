@@ -143,57 +143,45 @@ export const PRESETS_ADZIIMA = [
   { title: 'Obat / Vitamin', amount: 15000, category: 'lainnya_obat', iconName: 'Pill', currency: 'IDR' },
 ];
 
+export const BUSINESS_TYPES = [
+  { id: 'fashion', label: 'Fashion & Pakaian', icon: 'Shirt' },
+  { id: 'jastip_impor', label: 'Jastip & Impor Barang', icon: 'Plane' },
+  { id: 'fnb', label: 'Makanan & Minuman (F&B / Kuliner)', icon: 'Utensils' },
+  { id: 'beauty', label: 'Kecantikan, Kosmetik & Skincare', icon: 'Sparkles' },
+  { id: 'accessories', label: 'Aksesoris & Kerajinan', icon: 'Gem' },
+  { id: 'electronics', label: 'Gadget & Elektronik', icon: 'Smartphone' },
+  { id: 'services', label: 'Jasa & Layanan', icon: 'Briefcase' },
+  { id: 'other', label: 'Usaha Lainnya (Kustom)', icon: 'ShoppingBag' }
+];
+
+export const SALES_METHODS_LIST = [
+  { id: 'ready_stock', label: 'Ready Stock (Langsung / COD)', desc: 'Barang ready, pembeli pesan langsung kirim atau COD' },
+  { id: 'pre_order', label: 'Pre-Order (PO)', desc: 'Kumpulkan pesanan & pembayaran terlebih dahulu' },
+  { id: 'online_shop', label: 'Online Shop (WA / Medsos / Marketplace)', desc: 'Jualan lewat status WA, Instagram, TikTok, Shopee, dll' },
+  { id: 'konsinyasi', label: 'Konsinyasi / Titip Jual', desc: 'Titip barang di toko, teman, saudara, atau reseller' },
+  { id: 'reseller_dropship', label: 'Reseller & Dropship', desc: 'Jual grosir dengan margin komisi ke pihak ketiga' },
+  { id: 'event_bazar', label: 'Event / Bazar / Lapak CFD', desc: 'Buka booth lapak di acara keramaian atau bazar' }
+];
+
 export const DEFAULT_BUSINESS_DATA = {
   settings: {
-    businessName: 'Pocket Fashion Padang',
-    tagline: 'Jastip & Baju Impor China · Yasmeen & Adziima',
-    originCity: 'China ➔ Bandung ➔ Padang',
-    defaultItemPriceChina: 63200,      // Rp 63.200 per pcs (inc ongkir ke Bandung)
-    defaultWeightPerBalKg: 35,         // 35 kg per bal
-    defaultShippingPerKg: 3700,        // Rp 3.700 per kg (Bandung ke Padang)
-    defaultPcsPerBal: 50,              // 50 pcs per bal
-    defaultTargetSellPrice: 120000,    // Rp 120.000 harga dasar / setoran saudara
-    consignmentPriceToSaudara: 120000, // Harga setoran saudara per pcs
-    partnerProfitSplit: { yasmeen: 50, adziima: 50 } // Bagi hasil laba bersih 50:50
+    businessName: 'Rencana Usaha Bersama',
+    tagline: 'Perencanaan Modal, HPP & Penjualan · Yasmeen & Adziima',
+    businessType: 'fashion', // 'fashion' | 'jastip_impor' | 'fnb' | 'beauty' | etc.
+    customTypeName: '',
+    selectedSalesMethods: ['ready_stock', 'pre_order', 'online_shop'],
+    partnerProfitSplit: { yasmeen: 50, adziima: 50 } // Bagi hasil 50:50
   },
-  batches: [
-    {
-      id: 'batch-1',
-      name: 'Bal #1 - Baju Import China (Batch 1)',
-      date: '2026-11-01',
-      status: 'active',
-      totalPcs: 50,
-      weightKg: 35,
-      pricePerPcsChina: 63200,
-      totalItemCostChina: 3160000,
-      shippingCostPerKg: 3700,
-      totalShippingCost: 129500,
-      otherCosts: 0,
-      totalCapitalCost: 3289500,
-      hppPerPcs: 65790,
-      targetSellPrice: 120000,
-      allocations: {
-        saudara: 15,
-        cfd: 20,
-        live: 15
-      },
-      notes: 'Batch perdana 50 pcs baju impor. 1 bal 35 kg lewat kargo Bandung ke Padang.'
-    }
-  ],
+  plan: {
+    productName: 'Koleksi / Produk Batch 1',
+    totalUnits: 50,             // Jumlah pcs / unit
+    itemCostTotal: 3000000,     // Total modal beli barang (Rp)
+    shippingCostTotal: 250000,  // Total ongkir & kargo (Rp)
+    otherCostTotal: 50000,      // Biaya packing / admin / operasional lain (Rp)
+    targetPricePerUnit: 100000, // Target harga jual per unit (Rp)
+    notes: 'Perencanaan modal awal dan estimasi HPP produk.'
+  },
   sales: [],
-  consignments: [
-    {
-      id: 'csg-1',
-      batchId: 'batch-1',
-      saudaraName: 'Saudara / Reseller Padang',
-      givenPcs: 15,
-      dateGiven: '2026-11-01',
-      pricePerPcs: 120000,
-      soldPcs: 0,
-      returnedPcs: 0,
-      notes: 'Titip 15 pcs. Saudara setor Rp 120.000/pcs laku, selisih jual di atas itu jadi untung saudara.'
-    }
-  ],
   expenses: []
 };
 
