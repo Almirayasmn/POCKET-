@@ -404,37 +404,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         </div>
       )}
 
-      {/* Guide Banner & Nongkrong Tracker */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div className="pastel-card" style={{ padding: '1.2rem', background: '#fdf2f8', borderColor: '#fbcfe8' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.4rem' }}>
-            <Sparkles size={18} color="#db2777" />
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#9d174d' }}>
-              Panduan Jatah Belanja & Makan {monthLabel}
-            </h4>
-          </div>
-          <p style={{ fontSize: '0.85rem', color: '#831843', lineHeight: 1.5, margin: 0 }}>
-            {yasmeen.hasDailyBudgetSet ? (
-              <>
-                Sisa jatah pos daily:{' '}
-                <strong>
-                  {formatPrimary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr)} / hari
-                </strong>{' '}
-                {formatSecondary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr) && (
-                  <span>({formatSecondary(yasmeen.dailySafeCny, yasmeen.dailySafeIdr)})</span>
-                )}{' '}
-                <span style={{ fontSize: '0.78rem', color: '#9d174d' }}>
-                  (untuk {yasmeen.remainingDays} hari tersisa dari pos Makan, Jajan & Kebutuhan).
-                </span>
-              </>
-            ) : (
-              <>
-                Belum ada target pada pos Makan / Kebutuhan Harian. Tentukan pagu di pos bawah agar jatah harianmu terkontrol!
-              </>
-            )}
-          </p>
-        </div>
-      </div>
+
 
       {/* Category Budget Section */}
       <div style={{ marginBottom: '2rem' }}>
