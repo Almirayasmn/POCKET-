@@ -217,7 +217,7 @@ export default function LandingPage({
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '0.65rem',
+            gap: '0.45rem',
             width: '100%',
             marginTop: '0.35rem'
           }}
@@ -226,7 +226,7 @@ export default function LandingPage({
             onClick={() => setActiveView('yasmeen')}
             style={{
               background: '#fdf2f8',
-              padding: '0.45rem 0.75rem',
+              padding: '0.45rem 0.35rem',
               borderRadius: '12px',
               border: '1.5px solid #fbcfe8',
               cursor: 'pointer',
@@ -235,10 +235,10 @@ export default function LandingPage({
             }}
             title="Klik untuk buka catatan Yasmeen"
           >
-            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#db2777', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#db2777', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
               🌸 Yasmeen
             </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#9d174d', marginTop: '0.1rem' }}>
+            <div style={{ fontSize: 'clamp(0.72rem, 3.3vw, 0.95rem)', fontWeight: 900, color: '#9d174d', marginTop: '0.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {formatIdr(yasmeenBalanceIdr)}
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function LandingPage({
             onClick={() => setActiveView('adziima')}
             style={{
               background: '#f0f9ff',
-              padding: '0.45rem 0.75rem',
+              padding: '0.45rem 0.35rem',
               borderRadius: '12px',
               border: '1.5px solid #bae6fd',
               cursor: 'pointer',
@@ -256,10 +256,10 @@ export default function LandingPage({
             }}
             title="Klik untuk buka catatan Adziima"
           >
-            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#0284c7', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
               🌊 Adziima
             </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#0369a1', marginTop: '0.1rem' }}>
+            <div style={{ fontSize: 'clamp(0.72rem, 3.3vw, 0.95rem)', fontWeight: 900, color: '#0369a1', marginTop: '0.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {formatIdr(adziimaBalanceIdr)}
             </div>
           </div>
@@ -268,7 +268,7 @@ export default function LandingPage({
             onClick={() => setActiveView('gold')}
             style={{
               background: '#fefce8',
-              padding: '0.45rem 0.75rem',
+              padding: '0.45rem 0.35rem',
               borderRadius: '12px',
               border: '1.5px solid #fde047',
               cursor: 'pointer',
@@ -277,10 +277,10 @@ export default function LandingPage({
             }}
             title="Klik untuk buka portofolio emas"
           >
-            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.66rem', fontWeight: 800, color: '#b45309', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
               🪙 Emas 24K
             </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 900, color: '#92400e', marginTop: '0.1rem' }}>
+            <div style={{ fontSize: 'clamp(0.72rem, 3.3vw, 0.95rem)', fontWeight: 900, color: '#92400e', marginTop: '0.1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {formatIdr(goldAssetValueIdr)}
             </div>
           </div>

@@ -52,7 +52,7 @@ export default function NongkrongTracker({ onQuickAddNongkrong }) {
           title="Catat sesi nongkrong baru"
         >
           <Plus size={14} />
-          <span>+ Sesi Ngopi</span>
+          <span>Sesi Ngopi</span>
         </button>
       </div>
 

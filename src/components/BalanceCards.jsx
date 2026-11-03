@@ -181,7 +181,7 @@ export default function BalanceCards({ onOpenSettings, onOpenAdd, onOpenSetMoney
               }}
             >
               <PlusCircle size={16} />
-              <span>+ Catat Jajan Baru</span>
+              <span>Catat Jajan Baru</span>
             </button>
           </div>
         </div>
@@ -332,7 +332,7 @@ export default function BalanceCards({ onOpenSettings, onOpenAdd, onOpenSetMoney
           }}
         >
           <PlusCircle size={16} />
-          <span>+ Catat Jajan Baru</span>
+          <span>Catat Jajan Baru</span>
         </button>
       </div>
     </section>

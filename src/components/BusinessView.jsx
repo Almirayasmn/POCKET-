@@ -489,7 +489,7 @@ export default function BusinessView({ onOpenCloudModal }) {
             </div>
 
             {/* 4 Quick Stat Pills */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.65rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.55rem' }}>
               <div style={{ background: '#ffffff', borderRadius: '12px', padding: '0.65rem 0.85rem', border: '1.5px solid #ede9fe' }}>
                 <div style={{ fontSize: '0.68rem', fontWeight: 800, color: '#7c3aed' }}>KATEGORI BISNIS AKTIF</div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#581c87', marginTop: '0.1rem' }}>
@@ -966,7 +966,7 @@ export default function BusinessView({ onOpenCloudModal }) {
                 <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#ede9fe', color: '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.65rem' }}>
                   <Plus size={22} />
                 </div>
-                <div style={{ fontWeight: 800, color: '#581c87', fontSize: '0.92rem' }}>+ Buat Kategori Usaha Baru</div>
+                <div style={{ fontWeight: 800, color: '#581c87', fontSize: '0.92rem' }}>Buat Kategori Usaha Baru</div>
                 <div style={{ fontSize: '0.74rem', color: '#6d28d9', marginTop: '0.2rem', maxWidth: 240, lineHeight: 1.35 }}>
                   Punya ide usaha lain (Kuliner, Skincare, dll)? Buat halaman terpisah agar data tidak tercampur!
                 </div>
@@ -1109,7 +1109,7 @@ export default function BusinessView({ onOpenCloudModal }) {
             </div>
 
             {/* 4 Cards Grid of Calculated Insights */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.65rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.55rem', marginBottom: '1rem' }}>
               <div style={{ background: '#ffffff', borderRadius: '12px', padding: '0.75rem 0.9rem', border: '1.5px solid #bbf7d0' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#047857' }}>EST. UNTUNG / UNIT</div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 900, color: '#065f46', marginTop: '0.15rem' }}>
@@ -1457,7 +1457,7 @@ export default function BusinessView({ onOpenCloudModal }) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.55rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.5rem' }}>
               {SALES_METHODS_LIST.map(sm => {
                 const isAct = (activeProject.selectedSalesMethods || []).includes(sm.id);
                 return (
@@ -1544,7 +1544,7 @@ export default function BusinessView({ onOpenCloudModal }) {
                 }}
               >
                 <Plus size={14} />
-                <span>+ Catat Penjualan</span>
+                <span>Catat Penjualan</span>
               </button>
             </div>
 
@@ -1554,11 +1554,11 @@ export default function BusinessView({ onOpenCloudModal }) {
                 background: '#faf5ff',
                 borderRadius: '12px',
                 border: '1.5px solid #ddd6fe',
-                padding: '0.75rem 1rem',
+                padding: '0.65rem 0.5rem',
                 marginBottom: '1rem',
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                gap: '0.65rem',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '0.35rem',
                 textAlign: 'center'
               }}
             >
@@ -1596,7 +1596,7 @@ export default function BusinessView({ onOpenCloudModal }) {
             {/* Sales Table */}
             {(activeProject.sales || []).length === 0 ? (
               <div style={{ textAlign: 'center', padding: '1.5rem 1rem', color: '#94a3b8', fontSize: '0.82rem' }}>
-                Belum ada catatan penjualan di bisnis ini. Klik <strong>"+ Catat Penjualan"</strong> di atas!
+                Belum ada catatan penjualan di bisnis ini. Klik <strong>"Catat Penjualan"</strong> di atas!
               </div>
             ) : (
               <div style={{ overflowX: 'auto' }}>

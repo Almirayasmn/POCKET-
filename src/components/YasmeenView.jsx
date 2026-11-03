@@ -475,7 +475,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
               style={{ display: 'inline-flex', width: 'auto', padding: '0.6rem 1.4rem', fontSize: '0.85rem', margin: '0 auto' }}
             >
               <Plus size={16} />
-              <span>+ Buat Pos Pengeluaran Baru</span>
+              <span>Buat Pos Pengeluaran Baru</span>
             </button>
           </div>
         ) : (
