@@ -46,7 +46,8 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     isCloudSyncing,
     adziimaTransactions,
     getCategoriesForMonth,
-    googleDriveUrl
+    googleDriveUrl,
+    exchangeRate
   } = usePocket();
 
   const { adziima } = calculations;
@@ -109,7 +110,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     const remainingBudget = Math.max(0, totalBudget - mOutflow);
 
     const isCur = targetMonth === selectedMonth;
-    const startBalance = isCur ? adziima.initialIdr : 0;
+    const startBalance = isCur ? (adziima.startBalanceIdr || adziima.initialIdr || 0) : 0;
     const totalInflow = startBalance + mIncome;
     const netBalance = isCur ? adziima.totalBalanceIdr : (mIncome - mOutflow);
     const plannedSavings = Math.max(0, totalInflow - totalBudget);

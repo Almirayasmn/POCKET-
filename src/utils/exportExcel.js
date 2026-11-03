@@ -14,7 +14,7 @@ export function exportMonthToExcel({
   summary = {},
   exchangeRate = 2750
 }) {
-  const safeFileName = `Laporan_Keuangan_${userName}_${monthLabel.replace(/[^a-zA-Z0-9]/g, '_')}.xls`;
+  const safeFileName = `Laporan_Zimeira_${(userName || 'Keuangan').replace(/[^a-zA-Z0-9]/g, '_')}_${monthLabel.replace(/[^a-zA-Z0-9]/g, '_')}.xls`;
   const exportDate = new Date().toLocaleDateString('id-ID', {
     weekday: 'long',
     year: 'numeric',
