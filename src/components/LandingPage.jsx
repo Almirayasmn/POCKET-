@@ -595,7 +595,7 @@ export default function LandingPage({
           </div>
         </div>
 
-        {/* Card 4: Rencana Usaha Bersama */}
+        {/* Card 4: Bisnis Berdua */}
         <div className="profile-select-card purple">
           <div>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.45rem' }}>
@@ -618,50 +618,27 @@ export default function LandingPage({
             </div>
 
             <div className="profile-name" style={{ fontSize: '1.05rem', fontWeight: 900, color: '#581c87' }}>
-              {bizCalc.projects?.length > 1 ? `${bizCalc.projects.length} Proyek Bisnis Berdua` : (bizCalc.settings?.businessName || 'Rencana Bisnis Bersama')}
+              Bisnis Berdua
             </div>
             <div className="profile-desc" style={{ fontSize: '0.74rem', minHeight: '18px', color: '#6d28d9' }}>
-              {bizCalc.projects?.length > 1
-                ? `${bizCalc.projects.map(p => p.name).join(' · ')}`
-                : (BUSINESS_TYPES.find(b => b.id === (bizCalc.settings?.businessType || 'fashion'))?.label || 'Perencanaan HPP & Usaha')}
+              Kelola Kategori Usaha & HPP Mandiri
             </div>
           </div>
 
           <div>
-            <div className="profile-amount-box" style={{ border: '1.5px solid #d8b4fe' }}>
-              <div style={{ fontSize: '0.66rem', color: '#6b21a8', fontWeight: 800, letterSpacing: '0.04em' }}>
-                ESTIMASI POTENSI OMZET
+            <div className="profile-amount-box" style={{ border: '1.5px solid #d8b4fe', background: '#faf5ff', padding: '0.85rem 0.75rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '96px' }}>
+              <div style={{ fontSize: '0.66rem', color: '#6b21a8', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                PORTOFOLIO USAHA BERSAMA
               </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 900, color: '#581c87', marginTop: '0.1rem' }}>
-                {formatIdr(bizCalc.totalAllEstimatedRevenue || bizCalc.totalEstimatedRevenue || 0)}
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 900, color: '#581c87', marginTop: '0.2rem' }}>
+                {bizCalc.projects?.length || 1} Kategori Bisnis Aktif
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#7c3aed', marginTop: '0.15rem', fontWeight: 700 }}>
-                {bizCalc.projects?.length > 1
-                  ? `${bizCalc.projects.length} Kategori Bisnis Mandiri`
-                  : `${bizCalc.totalUnits || 0} unit · HPP ${formatIdr(bizCalc.hppPerUnit || 0)}/unit`}
-              </div>
-
-              {/* BEP / Margin Mini Progress Bar */}
-              <div style={{ marginTop: '0.35rem', paddingTop: '0.35rem', borderTop: '1px dashed #d8b4fe' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', fontWeight: 800, color: '#6b21a8', marginBottom: '0.2rem' }}>
-                  <span>Balik Modal: {bizCalc.bepUnits || 0} unit</span>
-                  <span>{bizCalc.marginPercent || 0}% Margin</span>
-                </div>
-                <div style={{ width: '100%', height: 6, background: '#ede9fe', borderRadius: 99, overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      height: '100%',
-                      width: `${bizCalc.bepPercent || 0}%`,
-                      background: 'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
-                      borderRadius: 99,
-                      transition: 'width 0.4s ease'
-                    }}
-                  />
-                </div>
+              <div style={{ fontSize: '0.72rem', color: '#7c3aed', marginTop: '0.25rem', fontWeight: 600, textAlign: 'center', lineHeight: 1.35 }}>
+                HPP, Ongkir per Kg & Pencatatan Terpisah
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.65rem' }}>
               <button
                 className="btn-enter-profile"
                 onClick={() => setActiveView('business')}
@@ -675,7 +652,7 @@ export default function LandingPage({
                   boxShadow: '0 3px 10px rgba(124, 58, 237, 0.25)'
                 }}
               >
-                <span>Kelola Rencana & HPP</span>
+                <span>Buka Catatan Bisnis</span>
                 <ArrowRight size={15} />
               </button>
             </div>
