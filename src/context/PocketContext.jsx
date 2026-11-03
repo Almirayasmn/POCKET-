@@ -7,7 +7,8 @@ import {
   SAMPLE_YASMEEN_TRANSACTIONS,
   SAMPLE_ADZIIMA_TRANSACTIONS,
   DEFAULT_GOLD_SAVINGS,
-  GALERI24_DEFAULT_PRICE_TABLE
+  GALERI24_DEFAULT_PRICE_TABLE,
+  DEFAULT_BUSINESS_DATA
 } from '../data/initialData';
 import {
   getSavedFirebaseUrl,
@@ -77,7 +78,7 @@ export function PocketProvider({ children }) {
   const [activeView, setActiveViewState] = useState(() => {
     try {
       const saved = localStorage.getItem('pocket_device_active_view');
-      if (saved && ['landing', 'yasmeen', 'adziima', 'gold'].includes(saved)) {
+      if (saved && ['landing', 'yasmeen', 'adziima', 'gold', 'business'].includes(saved)) {
         return saved;
       }
     } catch (e) {}
@@ -203,7 +204,8 @@ export function PocketProvider({ children }) {
               valuationMode: parsed.goldSavings?.valuationMode || 'sell'
             },
             monthlyBudgets: parsed.monthlyBudgets || { yasmeen: {}, adziima: {} },
-            googleDriveUrl: resolveDriveUrl(parsed.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null))
+            googleDriveUrl: resolveDriveUrl(parsed.googleDriveUrl || (typeof window !== 'undefined' ? localStorage.getItem('pocket_gdrive_url') : null)),
+            business: parsed.business || DEFAULT_BUSINESS_DATA
           };
         }
       }
@@ -221,7 +223,8 @@ export function PocketProvider({ children }) {
       adziimaTransactions: SAMPLE_ADZIIMA_TRANSACTIONS,
       goldSavings: DEFAULT_GOLD_SAVINGS,
       monthlyBudgets: { yasmeen: {}, adziima: {} },
-      googleDriveUrl: DEFAULT_GOOGLE_DRIVE_FOLDER_URL
+      googleDriveUrl: DEFAULT_GOOGLE_DRIVE_FOLDER_URL,
+      business: DEFAULT_BUSINESS_DATA
     };
   });
 
@@ -1102,6 +1105,167 @@ export function PocketProvider({ children }) {
     };
   }, []);
 
+  // Business Action Methods
+  const recordBusinessSale = (saleData) => {
+    const newSale = {
+      id: `bsale-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      batchId: saleData.batchId || 'batch-1',
+      channel: saleData.channel || 'cfd',
+      date: saleData.date || getLocalDateString(),
+      pcs: parseInt(saleData.pcs, 10) || 1,
+      pricePerPcs: parseFloat(saleData.pricePerPcs) || 120000,
+      totalAmountIdr: (parseInt(saleData.pcs, 10) || 1) * (parseFloat(saleData.pricePerPcs) || 120000),
+      buyerOrNote: saleData.buyerOrNote || '',
+      seller: saleData.seller || 'berdua',
+      createdAt: new Date().toISOString()
+    };
+
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          sales: [newSale, ...(prevBiz.sales || [])]
+        }
+      };
+    });
+  };
+
+  const deleteBusinessSale = (saleId) => {
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          sales: (prevBiz.sales || []).filter(s => s.id !== saleId)
+        }
+      };
+    });
+  };
+
+  const addBusinessExpense = (expenseData) => {
+    const newExp = {
+      id: `bexp-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      batchId: expenseData.batchId || 'batch-1',
+      channel: expenseData.channel || 'operasional',
+      date: expenseData.date || getLocalDateString(),
+      category: expenseData.category || 'operasional',
+      amountIdr: parseFloat(expenseData.amountIdr) || 0,
+      notes: expenseData.notes || '',
+      createdAt: new Date().toISOString()
+    };
+
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          expenses: [newExp, ...(prevBiz.expenses || [])]
+        }
+      };
+    });
+  };
+
+  const deleteBusinessExpense = (expenseId) => {
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          expenses: (prevBiz.expenses || []).filter(e => e.id !== expenseId)
+        }
+      };
+    });
+  };
+
+  const updateConsignmentStock = ({ consignmentId, deltaGiven = 0, deltaSold = 0, deltaReturned = 0, deltaPaid = 0, notes }) => {
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      const prevConsignments = prevBiz.consignments || [];
+      const updated = prevConsignments.map(c => {
+        if (c.id === consignmentId) {
+          const newGiven = Math.max(0, (c.givenPcs || 0) + deltaGiven);
+          const newSold = Math.max(0, (c.soldPcs || 0) + deltaSold);
+          const newReturned = Math.max(0, (c.returnedPcs || 0) + deltaReturned);
+          const newPaid = Math.max(0, (c.paidAmount || 0) + deltaPaid);
+          return {
+            ...c,
+            givenPcs: newGiven,
+            soldPcs: newSold,
+            returnedPcs: newReturned,
+            paidAmount: newPaid,
+            notes: notes !== undefined ? notes : c.notes
+          };
+        }
+        return c;
+      });
+
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          consignments: updated
+        }
+      };
+    });
+  };
+
+  const updateBusinessBatch = (batchId, batchUpdates) => {
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      const batches = (prevBiz.batches || []).map(b => {
+        if (b.id === batchId) {
+          const updated = { ...b, ...batchUpdates };
+          const pcs = parseInt(updated.totalPcs, 10) || 50;
+          const weight = parseFloat(updated.weightKg) || 35;
+          const priceChina = parseFloat(updated.pricePerPcsChina) || 63200;
+          const shipKg = parseFloat(updated.shippingCostPerKg) || 3700;
+          const other = parseFloat(updated.otherCosts) || 0;
+          const itemCost = pcs * priceChina;
+          const shipCost = weight * shipKg;
+          const totalCapital = itemCost + shipCost + other;
+          const hpp = pcs > 0 ? Math.round(totalCapital / pcs) : 0;
+          return {
+            ...updated,
+            totalItemCostChina: itemCost,
+            totalShippingCost: shipCost,
+            totalCapitalCost: totalCapital,
+            hppPerPcs: hpp
+          };
+        }
+        return b;
+      });
+
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          batches
+        }
+      };
+    });
+  };
+
+  const updateBusinessSettings = (newSettings) => {
+    setData(prev => {
+      const prevBiz = prev.business || DEFAULT_BUSINESS_DATA;
+      return {
+        ...prev,
+        business: {
+          ...prevBiz,
+          settings: {
+            ...prevBiz.settings,
+            ...newSettings
+          }
+        }
+      };
+    });
+  };
+
   // Bulletproof Calculations per selectedMonth
   const calculations = useMemo(() => {
     try {
@@ -1611,10 +1775,142 @@ export function PocketProvider({ children }) {
     }
   }, [data, selectedMonth]);
 
+  // Business Calculations Memo
+  const businessCalculations = useMemo(() => {
+    const biz = data?.business || DEFAULT_BUSINESS_DATA;
+    const batch = (biz?.batches && biz.batches[0]) || DEFAULT_BUSINESS_DATA.batches[0];
+
+    const totalPcs = parseInt(batch.totalPcs, 10) || 50;
+    const weightKg = parseFloat(batch.weightKg) || 35;
+    const pricePerPcsChina = parseFloat(batch.pricePerPcsChina) || 63200;
+    const shippingCostPerKg = parseFloat(batch.shippingCostPerKg) || 3700;
+    const otherCosts = parseFloat(batch.otherCosts) || 0;
+
+    const totalItemCostChina = totalPcs * pricePerPcsChina;
+    const totalShippingCost = weightKg * shippingCostPerKg;
+    const totalCapitalCost = totalItemCostChina + totalShippingCost + otherCosts;
+    const hppPerPcs = totalPcs > 0 ? Math.round(totalCapitalCost / totalPcs) : 65790;
+    const targetSellPrice = parseFloat(batch.targetSellPrice) || 120000;
+
+    // Sales Breakdown
+    const sales = biz?.sales || [];
+    let totalPcsSold = 0;
+    let totalRevenue = 0;
+    let cfdPcsSold = 0;
+    let cfdRevenue = 0;
+    let livePcsSold = 0;
+    let liveRevenue = 0;
+    let saudaraPcsSold = 0;
+    let saudaraRevenue = 0;
+
+    sales.forEach(s => {
+      const p = parseInt(s.pcs, 10) || 0;
+      const amt = parseFloat(s.totalAmountIdr) || (p * (parseFloat(s.pricePerPcs) || 120000));
+      totalPcsSold += p;
+      totalRevenue += amt;
+
+      if (s.channel === 'cfd') {
+        cfdPcsSold += p;
+        cfdRevenue += amt;
+      } else if (s.channel === 'live') {
+        livePcsSold += p;
+        liveRevenue += amt;
+      } else if (s.channel === 'saudara') {
+        saudaraPcsSold += p;
+        saudaraRevenue += amt;
+      }
+    });
+
+    // Consignment
+    const consignments = biz?.consignments || [];
+    const consignment1 = consignments[0] || {};
+    const givenToSaudara = consignment1.givenPcs || 15;
+    const soldBySaudara = consignment1.soldPcs || saudaraPcsSold;
+    const returnedBySaudara = consignment1.returnedPcs || 0;
+    const remainingAtSaudara = Math.max(0, givenToSaudara - soldBySaudara - returnedBySaudara);
+
+    // Expenses
+    const expenses = biz?.expenses || [];
+    let totalExpenses = 0;
+    let cfdExpenses = 0;
+    let liveExpenses = 0;
+
+    expenses.forEach(e => {
+      const amt = parseFloat(e.amountIdr) || 0;
+      totalExpenses += amt;
+      if (e.channel === 'cfd') cfdExpenses += amt;
+      else if (e.channel === 'live') liveExpenses += amt;
+    });
+
+    // Profitability & BEP
+    const bepPcs = Math.ceil(totalCapitalCost / targetSellPrice);
+    const bepPercent = Math.min(100, Math.round((totalPcsSold / (bepPcs || 1)) * 100));
+    const isCapitalRecovered = totalRevenue >= totalCapitalCost;
+
+    const totalHppSold = totalPcsSold * hppPerPcs;
+    const grossProfit = totalRevenue - totalHppSold;
+    const netProfit = Math.max(0, grossProfit - totalExpenses);
+
+    const restockFund = Math.min(totalCapitalCost, totalRevenue);
+    const distributableProfit = Math.max(0, totalRevenue - totalCapitalCost - totalExpenses);
+    const profitYasmeen = Math.round(distributableProfit * 0.5);
+    const profitAdziima = Math.round(distributableProfit * 0.5);
+
+    const remainingReadyStock = Math.max(0, totalPcs - totalPcsSold - remainingAtSaudara);
+
+    return {
+      currentBatch: {
+        ...batch,
+        totalPcs,
+        weightKg,
+        pricePerPcsChina,
+        shippingCostPerKg,
+        otherCosts,
+        totalItemCostChina,
+        totalShippingCost,
+        totalCapitalCost,
+        hppPerPcs,
+        targetSellPrice
+      },
+      totalStock: totalPcs,
+      totalPcsSold,
+      totalRevenue,
+      cfdPcsSold,
+      cfdRevenue,
+      cfdExpenses,
+      livePcsSold,
+      liveRevenue,
+      liveExpenses,
+      saudaraPcsSold,
+      saudaraRevenue,
+      remainingAtSaudara,
+      remainingReadyStock,
+      totalExpenses,
+      bepPcs,
+      bepPercent,
+      isCapitalRecovered,
+      grossProfit,
+      netProfit,
+      restockFund,
+      distributableProfit,
+      profitYasmeen,
+      profitAdziima
+    };
+  }, [data?.business]);
+
   return (
     <PocketContext.Provider
       value={{
         ...data,
+        business: data?.business || DEFAULT_BUSINESS_DATA,
+        businessCalculations,
+        recordBusinessSale,
+        deleteBusinessSale,
+        addBusinessExpense,
+        deleteBusinessExpense,
+        updateConsignmentStock,
+        updateBusinessBatch,
+        updateBusinessSettings,
         activeView,
         setActiveView,
         selectedMonth,

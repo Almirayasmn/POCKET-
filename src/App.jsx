@@ -4,6 +4,7 @@ import LandingPage from './components/LandingPage';
 import YasmeenView from './components/YasmeenView';
 import AdziimaView from './components/AdziimaView';
 import GoldSavingsView from './components/GoldSavingsView';
+import BusinessView from './components/BusinessView';
 import QuickAddModal from './components/QuickAddModal';
 import EditProfileModal from './components/EditProfileModal';
 import CloudSyncModal from './components/CloudSyncModal';
@@ -96,6 +97,12 @@ function PocketAppContent() {
 
       {activeView === 'gold' && (
         <GoldSavingsView
+          onOpenCloudModal={() => setIsCloudModalOpen(true)}
+        />
+      )}
+
+      {activeView === 'business' && (
+        <BusinessView
           onOpenCloudModal={() => setIsCloudModalOpen(true)}
         />
       )}

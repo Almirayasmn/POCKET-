@@ -143,3 +143,58 @@ export const PRESETS_ADZIIMA = [
   { title: 'Kopi Santai', amount: 15000, category: 'ngopi_santai', iconName: 'Coffee', currency: 'IDR' },
   { title: 'Obat / Vitamin', amount: 15000, category: 'lainnya_obat', iconName: 'Pill', currency: 'IDR' },
 ];
+
+export const DEFAULT_BUSINESS_DATA = {
+  settings: {
+    businessName: 'Pocket Fashion Padang',
+    tagline: 'Jastip & Baju Impor China · Yasmeen & Adziima',
+    originCity: 'China ➔ Bandung ➔ Padang',
+    defaultItemPriceChina: 63200,      // Rp 63.200 per pcs (inc ongkir ke Bandung)
+    defaultWeightPerBalKg: 35,         // 35 kg per bal
+    defaultShippingPerKg: 3700,        // Rp 3.700 per kg (Bandung ke Padang)
+    defaultPcsPerBal: 50,              // 50 pcs per bal
+    defaultTargetSellPrice: 120000,    // Rp 120.000 harga dasar / setoran saudara
+    consignmentPriceToSaudara: 120000, // Harga setoran saudara per pcs
+    partnerProfitSplit: { yasmeen: 50, adziima: 50 } // Bagi hasil laba bersih 50:50
+  },
+  batches: [
+    {
+      id: 'batch-1',
+      name: 'Bal #1 - Baju Import China (Batch 1)',
+      date: '2026-11-01',
+      status: 'active',
+      totalPcs: 50,
+      weightKg: 35,
+      pricePerPcsChina: 63200,
+      totalItemCostChina: 3160000,
+      shippingCostPerKg: 3700,
+      totalShippingCost: 129500,
+      otherCosts: 0,
+      totalCapitalCost: 3289500,
+      hppPerPcs: 65790,
+      targetSellPrice: 120000,
+      allocations: {
+        saudara: 15,
+        cfd: 20,
+        live: 15
+      },
+      notes: 'Batch perdana 50 pcs baju impor. 1 bal 35 kg lewat kargo Bandung ke Padang.'
+    }
+  ],
+  sales: [],
+  consignments: [
+    {
+      id: 'csg-1',
+      batchId: 'batch-1',
+      saudaraName: 'Saudara / Reseller Padang',
+      givenPcs: 15,
+      dateGiven: '2026-11-01',
+      pricePerPcs: 120000,
+      soldPcs: 0,
+      returnedPcs: 0,
+      notes: 'Titip 15 pcs. Saudara setor Rp 120.000/pcs laku, selisih jual di atas itu jadi untung saudara.'
+    }
+  ],
+  expenses: []
+};
+

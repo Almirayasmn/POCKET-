@@ -33,9 +33,11 @@ export default function LandingPage({
     setSelectedMonth,
     yasmeenTransactions,
     adziimaTransactions,
-    googleDriveUrl
+    googleDriveUrl,
+    businessCalculations
   } = usePocket();
 
+  const bizCalc = businessCalculations || {};
   const { yasmeen, adziima, gold, actualBalances = {} } = calculations;
   const isYasmeenIdr = yasmeenCurrencyView === 'IDR';
 
@@ -342,6 +344,33 @@ export default function LandingPage({
               {goldGrams > 0 ? `${goldGrams} gr (${goldKeping} kpg)` : '0 gr tersimpan'}
             </div>
           </div>
+
+          <div
+            className="wealth-chip-item"
+            onClick={() => setActiveView('business')}
+            style={{
+              background: '#faf5ff',
+              padding: '0.75rem 1.15rem',
+              borderRadius: 'var(--radius-lg)',
+              border: '1.5px solid #e9d5ff',
+              cursor: 'pointer',
+              textAlign: 'center',
+              flex: '1 1 180px',
+              maxWidth: '240px',
+              transition: 'all 0.15s ease'
+            }}
+            title="Klik untuk buka catatan bisnis baju"
+          >
+            <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#7c3aed', textTransform: 'uppercase' }}>
+              👗 Bisnis Baju Kita
+            </div>
+            <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#581c87', marginTop: '0.15rem' }}>
+              {formatIdr(bizCalc.totalRevenue || 0)}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#7c3aed', fontWeight: 700, marginTop: '0.1rem' }}>
+              {bizCalc.totalPcsSold || 0} pcs laku · 50 pcs bal
+            </div>
+          </div>
         </div>
       </div>
 
@@ -645,6 +674,85 @@ export default function LandingPage({
                 style={{ flex: 1 }}
               >
                 <span>Buka Portofolio Emas</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Bisnis Baju Kita */}
+        <div className="profile-select-card purple">
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.8rem' }}>
+              <div
+                style={{
+                  width: '92px',
+                  height: '92px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ede9fe 0%, #fdf2f8 100%)',
+                  border: '3px solid #c4b5fd',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '2.5rem',
+                  boxShadow: '0 4px 14px rgba(124, 58, 237, 0.12)'
+                }}
+              >
+                👗
+              </div>
+            </div>
+
+            <div className="profile-name">Bisnis Baju Kita</div>
+            <div className="profile-tag" style={{ background: '#ede9fe', color: '#6d28d9', border: '1px solid #c4b5fd' }}>
+              <span>Jastip & Impor China ➔ Padang</span>
+            </div>
+          </div>
+
+          <div>
+            <div className="profile-amount-box" style={{ border: '1.5px solid #d8b4fe' }}>
+              <div style={{ fontSize: '0.72rem', color: '#6b21a8', fontWeight: 800, letterSpacing: '0.04em' }}>
+                OMZET PENJUALAN BAL #1
+              </div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.45rem', fontWeight: 900, color: '#581c87', marginTop: '0.15rem' }}>
+                {formatIdr(bizCalc.totalRevenue || 0)}
+              </div>
+              <div style={{ fontSize: '0.78rem', color: '#7c3aed', marginTop: '0.2rem', fontWeight: 700 }}>
+                {bizCalc.totalPcsSold || 0} pcs terjual · {bizCalc.remainingReadyStock || 0} pcs ready
+              </div>
+
+              {/* BEP Progress Bar */}
+              <div style={{ marginTop: '0.65rem', paddingTop: '0.55rem', borderTop: '1px dashed #d8b4fe' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', fontWeight: 800, color: '#6b21a8', marginBottom: '0.3rem' }}>
+                  <span>Target Balik Modal: 28 pcs</span>
+                  <span>{bizCalc.bepPercent || 0}% Terpenuhi</span>
+                </div>
+                <div style={{ width: '100%', height: 7, background: '#ede9fe', borderRadius: 99, overflow: 'hidden' }}>
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${bizCalc.bepPercent || 0}%`,
+                      background: 'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
+                      borderRadius: 99,
+                      transition: 'width 0.4s ease'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className="btn-enter-profile"
+                onClick={() => setActiveView('business')}
+                style={{
+                  flex: 1,
+                  background: '#7c3aed',
+                  color: '#ffffff',
+                  border: 'none',
+                  boxShadow: '0 4px 14px rgba(124, 58, 237, 0.25)'
+                }}
+              >
+                <span>Buka Catatan Bisnis</span>
                 <ArrowRight size={16} />
               </button>
             </div>

@@ -413,9 +413,15 @@ button, input, select, textarea {
   margin: 0 auto;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .profile-select-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .profile-select-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -466,6 +472,18 @@ button, input, select, textarea {
   transform: translateY(-4px);
   border-color: #eab308;
   box-shadow: 0 10px 24px rgba(245, 158, 11, 0.2);
+}
+
+.profile-select-card.purple {
+  background: #faf5ff; /* Solid Pastel Lilac / Violet */
+  border: 2px solid #e9d5ff;
+  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.08);
+}
+
+.profile-select-card.purple:hover {
+  transform: translateY(-4px);
+  border-color: #c084fc;
+  box-shadow: 0 10px 24px rgba(168, 85, 247, 0.2);
 }
 
 .profile-avatar-circle {
