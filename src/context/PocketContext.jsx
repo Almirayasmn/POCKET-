@@ -668,9 +668,64 @@ export function PocketProvider({ children }) {
     setTimeout(() => { isRemoteUpdatingRef.current = false; }, 1200);
   };
 
-  // Helper to get categories for a given month
+  // Helper to get categories for a given month with fully resolved budgets in IDR & CNY
   const getCategoriesForMonth = (userId, targetMonth = null) => {
-    return resolveCategories(data, userId, targetMonth || selectedMonth || '2026-10');
+    const month = targetMonth || selectedMonth || '2026-10';
+    const rate = data?.exchangeRate || DEFAULT_EXCHANGE_RATE;
+    const rawList = resolveCategories(data, userId, month);
+    const userMonthlyBudgets = data?.monthlyBudgets?.[userId] || {};
+
+    const normalizeToIdr = (val) => {
+      const num = parseFloat(val) || 0;
+      if (num > 0 && num < 5000) {
+        return Math.round(num * rate);
+      }
+      return num;
+    };
+
+    return rawList.map(c => {
+      // 1. Direct match in monthlyBudgets for this month
+      let budgetVal = undefined;
+      if (userMonthlyBudgets[month] && userMonthlyBudgets[month][c.id] !== undefined) {
+        budgetVal = userMonthlyBudgets[month][c.id];
+      } else {
+        // Fallback chronological lookback
+        const sortedMonths = Object.keys(userMonthlyBudgets).filter(m => m <= month).sort();
+        for (let i = sortedMonths.length - 1; i >= 0; i--) {
+          const m = sortedMonths[i];
+          if (userMonthlyBudgets[m] && userMonthlyBudgets[m][c.id] !== undefined) {
+            budgetVal = userMonthlyBudgets[m][c.id];
+            break;
+          }
+        }
+      }
+
+      let resolvedIdr = 0;
+      let resolvedCny = 0;
+
+      if (userId === 'yasmeen') {
+        if (budgetVal !== undefined) {
+          resolvedIdr = normalizeToIdr(budgetVal);
+        } else {
+          const rawBudget = (c.budgetIdr !== undefined && c.budgetIdr !== null && c.budgetIdr >= 5000)
+            ? c.budgetIdr
+            : ((c.budgetCny || 0) * rate);
+          resolvedIdr = normalizeToIdr(rawBudget);
+        }
+        resolvedCny = Math.round((resolvedIdr / rate) * 100) / 100;
+      } else {
+        const raw = budgetVal !== undefined ? budgetVal : (c.budgetIdr || c.budget || 0);
+        resolvedIdr = Math.round(parseFloat(raw) || 0);
+        resolvedCny = Math.round((resolvedIdr / rate) * 100) / 100;
+      }
+
+      return {
+        ...c,
+        budgetIdr: resolvedIdr,
+        budgetCny: resolvedCny,
+        budget: resolvedIdr
+      };
+    });
   };
 
   const currentYasmeenCategories = useMemo(

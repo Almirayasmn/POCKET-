@@ -102,7 +102,10 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       else mOutflow += (tx.amountIdr || 0);
     });
 
-    const totalBudget = mCats.reduce((sum, c) => sum + (c.budgetIdr || c.budget || 0), 0);
+    const totalBudget = mCats.reduce((sum, c) => {
+      let b = (c.budgetIdr !== undefined && c.budgetIdr !== null) ? c.budgetIdr : c.budget;
+      return sum + (Number(b) || 0);
+    }, 0);
     const remainingBudget = Math.max(0, totalBudget - mOutflow);
 
     const isCur = targetMonth === selectedMonth;
@@ -118,6 +121,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       transactions: mTx,
       categories: mCats,
       categorySpending: mSpending,
+      exchangeRate,
       summary: {
         startBalance: formatIdr(startBalance),
         monthIncome: formatIdr(mIncome),

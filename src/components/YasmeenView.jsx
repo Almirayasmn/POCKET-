@@ -131,7 +131,11 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       else mOutflow += (tx.amountIdr || 0);
     });
 
-    const totalBudget = mCats.reduce((sum, c) => sum + (c.budgetIdr || c.budget || 0), 0);
+    const totalBudget = mCats.reduce((sum, c) => {
+      let b = (c.budgetIdr !== undefined && c.budgetIdr !== null) ? c.budgetIdr : (c.budgetCny ? c.budgetCny * (exchangeRate || 2750) : c.budget);
+      if (b > 0 && b < 5000) b = Math.round(b * (exchangeRate || 2750));
+      return sum + (Number(b) || 0);
+    }, 0);
     const remainingBudget = Math.max(0, totalBudget - mOutflow);
 
     const isCur = targetMonth === selectedMonth;
@@ -147,6 +151,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       transactions: mTx,
       categories: mCats,
       categorySpending: mSpending,
+      exchangeRate,
       summary: {
         startBalance: formatIdr(startBalance),
         monthIncome: formatIdr(mIncome),

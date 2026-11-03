@@ -11,7 +11,8 @@ export function exportMonthToExcel({
   transactions = [],
   categories = [],
   categorySpending = {},
-  summary = {}
+  summary = {},
+  exchangeRate = 2750
 }) {
   const safeFileName = `Laporan_Keuangan_${userName}_${monthLabel.replace(/[^a-zA-Z0-9]/g, '_')}.xls`;
   const exportDate = new Date().toLocaleDateString('id-ID', {
@@ -26,9 +27,22 @@ export function exportMonthToExcel({
   let grandTotalBudget = 0;
   let grandTotalSpent = 0;
 
+  const rate = Number(exchangeRate) || 2750;
+
   categories.forEach((cat, idx) => {
     const sp = categorySpending[cat.id] || { totalIdr: 0, count: 0 };
-    const budgetVal = cat.budgetIdr || cat.budget || 0;
+    let budgetVal = (cat.budgetIdr !== undefined && cat.budgetIdr !== null) ? cat.budgetIdr : cat.budget;
+    
+    // Fallback: If budgetVal is not set or 0, but budgetCny exists
+    if ((!budgetVal || budgetVal === 0) && cat.budgetCny > 0) {
+      budgetVal = Math.round(cat.budgetCny * rate);
+    }
+    
+    // Safeguard: If budgetVal is suspiciously small (< 5000) but > 0, it was stored in CNY!
+    if (budgetVal > 0 && budgetVal < 5000) {
+      budgetVal = Math.round(budgetVal * rate);
+    }
+    budgetVal = Number(budgetVal) || 0;
     const spentVal = sp.totalIdr || 0;
     const remainingVal = budgetVal - spentVal;
     const percentUsed = budgetVal > 0 ? Math.round((spentVal / budgetVal) * 100) : (spentVal > 0 ? 100 : 0);
