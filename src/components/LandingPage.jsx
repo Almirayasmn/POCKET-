@@ -571,8 +571,8 @@ export default function LandingPage({
               {/* Target Mini Bar */}
               <div style={{ marginTop: '0.35rem', paddingTop: '0.35rem', borderTop: '1px dashed #fde047' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', fontWeight: 800, color: '#92400e', marginBottom: '0.2rem' }}>
-                  <span>Target 25 Gram</span>
-                  <span>{goldGrams}/25 gr ({goldProgress}%)</span>
+                  <span>Target {targetGrams} Gram</span>
+                  <span>{goldGrams}/{targetGrams} gr ({goldProgress}%)</span>
                 </div>
                 <div style={{ width: '100%', height: 6, background: '#fef3c7', borderRadius: 99, overflow: 'hidden' }}>
                   <div
