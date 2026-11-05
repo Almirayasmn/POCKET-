@@ -223,7 +223,10 @@ export default function LandingPage({
           }}
         >
           <div
-            onClick={() => setActiveView('yasmeen')}
+            onClick={() => {
+              if (setSelectedMonth) setSelectedMonth('2026-11');
+              setActiveView('yasmeen');
+            }}
             style={{
               background: '#fdf2f8',
               padding: '0.45rem 0.35rem',
@@ -244,7 +247,10 @@ export default function LandingPage({
           </div>
 
           <div
-            onClick={() => setActiveView('adziima')}
+            onClick={() => {
+              if (setSelectedMonth) setSelectedMonth('2026-11');
+              setActiveView('adziima');
+            }}
             style={{
               background: '#f0f9ff',
               padding: '0.45rem 0.35rem',

@@ -547,95 +547,104 @@ export function PocketProvider({ children }) {
 
   // Add transaction (Expense or Income)
   const addTransaction = (userId, tx) => {
-    const rate = data.exchangeRate || DEFAULT_EXCHANGE_RATE;
+    isRemoteUpdatingRef.current = true;
     const key = userId === 'adziima' ? 'adziimaTransactions' : 'yasmeenTransactions';
-    const isYasmeenChinaMonth = userId === 'yasmeen' && (tx.date || data.selectedMonth) <= '2027-01';
 
-    let amountCny = 0;
-    let amountIdr = 0;
+    setData(prev => {
+      const rate = prev.exchangeRate || DEFAULT_EXCHANGE_RATE;
+      const isYasmeenChinaMonth = userId === 'yasmeen' && (tx.date || prev.selectedMonth) <= '2027-01';
 
-    if (userId === 'adziima' || !isYasmeenChinaMonth) {
-      amountIdr = parseFloat(tx.amount) || 0;
-      amountCny = Math.round((amountIdr / rate) * 100) / 100;
-    } else {
-      if (tx.inputCurrency === 'IDR') {
+      let amountCny = 0;
+      let amountIdr = 0;
+
+      if (userId === 'adziima' || !isYasmeenChinaMonth) {
         amountIdr = parseFloat(tx.amount) || 0;
         amountCny = Math.round((amountIdr / rate) * 100) / 100;
       } else {
-        amountCny = parseFloat(tx.amount) || 0;
-        amountIdr = Math.round(amountCny * rate);
+        if (tx.inputCurrency === 'IDR') {
+          amountIdr = parseFloat(tx.amount) || 0;
+          amountCny = Math.round((amountIdr / rate) * 100) / 100;
+        } else {
+          amountCny = parseFloat(tx.amount) || 0;
+          amountIdr = Math.round(amountCny * rate);
+        }
       }
-    }
 
-    const newTx = {
-      id: `tx-${userId}-${Date.now()}`,
-      date: tx.date || getLocalDateString(),
-      category: tx.category,
-      title: tx.title || 'Transaksi',
-      type: tx.type || 'Keluar',
-      amountIdr,
-      amountCny,
-      inputCurrency: (userId === 'adziima' || !isYasmeenChinaMonth) ? 'IDR' : (tx.inputCurrency || 'CNY'),
-      paymentMethod: tx.paymentMethod,
-      notes: tx.notes || ''
-    };
+      const newTx = {
+        id: `tx-${userId}-${Date.now()}`,
+        date: tx.date || getLocalDateString(),
+        category: tx.category,
+        title: tx.title || 'Transaksi',
+        type: tx.type || 'Keluar',
+        amountIdr,
+        amountCny,
+        inputCurrency: (userId === 'adziima' || !isYasmeenChinaMonth) ? 'IDR' : (tx.inputCurrency || 'CNY'),
+        paymentMethod: tx.paymentMethod,
+        notes: tx.notes || ''
+      };
 
-    const nextList = [newTx, ...(data[key] || [])];
-    const nextData = {
-      ...data,
-      [key]: nextList
-    };
+      const nextList = [newTx, ...(prev[key] || [])];
+      const nextData = {
+        ...prev,
+        [key]: nextList
+      };
 
-    setData(nextData);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
 
-    // Persist immediately to localStorage
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-    } catch (e) {}
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, key, nextList).catch(err => {
+          console.warn('Subpath push failed, fallback to debounced full push:', err);
+        });
+      }
 
-    // Instantly push specific transaction array to cloud
-    if (firebaseDbUrl) {
-      pushCloudSubpath(firebaseDbUrl, key, nextList).catch(err => {
-        console.warn('Subpath push failed, fallback to debounced full push:', err);
-      });
-    }
+      return nextData;
+    });
+
+    setTimeout(() => { isRemoteUpdatingRef.current = false; }, 800);
   };
 
   // Edit existing transaction
   const updateTransaction = (userId, id, updatedFields) => {
-    const rate = data.exchangeRate || DEFAULT_EXCHANGE_RATE;
+    isRemoteUpdatingRef.current = true;
     const key = userId === 'adziima' ? 'adziimaTransactions' : 'yasmeenTransactions';
 
-    const nextList = (data[key] || []).map(tx => {
-      if (tx.id !== id) return tx;
-      const merged = { ...tx, ...updatedFields };
+    setData(prev => {
+      const rate = prev.exchangeRate || DEFAULT_EXCHANGE_RATE;
+      const nextList = (prev[key] || []).map(tx => {
+        if (tx.id !== id) return tx;
+        const merged = { ...tx, ...updatedFields };
 
-      if (updatedFields.amount !== undefined) {
-        if (userId === 'adziima' || merged.inputCurrency === 'IDR') {
-          merged.amountIdr = parseFloat(updatedFields.amount) || 0;
-          merged.amountCny = Math.round((merged.amountIdr / rate) * 100) / 100;
-        } else {
-          merged.amountCny = parseFloat(updatedFields.amount) || 0;
-          merged.amountIdr = Math.round(merged.amountCny * rate);
+        if (updatedFields.amount !== undefined) {
+          if (userId === 'adziima' || merged.inputCurrency === 'IDR') {
+            merged.amountIdr = parseFloat(updatedFields.amount) || 0;
+            merged.amountCny = Math.round((merged.amountIdr / rate) * 100) / 100;
+          } else {
+            merged.amountCny = parseFloat(updatedFields.amount) || 0;
+            merged.amountIdr = Math.round(merged.amountCny * rate);
+          }
         }
+        return merged;
+      });
+
+      const nextData = {
+        ...prev,
+        [key]: nextList
+      };
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+      } catch (e) {}
+
+      if (firebaseDbUrl) {
+        pushCloudSubpath(firebaseDbUrl, key, nextList).catch(() => {});
       }
-      return merged;
+
+      return nextData;
     });
 
-    const nextData = {
-      ...data,
-      [key]: nextList
-    };
-
-    setData(nextData);
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
-    } catch (e) {}
-
-    if (firebaseDbUrl) {
-      pushCloudSubpath(firebaseDbUrl, key, nextList).catch(() => {});
-    }
+    setTimeout(() => { isRemoteUpdatingRef.current = false; }, 800);
   };
 
   const deleteTransaction = (userId, id) => {
