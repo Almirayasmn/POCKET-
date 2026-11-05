@@ -42,7 +42,7 @@ export default function Navbar({ onOpenSettings, onOpenAdd }) {
           <h1>
             Zimeira <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>🌸 & 🦊</span>
           </h1>
-          <p>Adziima & Almira</p>
+          <p>Adziima & Yasmeen</p>
         </div>
       </div>
 

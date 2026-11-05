@@ -109,7 +109,7 @@ function PocketAppContent() {
 
       {/* Footer */}
       <footer style={{ marginTop: '3.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <span>Zimeira · Adziima & Almira</span>
+        <span>Zimeira · Adziima & Yasmeen</span>
         <Heart size={13} color="#f472b6" fill="#f472b6" />
         <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
         <button
