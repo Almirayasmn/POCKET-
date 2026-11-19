@@ -183,17 +183,11 @@ export function exportMonthToExcel({
           <td style="font-weight: bold; text-align: right; border: 1px solid #cbd5e1; color: #15803d; font-size: 11pt; padding: 8px 8px; white-space: nowrap; mso-number-format:'\\@';">${summary.remainingBudget || '-'}</td>
         </tr>
         <tr>
-          <td colspan="3" style="font-weight: bold; background-color: #e0f2fe; color: #0369a1; border: 1.5px solid #0284c7; padding: 9px 10px;">
-            SISA SALDO KAS AKHIR BULAN:
+          <td colspan="4" style="font-weight: bold; background-color: #e0f2fe; color: #0369a1; border: 1.5px solid #0284c7; padding: 9px 10px;">
+            SISA SALDO KAS AKHIR BULAN (UANG RIIL):
           </td>
-          <td style="font-weight: bold; text-align: right; background-color: #e0f2fe; color: #0369a1; font-size: 11.5pt; border: 1.5px solid #0284c7; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
+          <td colspan="4" style="font-weight: bold; text-align: right; background-color: #e0f2fe; color: #0369a1; font-size: 11.5pt; border: 1.5px solid #0284c7; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
             ${summary.netBalance || '-'}
-          </td>
-          <td colspan="3" style="font-weight: bold; background-color: #fce7f3; color: #9d174d; border: 1.5px solid #ec4899; padding: 9px 10px;">
-            SIMPANAN BERSIH (TABUNGAN AMAN):
-          </td>
-          <td style="font-weight: bold; text-align: right; background-color: #fce7f3; color: #9d174d; font-size: 11.5pt; border: 1.5px solid #ec4899; padding: 9px 8px; white-space: nowrap; mso-number-format:'\\@';">
-            ${summary.plannedSavings || '-'}
           </td>
         </tr>
 

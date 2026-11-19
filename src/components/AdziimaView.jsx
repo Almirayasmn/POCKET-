@@ -297,7 +297,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
       )}
 
       {/* Unified Balance & Allocation Cards */}
-      <div className="balance-grid grid-4">
+      <div className="balance-grid grid-3">
         {/* Card 1: Sisa Saldo Kas */}
         <div className="balance-card" style={{ borderColor: 'var(--pastel-blue-border)' }}>
           <div>
@@ -357,28 +357,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             <span style={{ color: '#ea580c', fontWeight: 700 }}>Pagu</span>
           </div>
         </div>
-
-        {/* Card 4: Simpanan Bersih (Tabungan) */}
-        <div className="balance-card">
-          <div>
-            <div className="card-header-small">
-              <span>Simpanan Bersih</span>
-              <PiggyBank size={18} color="#10b981" />
-            </div>
-            <div className="amount-main" style={{ color: '#10b981' }}>
-              {formatIdr(adziima.plannedSavingsIdr)}
-            </div>
-            <div className="amount-sub">
-              {adziima.isOverAllocated ? 'Pagu pos melebihi saldo' : 'Di luar seluruh pos belanja'}
-            </div>
-          </div>
-          <div className="card-footer-meta">
-            <span>Murni ditabung</span>
-            <span style={{ color: adziima.isOverAllocated ? '#ef4444' : '#10b981', fontWeight: 700 }}>
-              {adziima.isOverAllocated ? 'Defisit Pagu' : 'Aman'}
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* Quick Action Buttons for Adziima */}
@@ -399,16 +377,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           <span>Catat Pemasukan</span>
         </button>
       </div>
-
-      {/* Alert if Total Category Budgets exceed Total Available Funds */}
-      {adziima.isOverAllocated && (
-        <div style={{ marginBottom: '1.2rem', padding: '0.75rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-md)', color: '#b91c1c', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-          <AlertCircle size={16} style={{ flexShrink: 0 }} />
-          <span>
-            <strong>Perhatian:</strong> Total pagu belanja pos ({formatIdr(adziima.totalAllBudgetIdr)}) melebihi total uang yang kamu miliki ({formatIdr(adziima.totalInflowIdr)}) sebesar <strong>{formatIdr(adziima.overAllocatedAmountIdr)}</strong>. Sesuaikan target pagu pos agar simpanan tabungan bisa terbentuk.
-          </span>
-        </div>
-      )}
 
 
 
