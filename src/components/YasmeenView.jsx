@@ -166,7 +166,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
       {/* BAND 2: Edge-to-Edge 3-Column KPI Metric Strip (Hairline Divided) */}
       <section className="hq-kpi-strip cols-3">
-        <div className="hq-kpi-cell">
+        <div className="hq-kpi-cell tint-pink">
           <div className="hq-kpi-label">
             <span style={{ color: '#db2777' }}>Sisa Saldo Kas</span>
             <Wallet size={15} color="#db2777" />
@@ -176,13 +176,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </div>
           <div className="hq-kpi-meta">
             <span>Total dana: {formatIdr(yasmeen.totalInflowIdr)}</span>
-            <span style={{ color: '#db2777', fontWeight: 700 }}>Aktif</span>
+            <span className="hq-badge hq-badge-pink">Aktif</span>
           </div>
         </div>
 
-        <div className="hq-kpi-cell">
+        <div className="hq-kpi-cell tint-rose">
           <div className="hq-kpi-label">
-            <span>Pengeluaran Bulan Ini</span>
+            <span style={{ color: '#e11d48' }}>Pengeluaran Bulan Ini</span>
             <TrendingDown size={15} color="#e11d48" />
           </div>
           <div className="hq-kpi-value" style={{ color: '#e11d48' }}>
@@ -190,13 +190,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </div>
           <div className="hq-kpi-meta">
             <span>{expenseCount} transaksi tercatat</span>
-            <span>Bulan {monthLabel}</span>
+            <span className="hq-badge hq-badge-red">{monthLabel}</span>
           </div>
         </div>
 
-        <div className="hq-kpi-cell">
+        <div className="hq-kpi-cell tint-orange">
           <div className="hq-kpi-label">
-            <span>Disisihkan ke Pos</span>
+            <span style={{ color: '#ea580c' }}>Disisihkan ke Pos</span>
             <Sliders size={15} color="#ea580c" />
           </div>
           <div className="hq-kpi-value" style={{ color: '#ea580c' }}>
@@ -204,7 +204,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </div>
           <div className="hq-kpi-meta">
             <span>Sisa pagu: {formatIdr(yasmeen.remainingAllBudgetIdr)}</span>
-            <span style={{ color: '#ea580c', fontWeight: 700 }}>Target Pos</span>
+            <span className="hq-badge hq-badge-amber">Target Pos</span>
           </div>
         </div>
       </section>
@@ -268,7 +268,13 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                 <div key={cat.id} className="hq-matrix-cell">
                   <div className="hq-cat-head">
                     <div className="hq-cat-title-wrap">
-                      <div className="hq-cat-icon">
+                      <div
+                        className="hq-cat-icon"
+                        style={{
+                          background: `${cat.color || '#db2777'}18`,
+                          borderColor: `${cat.color || '#db2777'}40`
+                        }}
+                      >
                         <CategoryIcon name={cat.iconName} size={16} color={cat.color || '#db2777'} />
                       </div>
                       <div style={{ minWidth: 0 }}>

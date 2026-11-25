@@ -346,7 +346,7 @@ export default function GoldSavingsView() {
 
       {/* BAND 2: Edge-to-Edge 4-Column KPI Strip */}
       <section className="hq-kpi-strip cols-4">
-        <div className="hq-kpi-cell">
+        <div className="hq-kpi-cell tint-gold">
           <div className="hq-kpi-label">
             <span style={{ color: '#b45309' }}>Total Gramasi</span>
             <Coins size={15} color="#d97706" />
@@ -356,23 +356,23 @@ export default function GoldSavingsView() {
           </div>
           <div className="hq-kpi-meta">
             <span>{gold.totalKeping} keping fisik</span>
-            <span>24K (999.9)</span>
+            <span className="hq-badge hq-badge-amber">24K · 999.9</span>
           </div>
         </div>
 
-        <div className="hq-kpi-cell">
+        <div className="hq-kpi-cell tint-orange">
           <div className="hq-kpi-label">
-            <span>{isBuybackMode ? 'Nilai Cair (Buyback)' : 'Nilai Pasar Kini'}</span>
+            <span style={{ color: '#c2410c' }}>{isBuybackMode ? 'Nilai Cair (Buyback)' : 'Nilai Pasar Kini'}</span>
           </div>
-          <div className="hq-kpi-value">{formatIdr(gold.currentAssetValueIdr)}</div>
+          <div className="hq-kpi-value" style={{ color: '#b45309' }}>{formatIdr(gold.currentAssetValueIdr)}</div>
           <div className="hq-kpi-meta">
             <span>Acuan: {formatIdr(gold.activeValuationPrice)}/gr</span>
           </div>
         </div>
 
-        <div className="hq-kpi-cell">
+        <div className={`hq-kpi-cell ${isProfit ? 'tint-green' : 'tint-rose'}`}>
           <div className="hq-kpi-label">
-            <span>Tren Untung / Rugi</span>
+            <span style={{ color: isProfit ? '#059669' : '#e11d48' }}>Tren Untung / Rugi</span>
             {isProfit ? <TrendingUp size={15} color="#059669" /> : <TrendingDown size={15} color="#e11d48" />}
           </div>
           <div className="hq-kpi-value" style={{ color: isProfit ? '#059669' : '#e11d48' }}>
@@ -385,20 +385,20 @@ export default function GoldSavingsView() {
               Modal: {formatIdr(gold.totalGoldSpentIdr)}
             </span>
             {gold.totalGoldSpentIdr > 0 && (
-              <strong style={{ color: isProfit ? '#059669' : '#e11d48' }}>
+              <span className={`hq-badge ${isProfit ? 'hq-badge-green' : 'hq-badge-red'}`}>
                 {isProfit ? '+' : ''}
                 {gold.profitLossPercent}%
-              </strong>
+              </span>
             )}
           </div>
         </div>
 
-        <div className="hq-kpi-cell">
+        <div className="hq-kpi-cell tint-purple">
           <div className="hq-kpi-label">
-            <span>Target Berdua</span>
-            <Target size={15} color="#b45309" />
+            <span style={{ color: '#7c3aed' }}>Target Berdua</span>
+            <Target size={15} color="#7c3aed" />
           </div>
-          <div className="hq-kpi-value">
+          <div className="hq-kpi-value" style={{ color: '#6d28d9' }}>
             {gold.progressPercent}%
             <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', marginLeft: '0.4rem' }}>
               / {gold.targetGrams} gr
@@ -408,7 +408,7 @@ export default function GoldSavingsView() {
             <div className="hq-progress-track">
               <div
                 className="hq-progress-fill"
-                style={{ width: `${gold.progressPercent}%`, background: '#d97706' }}
+                style={{ width: `${gold.progressPercent}%`, background: 'linear-gradient(90deg, #f59e0b, #8b5cf6)' }}
               />
             </div>
           </div>
@@ -416,45 +416,45 @@ export default function GoldSavingsView() {
       </section>
 
       {/* BAND 3: Edge-to-Edge Contributor Breakdown Strip */}
-      <section className="hq-kpi-strip cols-3" style={{ background: 'var(--bg-surface)' }}>
-        <div className="hq-kpi-cell" style={{ paddingTop: '0.9rem', paddingBottom: '0.9rem' }}>
+      <section className="hq-kpi-strip cols-3">
+        <div className="hq-kpi-cell" style={{ paddingTop: '0.9rem', paddingBottom: '0.9rem', background: '#fdf2f8' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#9d174d', textTransform: 'uppercase' }}>
               Disetor Yasmeen
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: '#db2777' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, color: '#db2777' }}>
               {gold.yasmeenContributedGrams.toFixed(2)} gr
             </span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.15rem' }} className="tabular-nums">
+          <div style={{ fontSize: '0.75rem', color: '#be185d', opacity: 0.85, marginTop: '0.15rem' }} className="tabular-nums">
             ≈ {formatIdr(gold.yasmeenContributedValueIdr || 0)}
           </div>
         </div>
 
-        <div className="hq-kpi-cell" style={{ paddingTop: '0.9rem', paddingBottom: '0.9rem' }}>
+        <div className="hq-kpi-cell" style={{ paddingTop: '0.9rem', paddingBottom: '0.9rem', background: '#f0f9ff' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#0369a1', textTransform: 'uppercase' }}>
               Disetor Adziima
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: '#0284c7' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, color: '#0284c7' }}>
               {gold.adziimaContributedGrams.toFixed(2)} gr
             </span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.15rem' }} className="tabular-nums">
+          <div style={{ fontSize: '0.75rem', color: '#0369a1', opacity: 0.85, marginTop: '0.15rem' }} className="tabular-nums">
             ≈ {formatIdr(gold.adziimaContributedValueIdr || 0)}
           </div>
         </div>
 
-        <div className="hq-kpi-cell" style={{ paddingTop: '0.9rem', paddingBottom: '0.9rem' }}>
+        <div className="hq-kpi-cell" style={{ paddingTop: '0.9rem', paddingBottom: '0.9rem', background: '#fffbeb' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#92400e', textTransform: 'uppercase' }}>
               Patungan Berdua (50:50)
             </span>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, color: '#b45309' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, color: '#b45309' }}>
               {contributorStats.shared.grams.toFixed(2)} gr
             </span>
           </div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '0.15rem' }} className="tabular-nums">
+          <div style={{ fontSize: '0.75rem', color: '#b45309', opacity: 0.85, marginTop: '0.15rem' }} className="tabular-nums">
             ≈ {formatIdr(contributorStats.shared.value || 0)} · Avg beli{' '}
             {gold.totalGrams > 0 ? `${formatIdr(Math.round(gold.avgBuyPricePerGram))}/gr` : '-'}
           </div>

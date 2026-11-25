@@ -54,7 +54,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
   return (
     <div style={{ width: '100%' }}>
       {/* BAND 1: Full-Width Hero Net Worth & Distribution */}
-      <section className="hq-band">
+      <section className="hq-band hq-band-hero">
         <div className="hq-hero-wealth">
           <div>
             <div className="hq-eyebrow">
@@ -104,7 +104,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
       <section className="hq-accounts-grid">
         {/* Account 1: Yasmeen */}
         <div
-          className="hq-account-col"
+          className="hq-account-col col-pink"
           onClick={() => openMonthlyAccount('yasmeen')}
           role="button"
           tabIndex={0}
@@ -171,7 +171,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
 
         {/* Account 2: Adziima */}
         <div
-          className="hq-account-col"
+          className="hq-account-col col-blue"
           onClick={() => openMonthlyAccount('adziima')}
           role="button"
           tabIndex={0}
@@ -238,7 +238,7 @@ export default function LandingPage({ onOpenEditProfile, onOpenCloudModal }) {
 
         {/* Account 3: Aset Emas 24K */}
         <div
-          className="hq-account-col"
+          className="hq-account-col col-gold"
           onClick={() => setActiveView('gold')}
           role="button"
           tabIndex={0}

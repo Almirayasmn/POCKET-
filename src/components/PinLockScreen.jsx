@@ -70,7 +70,7 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: '#ffffff',
+        background: 'linear-gradient(135deg, #fdf2f8 0%, #f5f3ff 50%, #e0f2fe 100%)',
         fontFamily: 'var(--font-sans)'
       }}
     >
@@ -80,7 +80,8 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
           width: '100%',
           padding: '0 var(--hq-pad-x)',
           height: '56px',
-          borderBottom: '1px solid var(--border-line)',
+          background: 'rgba(255,255,255,0.88)',
+          borderBottom: '1px solid #fbcfe8',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
@@ -90,7 +91,7 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
           <span className="hq-brand-mark">Z</span>
           <span className="hq-brand-text">Zimeira</span>
         </div>
-        <span className="hq-badge hq-badge-slate">
+        <span className="hq-badge hq-badge-pink">
           <Lock size={11} />
           Terkunci
         </span>
@@ -141,11 +142,11 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
                 <div
                   key={idx}
                   style={{
-                    width: '14px',
-                    height: '14px',
+                    width: '15px',
+                    height: '15px',
                     borderRadius: '50%',
-                    background: isFilled ? '#0f172a' : 'transparent',
-                    border: isFilled ? '2px solid #0f172a' : '2px solid #cbd5e1',
+                    background: isFilled ? 'linear-gradient(135deg, #ec4899, #7c3aed)' : '#ffffff',
+                    border: isFilled ? '2px solid #db2777' : '2px solid #f9a8d4',
                     transition: 'all 0.12s ease'
                   }}
                 />
