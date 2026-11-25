@@ -78,7 +78,7 @@ export function PocketProvider({ children }) {
   const [activeView, setActiveViewState] = useState(() => {
     try {
       const saved = localStorage.getItem('pocket_device_active_view');
-      if (saved && ['landing', 'yasmeen', 'adziima', 'gold', 'business'].includes(saved)) {
+      if (saved && ['landing', 'yasmeen', 'adziima', 'gold'].includes(saved)) {
         return saved;
       }
     } catch (e) {}

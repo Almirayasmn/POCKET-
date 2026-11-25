@@ -1,56 +1,34 @@
 import React, { useState } from 'react';
 import { usePocket } from '../context/PocketContext';
-import { formatCny, formatIdr, formatDateIndo } from '../utils/formatters';
+import { formatIdr, formatDateIndo } from '../utils/formatters';
 import { exportMonthToExcel } from '../utils/exportExcel';
-import UserAvatar from './UserAvatar';
 import CategoryIcon from './CategoryIcon';
 import UnifiedDashboardHeader from './UnifiedDashboardHeader';
-import MonthNavigator, { ALL_MONTH_OPTIONS } from './MonthNavigator';
+import { ALL_MONTH_OPTIONS } from './MonthNavigator';
+import ManageCategoriesModal from './ManageCategoriesModal';
 import {
-  ArrowLeft,
   Wallet,
-  ShieldCheck,
-  Sparkles,
-  TrendingUp,
   TrendingDown,
   Plus,
   Trash2,
   Edit2,
-  Coffee,
-  Coins,
-  Settings,
-  Download,
-  Cloud,
-  RefreshCw,
   Sliders,
-  CheckCircle2,
-  AlertTriangle,
-  PieChart,
-  PiggyBank,
-  Lock,
-  FolderUp
+  Download,
+  FolderUp,
+  Search,
+  X,
+  Check
 } from 'lucide-react';
-import ManageCategoriesModal from './ManageCategoriesModal';
-
-const DAYS_OF_WEEK = ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'];
 
 export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, onOpenCloudModal }) {
   const {
-    setActiveView,
     calculations,
     deleteTransaction,
-    toggleStipend,
     updateCategoryBudget,
     setTotalMoney,
-    toggleNongkrongDay,
     exchangeRate,
     users,
     selectedMonth,
-    setSelectedMonth,
-    yasmeenCurrencyView,
-    setYasmeenCurrencyView,
-    isCloudConnected,
-    isCloudSyncing,
     yasmeenTransactions,
     getCategoriesForMonth,
     googleDriveUrl
@@ -58,15 +36,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
 
   const { yasmeen } = calculations;
   const user = users.yasmeen || {};
-  const isChina = yasmeen.isChina; // True if <= 2027-01, False if > 2027-01
-  const isViewYuan = false;
-
-  const formatPrimary = (cny, idr) => {
-    return formatIdr(idr);
-  };
-
-  const formatSecondary = () => null;
-
   const currentCategories = yasmeen.categories;
   const currentMonthTx = yasmeen.monthTx;
 
@@ -79,26 +48,16 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
   const [isManageCatOpen, setIsManageCatOpen] = useState(false);
 
-  const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
+  const monthLabel = ALL_MONTH_OPTIONS.find((m) => m.value === selectedMonth)?.label || selectedMonth;
 
   const handleStartEditBudget = (cat) => {
     setEditingCatId(cat.id);
-    if (isViewYuan) {
-      setTempBudget((cat.budgetCny || 0).toString());
-    } else {
-      setTempBudget((cat.budgetIdr || 0).toString());
-    }
+    setTempBudget((cat.budgetIdr || 0).toString());
   };
 
   const handleSaveBudget = (catId) => {
     const val = parseFloat(tempBudget) || 0;
-    if (isViewYuan) {
-      // Inputted as CNY, convert to IDR
-      const asIdr = Math.round(val * exchangeRate);
-      updateCategoryBudget('yasmeen', catId, asIdr, selectedMonth);
-    } else {
-      updateCategoryBudget('yasmeen', catId, val, selectedMonth);
-    }
+    updateCategoryBudget('yasmeen', catId, val, selectedMonth);
     setEditingCatId(null);
   };
 
@@ -108,31 +67,40 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     setIsEditingModal(false);
   };
 
-
-  // Export to Excel handler (1 single month per file, clean 100% Rupiah, no Yuan)
   const handleExportExcel = (targetMonth = selectedMonth) => {
-    const label = ALL_MONTH_OPTIONS.find(opt => opt.value === targetMonth)?.label || targetMonth;
-    const mTx = (yasmeenTransactions || []).filter(tx => (tx?.date || '').startsWith(targetMonth));
-    const mCats = getCategoriesForMonth ? getCategoriesForMonth('yasmeen', targetMonth) : (targetMonth === selectedMonth ? (yasmeen.categories || currentCategories) : []);
+    const label = ALL_MONTH_OPTIONS.find((opt) => opt.value === targetMonth)?.label || targetMonth;
+    const mTx = (yasmeenTransactions || []).filter((tx) => (tx?.date || '').startsWith(targetMonth));
+    const mCats = getCategoriesForMonth
+      ? getCategoriesForMonth('yasmeen', targetMonth)
+      : targetMonth === selectedMonth
+      ? yasmeen.categories || currentCategories
+      : [];
 
     const mSpending = {};
-    mCats.forEach(c => { mSpending[c.id] = { totalIdr: 0, count: 0 }; });
-    mTx.forEach(tx => {
+    mCats.forEach((c) => {
+      mSpending[c.id] = { totalIdr: 0, count: 0 };
+    });
+    mTx.forEach((tx) => {
       if (tx?.type !== 'Masuk' && mSpending[tx?.category]) {
-        mSpending[tx.category].totalIdr += (tx.amountIdr || 0);
+        mSpending[tx.category].totalIdr += tx.amountIdr || 0;
         mSpending[tx.category].count += 1;
       }
     });
 
     let mIncome = 0;
     let mOutflow = 0;
-    mTx.forEach(tx => {
-      if (tx?.type === 'Masuk') mIncome += (tx.amountIdr || 0);
-      else mOutflow += (tx.amountIdr || 0);
+    mTx.forEach((tx) => {
+      if (tx?.type === 'Masuk') mIncome += tx.amountIdr || 0;
+      else mOutflow += tx.amountIdr || 0;
     });
 
     const totalBudget = mCats.reduce((sum, c) => {
-      let b = (c.budgetIdr !== undefined && c.budgetIdr !== null) ? c.budgetIdr : (c.budgetCny ? c.budgetCny * (exchangeRate || 2750) : c.budget);
+      let b =
+        c.budgetIdr !== undefined && c.budgetIdr !== null
+          ? c.budgetIdr
+          : c.budgetCny
+          ? c.budgetCny * (exchangeRate || 2750)
+          : c.budget;
       if (b > 0 && b < 5000) b = Math.round(b * (exchangeRate || 2750));
       return sum + (Number(b) || 0);
     }, 0);
@@ -141,7 +109,7 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     const isCur = targetMonth === selectedMonth;
     const startBalance = isCur ? yasmeen.startBalanceIdr : 0;
     const totalInflow = startBalance + mIncome;
-    const netBalance = isCur ? yasmeen.totalBalanceIdr : (mIncome - mOutflow);
+    const netBalance = isCur ? yasmeen.totalBalanceIdr : mIncome - mOutflow;
     const plannedSavings = Math.max(0, totalInflow - totalBudget);
 
     exportMonthToExcel({
@@ -165,7 +133,6 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     });
   };
 
-  // Filtered transactions for the view
   const filteredTransactions = currentMonthTx.filter((tx) => {
     if (selectedCatFilter !== 'all' && tx.category !== selectedCatFilter) return false;
     if (searchQuery.trim()) {
@@ -177,13 +144,14 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     return true;
   });
 
+  const expenseCount = currentMonthTx.filter((t) => t.type !== 'Masuk').length;
+
   return (
-    <div>
-      {/* Unified App Header (Profile, Currency Switcher, Actions, and Integrated Month Navigator) */}
+    <div style={{ width: '100%' }}>
+      {/* BAND 1: Full-Width Context Header + Month Navigator + Quick Actions */}
       <UnifiedDashboardHeader
         user={user}
         isYasmeen={true}
-        isChina={false}
         onOpenEditProfile={onOpenEditProfile}
         onOpenBalanceModal={() => {
           setModalInput(Math.round(yasmeen.totalBalanceIdr).toString());
@@ -192,359 +160,210 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         }}
         onOpenCloudModal={onOpenCloudModal}
         onExportExcel={handleExportExcel}
+        onOpenAdd={onOpenAdd}
         transactionCount={currentMonthTx.length}
       />
 
-      {/* Modal Edit Saldo */}
-      {isEditingModal && (
-        <div className="modal-overlay" onClick={() => setIsEditingModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
-            <div className="modal-header">
-              <h3>Atur Saldo & Uang Yasmeen</h3>
-              <button className="modal-close-btn" onClick={() => setIsEditingModal(false)}>✕</button>
-            </div>
-            <form onSubmit={handleSaveModal}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label className="form-label" style={{ marginBottom: '0.4rem', display: 'block' }}>Pilih yang Ingin Kamu Atur:</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => setBalanceMode('current_balance')}
-                    style={{
-                      padding: '0.55rem 0.5rem',
-                      borderRadius: '8px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      border: balanceMode === 'current_balance' ? '2px solid #db2777' : '1px solid #cbd5e1',
-                      background: balanceMode === 'current_balance' ? '#fdf2f8' : '#f8fafc',
-                      color: balanceMode === 'current_balance' ? '#9d174d' : '#64748b',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      lineHeight: 1.25
-                    }}
-                  >
-                    <div>Saldo Kas Sekarang</div>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Uang Riil Saat Ini)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setBalanceMode('initial_fund')}
-                    style={{
-                      padding: '0.55rem 0.5rem',
-                      borderRadius: '8px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      border: balanceMode === 'initial_fund' ? '2px solid #db2777' : '1px solid #cbd5e1',
-                      background: balanceMode === 'initial_fund' ? '#fdf2f8' : '#f8fafc',
-                      color: balanceMode === 'initial_fund' ? '#9d174d' : '#64748b',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      lineHeight: 1.25
-                    }}
-                  >
-                    <div>Modal Awal Bulan</div>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Sebelum Belanja)</div>
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  {balanceMode === 'current_balance' ? 'Uang Kas / Rekening Yasmeen Saat Ini (Rp IDR) *' : 'Modal Awal Yasmeen di Awal Bulan (Rp IDR) *'}
-                </label>
-                <input
-                  type="number"
-                  className="form-input"
-                  style={{ fontSize: '1.2rem', fontWeight: 800 }}
-                  value={modalInput}
-                  onChange={(e) => setModalInput(e.target.value)}
-                  autoFocus
-                  required
-                />
-                <div style={{ fontSize: '0.8rem', color: '#db2777', marginTop: '0.35rem', fontWeight: 600 }}>
-                  Terbaca: {formatIdr(parseFloat(modalInput) || 0)}
-                </div>
-              </div>
-
-              {/* Informational preview note */}
-              <div style={{ padding: '0.75rem', background: '#fdf2f8', borderRadius: '8px', border: '1px solid #fbcfe8', fontSize: '0.78rem', color: '#9d174d', marginBottom: '1.2rem', lineHeight: 1.4 }}>
-                {balanceMode === 'current_balance' ? (
-                  <>
-                    💡 <strong>Sisa Saldo Kas</strong> kamu akan langsung menjadi <strong>{formatPrimary((parseFloat(modalInput) || 0) / exchangeRate, parseFloat(modalInput) || 0)}</strong>. Seluruh riwayat {currentMonthTx.length} transaksi bulan {monthLabel} tetap aman tersimpan tanpa hilang!
-                  </>
-                ) : (
-                  <>
-                    💡 Nominal ini dijadikan patokan modal awal bulan. Saldo kas saat ini akan dihitung dari modal ini dikurangi pengeluaran bulan {monthLabel}.
-                  </>
-                )}
-              </div>
-
-              <button type="submit" className="submit-btn pink">
-                Simpan Saldo
-              </button>
-            </form>
+      {/* BAND 2: Edge-to-Edge 3-Column KPI Metric Strip (Hairline Divided) */}
+      <section className="hq-kpi-strip cols-3">
+        <div className="hq-kpi-cell">
+          <div className="hq-kpi-label">
+            <span style={{ color: '#db2777' }}>Sisa Saldo Kas</span>
+            <Wallet size={15} color="#db2777" />
           </div>
-        </div>
-      )}
-
-      {/* Unified Balance & Allocation Cards for Yasmeen */}
-      <div className="balance-grid grid-3">
-        {/* Card 1: Sisa Saldo Kas */}
-        <div className="balance-card" style={{ borderColor: 'var(--pastel-pink-border)' }}>
-          <div>
-            <div className="card-header-small">
-              <span style={{ color: '#db2777' }}>Sisa Saldo Kas</span>
-              <Wallet size={18} color="#db2777" />
-            </div>
-            <div className="amount-main" style={{ color: '#db2777' }}>
-              {formatPrimary(yasmeen.totalBalanceCny, yasmeen.totalBalanceIdr)}
-            </div>
-            {formatSecondary(yasmeen.totalBalanceCny, yasmeen.totalBalanceIdr) && (
-              <div className="amount-sub">
-                {formatSecondary(yasmeen.totalBalanceCny, yasmeen.totalBalanceIdr)}
-              </div>
-            )}
+          <div className="hq-kpi-value" style={{ color: '#db2777' }}>
+            {formatIdr(yasmeen.totalBalanceIdr)}
           </div>
-          <div className="card-footer-meta">
-            <span>Total dana: {formatPrimary(yasmeen.totalInflowCny, yasmeen.totalInflowIdr)}</span>
+          <div className="hq-kpi-meta">
+            <span>Total dana: {formatIdr(yasmeen.totalInflowIdr)}</span>
             <span style={{ color: '#db2777', fontWeight: 700 }}>Aktif</span>
           </div>
         </div>
 
-        {/* Card 2: Pengeluaran Bulan Ini */}
-        <div className="balance-card">
-          <div>
-            <div className="card-header-small">
-              <span>Pengeluaran Bulan Ini</span>
-              <TrendingDown size={18} color="#f43f5e" />
-            </div>
-            <div className="amount-main" style={{ color: '#f43f5e' }}>
-              {formatPrimary(yasmeen.totalOutflowCny, yasmeen.totalOutflowIdr)}
-            </div>
-            <div className="amount-sub">
-              {currentMonthTx.filter(t => t.type !== 'Masuk').length} transaksi tercatat
-            </div>
+        <div className="hq-kpi-cell">
+          <div className="hq-kpi-label">
+            <span>Pengeluaran Bulan Ini</span>
+            <TrendingDown size={15} color="#e11d48" />
           </div>
-          <div className="card-footer-meta">
+          <div className="hq-kpi-value" style={{ color: '#e11d48' }}>
+            {formatIdr(yasmeen.totalOutflowIdr)}
+          </div>
+          <div className="hq-kpi-meta">
+            <span>{expenseCount} transaksi tercatat</span>
             <span>Bulan {monthLabel}</span>
-            <span style={{ color: '#f43f5e', fontWeight: 700 }}>Terpakai</span>
           </div>
         </div>
 
-        {/* Card 3: Disisihkan ke Pos Belanja (Pagu Pos) */}
-        <div className="balance-card">
-          <div>
-            <div className="card-header-small">
-              <span>Disisihkan ke Pos</span>
-              <Sliders size={18} color="#ea580c" />
-            </div>
-            <div className="amount-main" style={{ color: '#ea580c' }}>
-              {formatPrimary(yasmeen.totalAllBudgetCny, yasmeen.totalAllBudgetIdr)}
-            </div>
-            <div className="amount-sub">
-              Sisa pagu: {formatPrimary(yasmeen.remainingAllBudgetCny, yasmeen.remainingAllBudgetIdr)}
-            </div>
+        <div className="hq-kpi-cell">
+          <div className="hq-kpi-label">
+            <span>Disisihkan ke Pos</span>
+            <Sliders size={15} color="#ea580c" />
           </div>
-          <div className="card-footer-meta">
-            <span>Target seluruh pos</span>
-            <span style={{ color: '#ea580c', fontWeight: 700 }}>Pagu</span>
+          <div className="hq-kpi-value" style={{ color: '#ea580c' }}>
+            {formatIdr(yasmeen.totalAllBudgetIdr)}
+          </div>
+          <div className="hq-kpi-meta">
+            <span>Sisa pagu: {formatIdr(yasmeen.remainingAllBudgetIdr)}</span>
+            <span style={{ color: '#ea580c', fontWeight: 700 }}>Target Pos</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Quick Action Buttons for Yasmeen */}
-      <div className="action-buttons-grid">
-        <button
-          className="btn-action-primary pink"
-          onClick={() => onOpenAdd('Keluar')}
-        >
-          <Plus size={18} />
-          <span>Catat Pengeluaran</span>
-        </button>
-
-        <button
-          className="btn-action-primary green"
-          onClick={() => onOpenAdd('Masuk')}
-        >
-          <TrendingUp size={18} />
-          <span>Catat Pemasukan</span>
-        </button>
-      </div>
-
-
-
-      {/* Category Budget Section */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+      {/* BAND 3: Pos Anggaran Bulanan (Hairline Matrix - Zero Floating Cards) */}
+      <section>
+        <div className="hq-section-header">
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800 }}>
-              Budget Kategori Pos Bulanan
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Alokasi dan batas pengeluaran bulanan (Rupiah Rp)
+            <h2 className="hq-section-title">Budget Kategori Pos Bulanan</h2>
+            <p className="hq-section-subtitle">
+              Alokasi dan batas pengeluaran bulan {monthLabel} ({currentCategories.length} pos aktif)
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => setIsManageCatOpen(true)}
-            className="btn-back-home"
-            style={{
-              borderColor: 'var(--pastel-pink-border)',
-              color: '#db2777',
-              background: '#ffffff'
-            }}
+            className="hq-btn"
             title="Tambah atau edit pos pengeluaran"
           >
-            <Sliders size={14} />
+            <Sliders size={14} color="#db2777" />
             <span>Kelola / Tambah Pos</span>
           </button>
         </div>
 
         {currentCategories.length === 0 ? (
-          <div className="pastel-card" style={{ textAlign: 'center', padding: '2.5rem 1.2rem', background: '#ffffff', border: '1.5px dashed var(--pastel-pink-border)', borderRadius: 'var(--radius-lg)' }}>
-            <div style={{ fontSize: '2.2rem', marginBottom: '0.6rem' }}>📋</div>
-            <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.35rem' }}>
-              Belum Ada Pos Pengeluaran di Bulan Ini
-            </h4>
-            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', maxWidth: '420px', margin: '0 auto 1.2rem auto', lineHeight: 1.5 }}>
+          <div className="hq-empty" style={{ borderBottom: '1px solid var(--border-line)' }}>
+            <p style={{ fontWeight: 800, fontSize: '0.98rem', color: 'var(--text-main)' }}>
+              Belum Ada Pos Pengeluaran di Bulan {monthLabel}
+            </p>
+            <p style={{ fontSize: '0.82rem', maxWidth: '420px', margin: '0.35rem auto 1rem' }}>
               Bulan baru dimulai dengan pos kosong agar kamu bisa merancang anggaran belanja sesuai kebutuhan.
             </p>
             <button
               type="button"
               onClick={() => setIsManageCatOpen(true)}
-              className="submit-btn pink"
-              style={{ display: 'inline-flex', width: 'auto', padding: '0.6rem 1.4rem', fontSize: '0.85rem', margin: '0 auto' }}
+              className="hq-btn hq-btn-pink"
             >
-              <Plus size={16} />
+              <Plus size={15} />
               <span>Buat Pos Pengeluaran Baru</span>
             </button>
           </div>
         ) : (
-          <div className="categories-grid">
-          {currentCategories.map((cat) => {
-            const spending = yasmeen.spending[cat.id] || { totalCny: 0, totalIdr: 0, count: 0 };
-            const spentIdr = spending.totalIdr || 0;
-            const budgetIdr = cat.budgetIdr || 0;
-            const remainingIdr = budgetIdr - spentIdr;
-            const effectiveBudget = budgetIdr;
-            const effectiveSpent = spentIdr;
-            const percent = effectiveBudget > 0 ? Math.min(100, Math.round((effectiveSpent / effectiveBudget) * 100)) : (effectiveSpent > 0 ? 100 : 0);
-            const isOver = effectiveBudget > 0 && effectiveSpent > effectiveBudget;
-            const isWarning = percent >= 50 && !isOver;
-            const barColor = isOver ? '#f43f5e' : (isWarning ? '#f59e0b' : '#f472b6');
+          <div className="hq-matrix-grid">
+            {currentCategories.map((cat) => {
+              const spending = yasmeen.spending[cat.id] || { totalIdr: 0, count: 0 };
+              const spentIdr = spending.totalIdr || 0;
+              const budgetIdr = cat.budgetIdr || 0;
+              const remainingIdr = budgetIdr - spentIdr;
+              const percent =
+                budgetIdr > 0
+                  ? Math.min(100, Math.round((spentIdr / budgetIdr) * 100))
+                  : spentIdr > 0
+                  ? 100
+                  : 0;
+              const isOver = budgetIdr > 0 && spentIdr > budgetIdr;
+              const isWarning = percent >= 50 && !isOver;
+              const barColor = isOver ? '#e11d48' : isWarning ? '#f59e0b' : '#db2777';
 
-            return (
-              <div key={cat.id} className="category-card">
-                <div>
-                  <div className="category-header">
-                    <div className="category-title-group">
-                      <div className="category-icon">
-                        <CategoryIcon name={cat.iconName} size={18} color={cat.color} />
+              return (
+                <div key={cat.id} className="hq-matrix-cell">
+                  <div className="hq-cat-head">
+                    <div className="hq-cat-title-wrap">
+                      <div className="hq-cat-icon">
+                        <CategoryIcon name={cat.iconName} size={16} color={cat.color || '#db2777'} />
                       </div>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <span className="category-name">{cat.name}</span>
-                          {isOver && (
-                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#e11d48', background: '#ffe4e6', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
-                              🚨 Over
-                            </span>
-                          )}
-                          {isWarning && (
-                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
-                              ⚠️ 50%+
-                            </span>
-                          )}
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                          <span className="hq-cat-name">{cat.name}</span>
+                          {isOver && <span className="hq-badge hq-badge-red">Over</span>}
+                          {isWarning && <span className="hq-badge hq-badge-amber">50%+</span>}
                         </div>
-                        <div className="category-basis">{cat.note}</div>
+                        {cat.note && <div className="hq-cat-note">{cat.note}</div>}
                       </div>
                     </div>
 
                     {editingCatId === cat.id ? (
-                      <div style={{ display: 'flex', gap: '0.3rem' }}>
+                      <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
                         <input
                           type="number"
                           value={tempBudget}
                           onChange={(e) => setTempBudget(e.target.value)}
                           placeholder="Rp"
-                          style={{ width: '95px', padding: '0.2rem 0.4rem', fontSize: '0.8rem', border: '1px solid #f472b6', borderRadius: '4px' }}
+                          className="hq-input-inline"
+                          style={{ width: '96px', padding: '0.25rem 0.45rem', fontSize: '0.78rem' }}
                           autoFocus
                         />
                         <button
+                          type="button"
                           onClick={() => handleSaveBudget(cat.id)}
-                          style={{ background: '#f472b6', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.2rem 0.5rem', cursor: 'pointer' }}
+                          className="hq-btn hq-btn-pink"
+                          style={{ padding: '0.28rem 0.5rem' }}
                         >
-                          ✓
+                          <Check size={13} />
                         </button>
                       </div>
                     ) : (
                       <button
+                        type="button"
                         onClick={() => handleStartEditBudget(cat)}
+                        className="hq-btn-icon"
                         title="Atur target budget"
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}
                       >
                         <Edit2 size={13} />
                       </button>
                     )}
                   </div>
 
-                  <div className="progress-bar-bg" style={{ position: 'relative' }}>
-                    <div
-                      className="progress-bar-fill"
-                      style={{
-                        width: `${percent}%`,
-                        background: barColor,
-                        boxShadow: isWarning ? '0 0 8px rgba(245, 158, 11, 0.4)' : (isOver ? '0 0 8px rgba(244, 63, 94, 0.4)' : 'none'),
-                        transition: 'all 0.3s ease'
-                      }}
-                    />
-                  </div>
+                  <div>
+                    <div className="hq-progress-track">
+                      <div
+                        className="hq-progress-fill"
+                        style={{ width: `${percent}%`, background: barColor }}
+                      />
+                    </div>
 
-                  <div className="progress-meta">
-                    <span>
-                      Terpakai:{' '}
-                      <span className="spent" style={{ color: isOver ? '#f43f5e' : (isWarning ? '#d97706' : 'inherit') }}>
-                        {formatIdr(spentIdr)}
+                    <div className="hq-cat-nums" style={{ marginTop: '0.45rem' }}>
+                      <span>
+                        Terpakai:{' '}
+                        <strong style={{ color: isOver ? '#e11d48' : 'var(--text-main)' }}>
+                          {formatIdr(spentIdr)}
+                        </strong>
                       </span>
+                      <span>
+                        Pagu: {budgetIdr > 0 ? formatIdr(budgetIdr) : 'Belum diatur'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="hq-cat-foot">
+                    <span style={{ color: isOver ? '#e11d48' : 'var(--text-muted)', fontWeight: isOver ? 700 : 500 }}>
+                      {isOver
+                        ? `Lebih ${formatIdr(spentIdr - budgetIdr)}`
+                        : `Sisa ${formatIdr(remainingIdr)}`}
                     </span>
-                    <span>
-                      Budget: {budgetIdr > 0 ? formatIdr(budgetIdr) : 'Belum diatur'}
-                    </span>
+                    <span style={{ color: 'var(--text-dim)' }}>{percent}%</span>
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
-                <div style={{ marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid var(--bg-subtle)', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: isOver ? '#f43f5e' : 'var(--text-muted)' }}>
-                    {isOver
-                      ? `⚠️ Lebih ${formatIdr(spentIdr - budgetIdr)}`
-                      : `Sisa ${formatIdr(remainingIdr)}`}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-    </div>
-
-      {/* Yasmeen Transaction Diary for Current Month */}
-      <div className="pastel-card" style={{ padding: '1.4rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1.2rem' }}>
+      {/* BAND 4: Full-Width Transaction Ledger */}
+      <section>
+        <div className="hq-section-header">
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>
-              Riwayat Transaksi ({monthLabel})
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Catatan jajan dan pengeluaran bulan {monthLabel}
+            <h2 className="hq-section-title">Riwayat Transaksi ({monthLabel})</h2>
+            <p className="hq-section-subtitle">
+              {filteredTransactions.length} dari {currentMonthTx.length} catatan ditampilkan
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
             <button
-              className="btn-back-home"
+              type="button"
+              className="hq-btn"
               onClick={() => handleExportExcel(selectedMonth)}
-              style={{ background: 'var(--pastel-green-soft)', borderColor: '#a7f3d0', color: '#047857' }}
               title={`Unduh Rekapan Excel Bulan ${monthLabel}`}
             >
               <Download size={14} />
@@ -552,117 +371,144 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             </button>
 
             <a
-              href={googleDriveUrl || 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing'}
+              href={
+                googleDriveUrl ||
+                'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing'
+              }
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-back-home"
-              style={{ background: '#ecfdf5', borderColor: '#6ee7b7', color: '#047857', textDecoration: 'none' }}
+              className="hq-btn"
               title="Buka Folder Google Drive"
             >
-              <FolderUp size={14} />
+              <FolderUp size={14} color="#059669" />
               <span>Buka Drive</span>
             </a>
           </div>
         </div>
 
-        {/* Filter bar */}
-        <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '180px' }}>
+        {/* Inline Edge-to-Edge Filter Bar */}
+        <div className="hq-filter-bar">
+          <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: '420px' }}>
+            <Search
+              size={14}
+              color="var(--text-dim)"
+              style={{ position: 'absolute', left: '0.7rem', top: '50%', transform: 'translateY(-50%)' }}
+            />
             <input
               type="text"
-              placeholder="Cari transaksi..."
+              placeholder="Cari transaksi atau catatan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="form-input"
-              style={{ padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}
+              className="hq-input-inline"
+              style={{ width: '100%', paddingLeft: '2.1rem' }}
             />
           </div>
 
           <select
             value={selectedCatFilter}
             onChange={(e) => setSelectedCatFilter(e.target.value)}
-            className="form-select"
-            style={{ width: 'auto', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}
+            className="hq-input-inline"
+            style={{ minWidth: '170px', cursor: 'pointer' }}
           >
             <option value="all">Semua Kategori</option>
-            {currentCategories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+            {currentCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
         </div>
 
+        {/* Flat Ledger Rows */}
         {filteredTransactions.length === 0 ? (
-          <div className="empty-state">
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.6rem', color: 'var(--text-dim)' }}>
-              <Wallet size={24} />
-            </div>
-            <p style={{ fontWeight: 700, fontSize: '1rem' }}>Belum ada transaksi di bulan {monthLabel}</p>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Klik "+ Catat Transaksi" untuk memasukkan catatan belanja bulan ini.
+          <div className="hq-empty">
+            <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+              Belum ada transaksi di bulan {monthLabel}
+            </p>
+            <p style={{ fontSize: '0.82rem', marginTop: '0.25rem' }}>
+              Klik tombol &quot;Catat Pengeluaran&quot; atau &quot;Pemasukan&quot; di atas untuk menambah catatan.
             </p>
           </div>
         ) : (
-          <div>
+          <div className="hq-ledger">
             {filteredTransactions.map((tx) => {
-              const cat = currentCategories.find(c => c.id === tx.category) || { name: tx.category, iconName: 'Tag', color: '#64748b' };
+              const cat = currentCategories.find((c) => c.id === tx.category) || {
+                name: tx.category,
+                iconName: 'Tag',
+                color: '#64748b'
+              };
               const isIncome = tx.type === 'Masuk';
 
               return (
-                <div key={tx.id} className="tx-item">
-                  <div className="tx-left">
-                    <div className="tx-category-badge" style={{ background: isIncome ? '#ecfdf5' : 'var(--bg-subtle)' }}>
-                      <CategoryIcon name={isIncome ? 'TrendingUp' : cat.iconName} size={18} color={isIncome ? '#059669' : cat.color} />
+                <div key={tx.id} className="hq-ledger-row">
+                  <div className="hq-ledger-left">
+                    <div
+                      className="hq-ledger-icon"
+                      style={{
+                        background: isIncome ? '#ecfdf5' : 'var(--bg-surface)',
+                        borderColor: isIncome ? '#a7f3d0' : 'var(--border-subtle)'
+                      }}
+                    >
+                      <CategoryIcon
+                        name={isIncome ? 'TrendingUp' : cat.iconName}
+                        size={16}
+                        color={isIncome ? '#059669' : cat.color}
+                      />
                     </div>
-                    <div className="tx-details">
-                      <h4>
-                        {tx.title}
-                        {isIncome && (
-                          <span style={{ fontSize: '0.72rem', background: '#ecfdf5', color: '#059669', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)', marginLeft: '0.4rem' }}>
-                            Pemasukan
-                          </span>
-                        )}
-                      </h4>
-                      <div className="tx-meta">
+
+                    <div className="hq-ledger-body">
+                      <div className="hq-ledger-title">
+                        <span>{tx.title}</span>
+                        {isIncome && <span className="hq-badge hq-badge-green">Pemasukan</span>}
+                      </div>
+
+                      <div className="hq-ledger-meta">
                         <span>{formatDateIndo(tx.date)}</span>
                         {!isIncome && (
                           <>
-                            <span>•</span>
+                            <span>·</span>
                             <span>{cat.name}</span>
                           </>
                         )}
                         {tx.paymentMethod && (
                           <>
-                            <span>•</span>
-                            <span style={{ fontWeight: 600, color: isIncome ? '#059669' : 'inherit' }}>
+                            <span>·</span>
+                            <span style={{ fontWeight: 600, color: isIncome ? '#059669' : 'var(--text-secondary)' }}>
                               {isIncome ? `Masuk ke ${tx.paymentMethod}` : tx.paymentMethod}
                             </span>
                           </>
                         )}
                         {tx.notes && (
                           <>
-                            <span>•</span>
-                            <span style={{ fontStyle: 'italic' }}>"{tx.notes}"</span>
+                            <span>·</span>
+                            <span style={{ fontStyle: 'italic' }}>&quot;{tx.notes}&quot;</span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="tx-right">
-                    <div className="tx-amount" style={{ color: isIncome ? '#059669' : '#db2777' }}>
+                  <div className="hq-ledger-right">
+                    <div
+                      className="hq-ledger-amount"
+                      style={{ color: isIncome ? '#059669' : '#db2777' }}
+                    >
                       {isIncome ? `+${formatIdr(tx.amountIdr)}` : `-${formatIdr(tx.amountIdr)}`}
                     </div>
-                    <div className="tx-actions">
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
                       <button
+                        type="button"
                         onClick={() => onEditTx(tx)}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        className="hq-btn-icon"
                         title="Edit Transaksi"
                       >
                         <Edit2 size={14} />
                       </button>
                       <button
+                        type="button"
                         onClick={() => deleteTransaction('yasmeen', tx.id)}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        className="hq-btn-icon danger"
                         title="Hapus"
                       >
                         <Trash2 size={14} />
@@ -674,7 +520,98 @@ export default function YasmeenView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             })}
           </div>
         )}
-      </div>
+      </section>
+
+      {/* Modal Edit Saldo */}
+      {isEditingModal && (
+        <div className="modal-overlay" onClick={() => setIsEditingModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div className="modal-header">
+              <h3>Atur Saldo Yasmeen</h3>
+              <button className="modal-close-btn" onClick={() => setIsEditingModal(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveModal}>
+              <div className="form-group">
+                <label className="form-label">Pilih Mode Pengaturan</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('current_balance')}
+                    className={`hq-btn ${balanceMode === 'current_balance' ? 'hq-btn-pink' : ''}`}
+                    style={{ flexDirection: 'column', gap: '0.1rem', padding: '0.6rem 0.5rem' }}
+                  >
+                    <span>Saldo Kas Sekarang</span>
+                    <span style={{ fontSize: '0.68rem', opacity: 0.85, fontWeight: 500 }}>Uang Riil Saat Ini</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('initial_fund')}
+                    className={`hq-btn ${balanceMode === 'initial_fund' ? 'hq-btn-pink' : ''}`}
+                    style={{ flexDirection: 'column', gap: '0.1rem', padding: '0.6rem 0.5rem' }}
+                  >
+                    <span>Modal Awal Bulan</span>
+                    <span style={{ fontSize: '0.68rem', opacity: 0.85, fontWeight: 500 }}>Sebelum Belanja</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  {balanceMode === 'current_balance'
+                    ? 'Uang Kas / Rekening Yasmeen Saat Ini (Rp) *'
+                    : 'Modal Awal Yasmeen di Awal Bulan (Rp) *'}
+                </label>
+                <input
+                  type="number"
+                  className="form-input"
+                  style={{ fontSize: '1.15rem', fontWeight: 800 }}
+                  value={modalInput}
+                  onChange={(e) => setModalInput(e.target.value)}
+                  autoFocus
+                  required
+                />
+                <div style={{ fontSize: '0.78rem', color: '#db2777', marginTop: '0.3rem', fontWeight: 700 }}>
+                  Terbaca: {formatIdr(parseFloat(modalInput) || 0)}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: '0.7rem 0.85rem',
+                  background: 'var(--bg-surface)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-line)',
+                  fontSize: '0.76rem',
+                  color: 'var(--text-secondary)',
+                  marginBottom: '0.5rem',
+                  lineHeight: 1.45
+                }}
+              >
+                {balanceMode === 'current_balance' ? (
+                  <>
+                    <strong>Sisa Saldo Kas</strong> akan langsung menjadi{' '}
+                    <strong>{formatIdr(parseFloat(modalInput) || 0)}</strong>. Seluruh riwayat{' '}
+                    {currentMonthTx.length} transaksi bulan {monthLabel} tetap tersimpan aman.
+                  </>
+                ) : (
+                  <>
+                    Nominal ini dijadikan patokan modal awal bulan {monthLabel}, lalu dikurangi pengeluaran bulan ini.
+                  </>
+                )}
+              </div>
+
+              <button type="submit" className="submit-btn pink">
+                <Check size={16} />
+                <span>Simpan Saldo</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Manage Categories Modal */}
       <ManageCategoriesModal

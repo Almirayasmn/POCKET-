@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Heart, Delete } from 'lucide-react';
+import { Lock, Delete } from 'lucide-react';
 
 export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
   const [pinInput, setPinInput] = useState('');
@@ -9,7 +9,6 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
 
   const PIN_LENGTH = 6;
 
-  // Handle physical keyboard input
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key >= '0' && e.key <= '9') {
@@ -36,7 +35,7 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
   };
 
   const handleDelete = () => {
-    setPinInput(prev => prev.slice(0, -1));
+    setPinInput((prev) => prev.slice(0, -1));
     setErrorMsg('');
   };
 
@@ -46,12 +45,11 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
   };
 
   const validatePin = (input) => {
-    const savedPin = (typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null);
+    const savedPin =
+      typeof window !== 'undefined' ? localStorage.getItem('pocket_duo_security_pin') : null;
     const target = String(savedPin || correctPin || '123456').trim();
 
-    // Check match against target or standard fallback
     if (input === target || input === '123456' || (target.length === 4 && input === target)) {
-      // Success!
       setTimeout(() => {
         onUnlock(rememberDevice);
       }, 150);
@@ -69,250 +67,210 @@ export default function PinLockScreen({ onUnlock, correctPin = '123456' }) {
     <div
       style={{
         minHeight: '100vh',
+        width: '100%',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1.5rem 1rem',
-        backgroundColor: '#faf5fa',
+        flexDirection: 'column',
+        backgroundColor: '#ffffff',
         fontFamily: 'var(--font-sans)'
       }}
     >
+      {/* Top Edge-to-Edge Brand Bar */}
       <div
-        className={isShaking ? 'animate-shake' : ''}
         style={{
           width: '100%',
-          maxWidth: '380px',
-          background: '#ffffff',
-          borderRadius: '24px',
-          border: '2px solid #fbcfe8',
-          boxShadow: '0 12px 36px rgba(244, 114, 182, 0.12)',
-          padding: '2.2rem 1.8rem',
-          textAlign: 'center',
-          position: 'relative'
+          padding: '0 var(--hq-pad-x)',
+          height: '56px',
+          borderBottom: '1px solid var(--border-line)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}
       >
-        {/* Couple Avatars Header */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '-8px', marginBottom: '1.2rem' }}>
-          <div
-            style={{
-              width: 58,
-              height: 58,
-              borderRadius: '50%',
-              background: '#fdf2f8',
-              border: '2.5px solid #fbcfe8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.4rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              zIndex: 2
-            }}
-          >
-            🌸
-          </div>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: '50%',
-              background: '#ffffff',
-              border: '1.5px solid #fbcfe8',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 -8px',
-              zIndex: 3
-            }}
-          >
-            <Heart size={16} color="#f472b6" fill="#f472b6" />
-          </div>
-          <div
-            style={{
-              width: 58,
-              height: 58,
-              borderRadius: '50%',
-              background: '#f0f9ff',
-              border: '2.5px solid #bae6fd',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '1.4rem',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              zIndex: 1
-            }}
-          >
-            🌊
-          </div>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.55rem' }}>
+          <span className="hq-brand-mark">Z</span>
+          <span className="hq-brand-text">Zimeira</span>
         </div>
+        <span className="hq-badge hq-badge-slate">
+          <Lock size={11} />
+          Terkunci
+        </span>
+      </div>
 
-        {/* Title & Description */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#fdf2f8', border: '1.5px solid #fbcfe8', padding: '0.28rem 0.85rem', borderRadius: '999px', marginBottom: '0.75rem' }}>
-          <Lock size={13} color="#db2777" />
-          <span style={{ fontSize: '0.74rem', fontWeight: 800, color: '#be185d', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Akses Terkunci Pribadi
-          </span>
-        </div>
-
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', margin: '0 0 0.35rem' }}>
-          Zimeira
-        </h2>
-        <p style={{ fontSize: '0.84rem', color: '#64748b', margin: '0 0 1.6rem', lineHeight: 1.5 }}>
-          Masukkan 6 digit PIN untuk membuka catatan.
-        </p>
-
-        {/* 6 Pastel Dots PIN Display */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.85rem', marginBottom: '1.5rem' }}>
-          {[0, 1, 2, 3, 4, 5].map(idx => {
-            const isFilled = pinInput.length > idx;
-            return (
-              <div
-                key={idx}
-                style={{
-                  width: '18px',
-                  height: '18px',
-                  borderRadius: '50%',
-                  background: isFilled ? '#f472b6' : '#ffffff',
-                  border: isFilled ? '2px solid #ec4899' : '2px solid #fbcfe8',
-                  boxShadow: isFilled ? '0 2px 8px rgba(244, 114, 182, 0.4)' : 'none',
-                  transition: 'all 0.15s ease',
-                  transform: isFilled ? 'scale(1.15)' : 'scale(1)'
-                }}
-              />
-            );
-          })}
-        </div>
-
-        {/* Error message */}
-        {errorMsg ? (
-          <div style={{ fontSize: '0.82rem', color: '#e11d48', fontWeight: 700, marginBottom: '1rem', minHeight: '1.2rem' }}>
-            ⚠️ {errorMsg}
-          </div>
-        ) : (
-          <div style={{ minHeight: '1.2rem', marginBottom: '1rem' }} />
-        )}
-
-        {/* Numeric Keypad - Pastel Soft Theme */}
+      {/* Centered Clean Keypad Surface (No floating card box) */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '2rem 1rem'
+        }}
+      >
         <div
+          className={isShaking ? 'animate-shake' : ''}
           style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '0.65rem',
-            maxWidth: '280px',
-            margin: '0 auto 1.4rem'
+            width: '100%',
+            maxWidth: '320px',
+            textAlign: 'center'
           }}
         >
-          {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
+          <div className="hq-eyebrow" style={{ marginBottom: '0.45rem' }}>
+            <Lock size={12} />
+            <span>Akses Pribadi</span>
+          </div>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '1.5rem',
+              fontWeight: 800,
+              color: '#0f172a',
+              marginBottom: '0.35rem'
+            }}
+          >
+            Masukkan PIN
+          </h1>
+          <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '1.75rem' }}>
+            6 digit kode keamanan Zimeira · Adziima & Yasmeen
+          </p>
+
+          {/* 6 PIN Dots */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '0.8rem', marginBottom: '1.25rem' }}>
+            {[0, 1, 2, 3, 4, 5].map((idx) => {
+              const isFilled = pinInput.length > idx;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    width: '14px',
+                    height: '14px',
+                    borderRadius: '50%',
+                    background: isFilled ? '#0f172a' : 'transparent',
+                    border: isFilled ? '2px solid #0f172a' : '2px solid #cbd5e1',
+                    transition: 'all 0.12s ease'
+                  }}
+                />
+              );
+            })}
+          </div>
+
+          <div
+            style={{
+              fontSize: '0.8rem',
+              color: '#e11d48',
+              fontWeight: 700,
+              marginBottom: '1rem',
+              minHeight: '1.2rem'
+            }}
+          >
+            {errorMsg || ''}
+          </div>
+
+          {/* Hairline-divided Numeric Keypad */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: '1px',
+              background: 'var(--border-line)',
+              border: '1px solid var(--border-line)',
+              borderRadius: 'var(--radius-lg)',
+              overflow: 'hidden',
+              marginBottom: '1.5rem'
+            }}
+          >
+            {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
+              <button
+                key={num}
+                type="button"
+                onClick={() => handleDigit(num)}
+                style={{
+                  background: '#ffffff',
+                  border: 'none',
+                  padding: '0.95rem 0',
+                  fontSize: '1.2rem',
+                  fontWeight: 700,
+                  color: '#0f172a',
+                  cursor: 'pointer',
+                  fontFamily: 'var(--font-display)'
+                }}
+              >
+                {num}
+              </button>
+            ))}
+
             <button
-              key={num}
-              onClick={() => handleDigit(num)}
+              type="button"
+              onClick={handleClear}
               style={{
-                background: '#ffffff',
-                border: '1.5px solid #fbcfe8',
-                borderRadius: '16px',
-                padding: '0.85rem 0',
-                fontSize: '1.25rem',
-                fontWeight: 800,
-                color: '#1e293b',
-                cursor: 'pointer',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.background = '#fdf2f8';
-                e.currentTarget.style.transform = 'scale(0.96)';
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.background = '#ffffff';
-                e.currentTarget.style.transform = 'scale(1)';
+                background: 'var(--bg-surface)',
+                border: 'none',
+                padding: '0.95rem 0',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                color: 'var(--text-muted)',
+                cursor: 'pointer'
               }}
             >
-              {num}
+              Reset
             </button>
-          ))}
 
-          {/* Bottom row: Clear, 0, Backspace */}
-          <button
-            onClick={handleClear}
-            style={{
-              background: '#f8fafc',
-              border: '1.5px solid #e2e8f0',
-              borderRadius: '16px',
-              padding: '0.85rem 0',
-              fontSize: '0.82rem',
-              fontWeight: 800,
-              color: '#64748b',
-              cursor: 'pointer'
-            }}
-          >
-            Hapus
-          </button>
+            <button
+              type="button"
+              onClick={() => handleDigit('0')}
+              style={{
+                background: '#ffffff',
+                border: 'none',
+                padding: '0.95rem 0',
+                fontSize: '1.2rem',
+                fontWeight: 700,
+                color: '#0f172a',
+                cursor: 'pointer',
+                fontFamily: 'var(--font-display)'
+              }}
+            >
+              0
+            </button>
 
-          <button
-            onClick={() => handleDigit('0')}
-            style={{
-              background: '#ffffff',
-              border: '1.5px solid #fbcfe8',
-              borderRadius: '16px',
-              padding: '0.85rem 0',
-              fontSize: '1.25rem',
-              fontWeight: 800,
-              color: '#1e293b',
-              cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.03)',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseDown={(e) => {
-              e.currentTarget.style.background = '#fdf2f8';
-              e.currentTarget.style.transform = 'scale(0.96)';
-            }}
-            onMouseUp={(e) => {
-              e.currentTarget.style.background = '#ffffff';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            0
-          </button>
+            <button
+              type="button"
+              onClick={handleDelete}
+              style={{
+                background: 'var(--bg-surface)',
+                border: 'none',
+                padding: '0.95rem 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'var(--text-muted)'
+              }}
+              title="Hapus 1 angka"
+            >
+              <Delete size={18} />
+            </button>
+          </div>
 
-          <button
-            onClick={handleDelete}
+          <label
             style={{
-              background: '#f8fafc',
-              border: '1.5px solid #e2e8f0',
-              borderRadius: '16px',
-              padding: '0.85rem 0',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: '0.5rem',
+              fontSize: '0.8rem',
+              color: 'var(--text-muted)',
+              fontWeight: 600,
               cursor: 'pointer',
-              color: '#64748b'
+              userSelect: 'none'
             }}
-            title="Hapus 1 angka"
           >
-            <Delete size={20} />
-          </button>
+            <input
+              type="checkbox"
+              checked={rememberDevice}
+              onChange={(e) => setRememberDevice(e.target.checked)}
+              style={{ accentColor: '#0f172a', width: 15, height: 15, cursor: 'pointer' }}
+            />
+            <span>Ingat saya di perangkat ini</span>
+          </label>
         </div>
-
-        {/* Remember device checkbox */}
-        <label
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            fontSize: '0.82rem',
-            color: '#475569',
-            fontWeight: 600,
-            cursor: 'pointer',
-            userSelect: 'none'
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={rememberDevice}
-            onChange={(e) => setRememberDevice(e.target.checked)}
-            style={{ accentColor: '#f472b6', width: 17, height: 17, cursor: 'pointer' }}
-          />
-          <span>Ingat saya di HP/laptop ini</span>
-        </label>
       </div>
     </div>
   );

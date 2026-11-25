@@ -3,42 +3,30 @@ import { usePocket } from '../context/PocketContext';
 import UserAvatar from './UserAvatar';
 import { ALL_MONTH_OPTIONS } from './MonthNavigator';
 import {
-  ArrowLeft,
   Settings,
   Coins,
-  Cloud,
-  RefreshCw,
   Download,
-  FolderUp,
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Sparkles
+  Plus,
+  TrendingUp
 } from 'lucide-react';
 
 export default function UnifiedDashboardHeader({
   user = {},
   isYasmeen = false,
-  isChina = false,
   onOpenEditProfile,
   onOpenBalanceModal,
-  onOpenCloudModal,
-  onOpenDriveModal,
   onExportExcel,
-  currencyToggle = null,
+  onOpenAdd,
   transactionCount = 0
 }) {
-  const {
-    setActiveView,
-    selectedMonth,
-    setSelectedMonth,
-    isCloudConnected,
-    isCloudSyncing,
-    googleDriveUrl
-  } = usePocket();
+  const { selectedMonth, setSelectedMonth } = usePocket();
 
-  const currentIndex = ALL_MONTH_OPTIONS.findIndex(m => m.value === selectedMonth);
-  const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
+  const currentIndex = ALL_MONTH_OPTIONS.findIndex((m) => m.value === selectedMonth);
+  const monthLabel =
+    ALL_MONTH_OPTIONS.find((m) => m.value === selectedMonth)?.label || selectedMonth;
 
   const handlePrevMonth = () => {
     if (currentIndex > 0) {
@@ -52,136 +40,56 @@ export default function UnifiedDashboardHeader({
     }
   };
 
-  const themeClass = isYasmeen ? 'theme-yasmeen' : 'theme-adziima';
   const accentColor = isYasmeen ? '#db2777' : '#0284c7';
-  const tagBg = isYasmeen ? '#fce7f3' : '#e0f2fe';
-  const tagText = isYasmeen ? '#9d174d' : '#0369a1';
 
   return (
-    <header className={`unified-header-card ${themeClass}`}>
-      {/* 1. TOP ROW: Identity, Navigation, and Action Buttons */}
-      <div className="udh-top-row">
-        {/* Left: Back button + User Identity */}
-        <div className="udh-left-cluster">
-          <button
-            type="button"
-            className="udh-btn-back"
-            onClick={() => {
-              if (setSelectedMonth) setSelectedMonth('2026-11');
-              setActiveView('landing');
-            }}
-            title="Kembali ke Halaman Beranda"
-          >
-            <ArrowLeft size={16} />
-            <span>Halaman Utama</span>
-          </button>
-
-          <div className="udh-divider-v" />
-
-          <div
-            className="udh-user-badge"
-            onClick={onOpenEditProfile}
-            title="Klik untuk ubah foto atau data profil"
-          >
-            <div className="udh-avatar-ring">
-              <UserAvatar user={user} size={44} />
+    <header className="hq-context-bar">
+      {/* Left: User Profile Trigger + Month Navigator */}
+      <div className="hq-context-left">
+        <div
+          className="hq-user-trigger"
+          onClick={onOpenEditProfile}
+          title="Klik untuk ubah foto atau data profil"
+        >
+          <UserAvatar user={user} size={40} />
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 800,
+                  fontSize: '1.05rem',
+                  color: 'var(--text-main)'
+                }}
+              >
+                {user.name || (isYasmeen ? 'Yasmeen Almira' : 'Muhammad Mulkan Adziima')}
+              </span>
+              <Settings size={13} color="var(--text-dim)" />
             </div>
-
-            <div className="udh-user-info">
-              <div className="udh-user-name-row">
-                <span className="udh-user-name">{user.name || (isYasmeen ? 'Yasmeen Almira' : 'Adziima')}</span>
-                <span className="udh-settings-btn" title="Pengaturan Profil">
-                  <Settings size={13} />
-                </span>
-              </div>
-
-              <div className="udh-user-subtitle">
-                {user.bio || user.status || (isYasmeen ? 'Catatan Keuangan Pribadi' : 'Catatan Keuangan')}
-              </div>
+            <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+              {user.bio || user.status || 'Catatan Keuangan Pribadi'} · {transactionCount} transaksi
             </div>
           </div>
         </div>
 
-        {/* Right: Quick Action Buttons */}
-        <div className="udh-right-cluster">
-          {/* Atur Saldo Button */}
-          {onOpenBalanceModal && (
-            <button
-              type="button"
-              className="udh-btn-action udh-btn-balance"
-              onClick={onOpenBalanceModal}
-              title="Atur Saldo Kas Awal / Modal"
-            >
-              <Coins size={15} />
-              <span>Atur Saldo</span>
-            </button>
-          )}
-
-          {/* Cloud Sync Button */}
-          {onOpenCloudModal && (
-            <button
-              type="button"
-              className={`udh-btn-action udh-btn-cloud ${isCloudConnected ? 'connected' : ''}`}
-              onClick={onOpenCloudModal}
-              title="Sinkronisasi Cloud Supabase Multi-Device"
-            >
-              {isCloudSyncing ? (
-                <RefreshCw size={15} className="animate-spin text-emerald-600" />
-              ) : (
-                <Cloud size={15} />
-              )}
-              <span>{isCloudConnected ? 'Cloud Aktif' : 'Sync Cloud'}</span>
-            </button>
-          )}
-
-          {/* Unduh Excel Button */}
-          {onExportExcel && (
-            <button
-              type="button"
-              className="udh-btn-action udh-btn-excel"
-              onClick={onExportExcel}
-              title={`Unduh Laporan Keuangan Bulan ${monthLabel} (.xls)`}
-            >
-              <Download size={15} />
-              <span>Unduh XLS</span>
-            </button>
-          )}
-
-          {/* Google Drive Direct Link */}
-          <a
-            href={googleDriveUrl || 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing'}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="udh-btn-action udh-btn-drive"
-            title="Buka Folder Google Drive Rekapan Bulanan"
-            style={{ textDecoration: 'none' }}
-          >
-            <FolderUp size={15} />
-            <span>Folder Drive</span>
-          </a>
-        </div>
-      </div>
-
-      {/* 2. BOTTOM TOOLBAR: Seamless Integrated Month Navigator & Summary Stats */}
-      <div className="udh-bottom-toolbar">
-        {/* Left: Modern Month Navigator Pill */}
-        <div className="udh-month-navigator">
+        <div className="hq-month-nav">
           <button
             type="button"
             onClick={handlePrevMonth}
             disabled={currentIndex <= 0}
-            className="udh-month-btn"
+            className="hq-month-nav-btn"
             title="Bulan Sebelumnya"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={15} />
           </button>
 
-          <div className="udh-month-picker-label">
-            <Calendar size={15} color={accentColor} />
+          <div className="hq-month-select-wrap">
+            <Calendar size={14} color={accentColor} />
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="udh-month-select"
+              className="hq-month-select"
+              aria-label="Pilih bulan"
             >
               {ALL_MONTH_OPTIONS.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -195,24 +103,61 @@ export default function UnifiedDashboardHeader({
             type="button"
             onClick={handleNextMonth}
             disabled={currentIndex >= ALL_MONTH_OPTIONS.length - 1}
-            className="udh-month-btn"
+            className="hq-month-nav-btn"
             title="Bulan Berikutnya"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={15} />
           </button>
         </div>
+      </div>
 
-        {/* Right: Period Status & Transaction Count Badges */}
-        <div className="udh-stats-badges">
-          <div className="udh-badge udh-badge-period">
-            <span className="udh-pulse-dot" />
-            <span>Periode Aktif: <strong>{monthLabel}</strong></span>
-          </div>
+      {/* Right: Clean SaaS Actions */}
+      <div className="hq-context-actions">
+        {onOpenBalanceModal && (
+          <button
+            type="button"
+            className="hq-btn"
+            onClick={onOpenBalanceModal}
+            title="Atur Saldo Kas / Modal Awal"
+          >
+            <Coins size={14} color={accentColor} />
+            <span>Atur Saldo</span>
+          </button>
+        )}
 
-          <div className="udh-badge udh-badge-count">
-            <span>📝 <strong>{transactionCount}</strong> Transaksi</span>
-          </div>
-        </div>
+        {onExportExcel && (
+          <button
+            type="button"
+            className="hq-btn"
+            onClick={() => onExportExcel(selectedMonth)}
+            title={`Unduh Laporan Keuangan Bulan ${monthLabel} (.xls)`}
+          >
+            <Download size={14} />
+            <span>Unduh XLS</span>
+          </button>
+        )}
+
+        {onOpenAdd && (
+          <>
+            <button
+              type="button"
+              className="hq-btn hq-btn-green-soft"
+              onClick={() => onOpenAdd('Masuk')}
+            >
+              <TrendingUp size={14} />
+              <span>Pemasukan</span>
+            </button>
+
+            <button
+              type="button"
+              className={`hq-btn ${isYasmeen ? 'hq-btn-pink' : 'hq-btn-blue'}`}
+              onClick={() => onOpenAdd('Keluar')}
+            >
+              <Plus size={15} />
+              <span>Catat Pengeluaran</span>
+            </button>
+          </>
+        )}
       </div>
     </header>
   );

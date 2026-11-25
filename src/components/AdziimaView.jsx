@@ -2,39 +2,26 @@ import React, { useState } from 'react';
 import { usePocket } from '../context/PocketContext';
 import { formatIdr, formatDateIndo } from '../utils/formatters';
 import { exportMonthToExcel } from '../utils/exportExcel';
-import UserAvatar from './UserAvatar';
 import CategoryIcon from './CategoryIcon';
 import UnifiedDashboardHeader from './UnifiedDashboardHeader';
-import MonthNavigator, { ALL_MONTH_OPTIONS } from './MonthNavigator';
+import { ALL_MONTH_OPTIONS } from './MonthNavigator';
+import ManageCategoriesModal from './ManageCategoriesModal';
 import {
-  ArrowLeft,
   Wallet,
-  ShieldCheck,
   TrendingDown,
-  TrendingUp,
   Plus,
   Trash2,
   Edit2,
-  Coins,
   Check,
-  Calendar,
-  Settings,
   Search,
   Download,
-  Cloud,
-  RefreshCw,
   Sliders,
-  PieChart,
-  PiggyBank,
-  AlertCircle,
-  Lock,
-  FolderUp
+  FolderUp,
+  X
 } from 'lucide-react';
-import ManageCategoriesModal from './ManageCategoriesModal';
 
 export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, onOpenCloudModal }) {
   const {
-    setActiveView,
     users,
     calculations,
     adziimaCategories,
@@ -42,8 +29,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     updateCategoryBudget,
     setTotalMoney,
     selectedMonth,
-    isCloudConnected,
-    isCloudSyncing,
     adziimaTransactions,
     getCategoriesForMonth,
     googleDriveUrl,
@@ -53,6 +38,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const { adziima } = calculations;
   const user = users.adziima || {};
   const currentMonthTx = adziima.monthTx;
+  const currentCategories = adziima.categories || adziimaCategories;
 
   const [isEditingMoney, setIsEditingMoney] = useState(false);
   const [moneyInput, setMoneyInput] = useState('');
@@ -63,7 +49,7 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
   const [selectedCatFilter, setSelectedCatFilter] = useState('all');
   const [isManageCatOpen, setIsManageCatOpen] = useState(false);
 
-  const monthLabel = ALL_MONTH_OPTIONS.find(m => m.value === selectedMonth)?.label || selectedMonth;
+  const monthLabel = ALL_MONTH_OPTIONS.find((m) => m.value === selectedMonth)?.label || selectedMonth;
 
   const handleSaveMoney = (e) => {
     e.preventDefault();
@@ -81,38 +67,43 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     setEditingCatId(null);
   };
 
-  // Export to Excel handler (1 single month per file, clean 100% Rupiah)
   const handleExportExcel = (targetMonth = selectedMonth) => {
-    const label = ALL_MONTH_OPTIONS.find(opt => opt.value === targetMonth)?.label || targetMonth;
-    const mTx = (adziimaTransactions || []).filter(tx => (tx?.date || '').startsWith(targetMonth));
-    const mCats = getCategoriesForMonth ? getCategoriesForMonth('adziima', targetMonth) : (targetMonth === selectedMonth ? (adziima.categories || adziimaCategories) : []);
+    const label = ALL_MONTH_OPTIONS.find((opt) => opt.value === targetMonth)?.label || targetMonth;
+    const mTx = (adziimaTransactions || []).filter((tx) => (tx?.date || '').startsWith(targetMonth));
+    const mCats = getCategoriesForMonth
+      ? getCategoriesForMonth('adziima', targetMonth)
+      : targetMonth === selectedMonth
+      ? currentCategories
+      : [];
 
     const mSpending = {};
-    mCats.forEach(c => { mSpending[c.id] = { totalIdr: 0, count: 0 }; });
-    mTx.forEach(tx => {
+    mCats.forEach((c) => {
+      mSpending[c.id] = { totalIdr: 0, count: 0 };
+    });
+    mTx.forEach((tx) => {
       if (tx?.type !== 'Masuk' && mSpending[tx?.category]) {
-        mSpending[tx.category].totalIdr += (tx.amountIdr || 0);
+        mSpending[tx.category].totalIdr += tx.amountIdr || 0;
         mSpending[tx.category].count += 1;
       }
     });
 
     let mIncome = 0;
     let mOutflow = 0;
-    mTx.forEach(tx => {
-      if (tx?.type === 'Masuk') mIncome += (tx.amountIdr || 0);
-      else mOutflow += (tx.amountIdr || 0);
+    mTx.forEach((tx) => {
+      if (tx?.type === 'Masuk') mIncome += tx.amountIdr || 0;
+      else mOutflow += tx.amountIdr || 0;
     });
 
     const totalBudget = mCats.reduce((sum, c) => {
-      let b = (c.budgetIdr !== undefined && c.budgetIdr !== null) ? c.budgetIdr : c.budget;
+      const b = c.budgetIdr !== undefined && c.budgetIdr !== null ? c.budgetIdr : c.budget;
       return sum + (Number(b) || 0);
     }, 0);
     const remainingBudget = Math.max(0, totalBudget - mOutflow);
 
     const isCur = targetMonth === selectedMonth;
-    const startBalance = isCur ? (adziima.startBalanceIdr || adziima.initialIdr || 0) : 0;
+    const startBalance = isCur ? adziima.startBalanceIdr || adziima.initialIdr || 0 : 0;
     const totalInflow = startBalance + mIncome;
-    const netBalance = isCur ? adziima.totalBalanceIdr : (mIncome - mOutflow);
+    const netBalance = isCur ? adziima.totalBalanceIdr : mIncome - mOutflow;
     const plannedSavings = Math.max(0, totalInflow - totalBudget);
 
     exportMonthToExcel({
@@ -136,7 +127,6 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     });
   };
 
-  // Filtered transactions for this month
   const filteredTransactions = currentMonthTx.filter((tx) => {
     if (selectedCatFilter !== 'all' && tx.category !== selectedCatFilter) return false;
     if (searchQuery.trim()) {
@@ -148,9 +138,11 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
     return true;
   });
 
+  const expenseCount = currentMonthTx.filter((t) => t.type !== 'Masuk').length;
+
   return (
-    <div>
-      {/* Unified App Header (Profile, Quick Actions, and Integrated Month Navigator) */}
+    <div style={{ width: '100%' }}>
+      {/* BAND 1: Full-Width Context Header + Month Navigator + Quick Actions */}
       <UnifiedDashboardHeader
         user={user}
         isYasmeen={false}
@@ -162,366 +154,206 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
         }}
         onOpenCloudModal={onOpenCloudModal}
         onExportExcel={handleExportExcel}
+        onOpenAdd={onOpenAdd}
         transactionCount={currentMonthTx.length}
       />
 
-      {/* If Adziima hasn't entered total money yet */}
+      {/* Flat Onboarding Strip if initial balance is 0 */}
       {adziima.initialIdr === 0 && !isEditingMoney && (
-        <div
-          className="pastel-card"
-          style={{
-            padding: '1.6rem',
-            marginBottom: '1.5rem',
-            background: 'var(--pastel-blue-soft)',
-            borderColor: 'var(--pastel-blue-border)',
-            textAlign: 'center'
-          }}
-        >
-          <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.8rem', color: '#0284c7' }}>
-            <Wallet size={24} />
-          </div>
-          <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0369a1', marginBottom: '0.3rem' }}>
-            Berapa Total Uang Pribadi Adziima Saat Ini?
-          </h3>
-          <p style={{ fontSize: '0.85rem', color: '#0c4a6e', marginBottom: '1.2rem' }}>
-            Nominal awal sengaja dikosongkan agar kamu bisa mengisinya sendiri sesuai saldo rekening atau dompetmu.
-          </p>
+        <div className="hq-alert-strip info">
+          <span>
+            Nominal saldo awal Adziima belum diatur. Isi sesuai saldo rekening atau dompetmu saat ini.
+          </span>
           <button
+            type="button"
             onClick={() => {
               setMoneyInput('');
               setBalanceMode('current_balance');
               setIsEditingMoney(true);
             }}
-            className="btn-enter-profile btn-enter-blue"
-            style={{ maxWidth: '260px', margin: '0 auto' }}
+            className="hq-btn hq-btn-blue"
           >
-            <Plus size={16} />
-            <span>Isi Saldo Saya Sekarang</span>
+            <Plus size={14} />
+            <span>Isi Saldo Sekarang</span>
           </button>
         </div>
       )}
 
-      {/* Modal Editor for Total Money */}
-      {isEditingMoney && (
-        <div className="modal-overlay" onClick={() => setIsEditingMoney(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
-            <div className="modal-header">
-              <h3>Atur Saldo & Uang Adziima</h3>
-              <button className="modal-close-btn" onClick={() => setIsEditingMoney(false)}>✕</button>
-            </div>
-            <form onSubmit={handleSaveMoney}>
-              <div style={{ marginBottom: '1rem' }}>
-                <label className="form-label" style={{ marginBottom: '0.4rem', display: 'block' }}>Pilih yang Ingin Kamu Atur:</label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => setBalanceMode('current_balance')}
-                    style={{
-                      padding: '0.55rem 0.5rem',
-                      borderRadius: '8px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      border: balanceMode === 'current_balance' ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      background: balanceMode === 'current_balance' ? '#e0f2fe' : '#f8fafc',
-                      color: balanceMode === 'current_balance' ? '#0369a1' : '#64748b',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      lineHeight: 1.25
-                    }}
-                  >
-                    <div>Saldo Kas Sekarang</div>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Uang Riil Saat Ini)</div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setBalanceMode('initial_fund')}
-                    style={{
-                      padding: '0.55rem 0.5rem',
-                      borderRadius: '8px',
-                      fontSize: '0.78rem',
-                      fontWeight: 700,
-                      border: balanceMode === 'initial_fund' ? '2px solid #0284c7' : '1px solid #cbd5e1',
-                      background: balanceMode === 'initial_fund' ? '#e0f2fe' : '#f8fafc',
-                      color: balanceMode === 'initial_fund' ? '#0369a1' : '#64748b',
-                      cursor: 'pointer',
-                      textAlign: 'center',
-                      lineHeight: 1.25
-                    }}
-                  >
-                    <div>Modal Awal Bulan</div>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 500, opacity: 0.8 }}>(Sebelum Belanja)</div>
-                  </button>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">
-                  {balanceMode === 'current_balance' ? 'Uang Kas / Rekening yang Kamu Pegang Saat Ini (Rp) *' : 'Modal Awal Adziima di Awal Bulan (Rp) *'}
-                </label>
-                <input
-                  type="number"
-                  className="form-input"
-                  style={{ fontSize: '1.2rem', fontWeight: 800 }}
-                  placeholder="Contoh: 2700000"
-                  value={moneyInput}
-                  onChange={(e) => setMoneyInput(e.target.value)}
-                  autoFocus
-                  required
-                />
-                <div style={{ fontSize: '0.8rem', color: '#0284c7', marginTop: '0.35rem' }}>
-                  Terbaca: <strong>{formatIdr(parseFloat(moneyInput) || 0)}</strong>
-                </div>
-              </div>
-
-              {/* Informational preview note */}
-              <div style={{ padding: '0.75rem', background: '#f0f9ff', borderRadius: '8px', border: '1px solid #bae6fd', fontSize: '0.78rem', color: '#0369a1', marginBottom: '1.2rem', lineHeight: 1.4 }}>
-                {balanceMode === 'current_balance' ? (
-                  <>
-                    💡 <strong>Sisa Saldo Kas</strong> kamu akan langsung menjadi <strong>{formatIdr(parseFloat(moneyInput) || 0)}</strong>. Seluruh riwayat {currentMonthTx.length} transaksi pengeluaran dan pemasukan bulan {monthLabel} tetap tersimpan rapi tanpa hilang!
-                  </>
-                ) : (
-                  <>
-                    💡 Nominal ini dijadikan patokan modal awal bulan. Saldo kas saat ini akan dihitung dari modal ini dikurangi pengeluaran bulan {monthLabel}.
-                  </>
-                )}
-              </div>
-
-              <button type="submit" className="submit-btn blue">
-                <Check size={18} />
-                <span>Simpan Saldo</span>
-              </button>
-            </form>
+      {/* BAND 2: Edge-to-Edge 3-Column KPI Metric Strip (Hairline Divided) */}
+      <section className="hq-kpi-strip cols-3">
+        <div className="hq-kpi-cell">
+          <div className="hq-kpi-label">
+            <span style={{ color: '#0284c7' }}>Sisa Saldo Kas</span>
+            <Wallet size={15} color="#0284c7" />
           </div>
-        </div>
-      )}
-
-      {/* Unified Balance & Allocation Cards */}
-      <div className="balance-grid grid-3">
-        {/* Card 1: Sisa Saldo Kas */}
-        <div className="balance-card" style={{ borderColor: 'var(--pastel-blue-border)' }}>
-          <div>
-            <div className="card-header-small">
-              <span style={{ color: '#0284c7' }}>Sisa Saldo Kas</span>
-              <Wallet size={18} color="#0284c7" />
-            </div>
-            <div className="amount-main" style={{ color: '#0284c7' }}>
-              {formatIdr(adziima.totalBalanceIdr)}
-            </div>
-            <div className="amount-sub">
-              Total modal: {formatIdr(adziima.totalInflowIdr)}
-            </div>
+          <div className="hq-kpi-value" style={{ color: '#0284c7' }}>
+            {formatIdr(adziima.totalBalanceIdr)}
           </div>
-          <div className="card-footer-meta">
-            <span>Uang di rekening / dompet</span>
+          <div className="hq-kpi-meta">
+            <span>Total modal: {formatIdr(adziima.totalInflowIdr)}</span>
             <span style={{ color: '#0284c7', fontWeight: 700 }}>Aktif</span>
           </div>
         </div>
 
-        {/* Card 2: Pengeluaran Bulan Ini */}
-        <div className="balance-card">
-          <div>
-            <div className="card-header-small">
-              <span>Pengeluaran Bulan Ini</span>
-              <TrendingDown size={18} color="#f43f5e" />
-            </div>
-            <div className="amount-main" style={{ color: '#f43f5e' }}>
-              {formatIdr(adziima.totalOutflowIdr)}
-            </div>
-            <div className="amount-sub">
-              {currentMonthTx.filter(t => t.type !== 'Masuk').length} transaksi tercatat
-            </div>
+        <div className="hq-kpi-cell">
+          <div className="hq-kpi-label">
+            <span>Pengeluaran Bulan Ini</span>
+            <TrendingDown size={15} color="#e11d48" />
           </div>
-          <div className="card-footer-meta">
+          <div className="hq-kpi-value" style={{ color: '#e11d48' }}>
+            {formatIdr(adziima.totalOutflowIdr)}
+          </div>
+          <div className="hq-kpi-meta">
+            <span>{expenseCount} transaksi tercatat</span>
             <span>Bulan {monthLabel}</span>
-            <span style={{ color: '#f43f5e', fontWeight: 700 }}>Terpakai</span>
           </div>
         </div>
 
-        {/* Card 3: Disisihkan ke Pos Belanja */}
-        <div className="balance-card">
-          <div>
-            <div className="card-header-small">
-              <span>Disisihkan ke Pos</span>
-              <Sliders size={18} color="#ea580c" />
-            </div>
-            <div className="amount-main" style={{ color: '#ea580c' }}>
-              {formatIdr(adziima.totalAllBudgetIdr)}
-            </div>
-            <div className="amount-sub">
-              Sisa pagu: {formatIdr(adziima.remainingAllBudgetIdr)}
-            </div>
+        <div className="hq-kpi-cell">
+          <div className="hq-kpi-label">
+            <span>Disisihkan ke Pos</span>
+            <Sliders size={15} color="#ea580c" />
           </div>
-          <div className="card-footer-meta">
-            <span>Target seluruh pos</span>
-            <span style={{ color: '#ea580c', fontWeight: 700 }}>Pagu</span>
+          <div className="hq-kpi-value" style={{ color: '#ea580c' }}>
+            {formatIdr(adziima.totalAllBudgetIdr)}
+          </div>
+          <div className="hq-kpi-meta">
+            <span>Sisa pagu: {formatIdr(adziima.remainingAllBudgetIdr)}</span>
+            <span style={{ color: '#ea580c', fontWeight: 700 }}>Target Pos</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Quick Action Buttons for Adziima */}
-      <div className="action-buttons-grid">
-        <button
-          className="btn-action-primary blue"
-          onClick={() => onOpenAdd('Keluar')}
-        >
-          <Plus size={18} />
-          <span>Catat Pengeluaran</span>
-        </button>
-
-        <button
-          className="btn-action-primary green"
-          onClick={() => onOpenAdd('Masuk')}
-        >
-          <TrendingUp size={18} />
-          <span>Catat Pemasukan</span>
-        </button>
-      </div>
-
-
-
-      {/* Category Budget Section */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
+      {/* BAND 3: Pos Pengeluaran (Hairline Matrix - Zero Floating Cards) */}
+      <section>
+        <div className="hq-section-header">
           <div>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)' }}>
-              Pos Pengeluaran Adziima ({monthLabel})
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Target alokasi bulanan di Indonesia (Rupiah)
+            <h2 className="hq-section-title">Pos Pengeluaran Adziima ({monthLabel})</h2>
+            <p className="hq-section-subtitle">
+              Target alokasi bulanan dalam Rupiah ({currentCategories.length} pos aktif)
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => setIsManageCatOpen(true)}
-            className="btn-back-home"
-            style={{
-              borderColor: 'var(--pastel-blue-border)',
-              color: '#0284c7',
-              background: '#ffffff'
-            }}
+            className="hq-btn"
             title="Tambah atau edit pos pengeluaran"
           >
-            <Sliders size={14} />
+            <Sliders size={14} color="#0284c7" />
             <span>Kelola / Tambah Pos</span>
           </button>
         </div>
 
-        <div className="categories-grid">
-          {(adziima.categories || adziimaCategories).map((cat) => {
+        <div className="hq-matrix-grid">
+          {currentCategories.map((cat) => {
             const spending = adziima.spending[cat.id] || { totalIdr: 0, count: 0 };
             const spent = spending.totalIdr;
             const budget = cat.budgetIdr || 0;
-            const percent = budget > 0 ? Math.min(100, Math.round((spent / budget) * 100)) : (spent > 0 ? 100 : 0);
+            const percent =
+              budget > 0
+                ? Math.min(100, Math.round((spent / budget) * 100))
+                : spent > 0
+                ? 100
+                : 0;
             const isOver = budget > 0 && spent > budget;
             const isWarning = percent >= 50 && !isOver;
-            const barColor = isOver ? '#f43f5e' : (isWarning ? '#f59e0b' : '#38bdf8');
+            const barColor = isOver ? '#e11d48' : isWarning ? '#f59e0b' : '#0284c7';
 
             return (
-              <div key={cat.id} className="category-card">
-                <div>
-                  <div className="category-header">
-                    <div className="category-title-group">
-                      <div className="category-icon">
-                        <CategoryIcon name={cat.iconName} size={18} color={cat.color} />
-                      </div>
-                      <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <span className="category-name">{cat.name}</span>
-                          {isOver && (
-                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#e11d48', background: '#ffe4e6', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
-                              🚨 Over
-                            </span>
-                          )}
-                          {isWarning && (
-                            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#b45309', background: '#fef3c7', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>
-                              ⚠️ 50%+
-                            </span>
-                          )}
-                        </div>
-                        <div className="category-basis">{cat.note}</div>
-                      </div>
+              <div key={cat.id} className="hq-matrix-cell">
+                <div className="hq-cat-head">
+                  <div className="hq-cat-title-wrap">
+                    <div className="hq-cat-icon">
+                      <CategoryIcon name={cat.iconName} size={16} color={cat.color || '#0284c7'} />
                     </div>
-
-                    {editingCatId === cat.id ? (
-                      <div style={{ display: 'flex', gap: '0.3rem' }}>
-                        <input
-                          type="number"
-                          value={catBudgetInput}
-                          onChange={(e) => setCatBudgetInput(e.target.value)}
-                          style={{ width: '85px', padding: '0.2rem 0.4rem', fontSize: '0.8rem', border: '1px solid #38bdf8', borderRadius: '4px' }}
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => handleSaveCatBudget(cat.id)}
-                          style={{ background: '#38bdf8', color: '#fff', border: 'none', borderRadius: '4px', padding: '0.2rem 0.5rem', cursor: 'pointer' }}
-                        >
-                          ✓
-                        </button>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+                        <span className="hq-cat-name">{cat.name}</span>
+                        {isOver && <span className="hq-badge hq-badge-red">Over</span>}
+                        {isWarning && <span className="hq-badge hq-badge-amber">50%+</span>}
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => handleStartEditBudget(cat)}
-                        title="Atur target budget pos ini"
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}
-                      >
-                        <Edit2 size={13} />
-                      </button>
-                    )}
+                      {cat.note && <div className="hq-cat-note">{cat.note}</div>}
+                    </div>
                   </div>
 
-                  <div className="progress-bar-bg" style={{ position: 'relative' }}>
+                  {editingCatId === cat.id ? (
+                    <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
+                      <input
+                        type="number"
+                        value={catBudgetInput}
+                        onChange={(e) => setCatBudgetInput(e.target.value)}
+                        className="hq-input-inline"
+                        style={{ width: '96px', padding: '0.25rem 0.45rem', fontSize: '0.78rem' }}
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleSaveCatBudget(cat.id)}
+                        className="hq-btn hq-btn-blue"
+                        style={{ padding: '0.28rem 0.5rem' }}
+                      >
+                        <Check size={13} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleStartEditBudget(cat)}
+                      className="hq-btn-icon"
+                      title="Atur target budget pos ini"
+                    >
+                      <Edit2 size={13} />
+                    </button>
+                  )}
+                </div>
+
+                <div>
+                  <div className="hq-progress-track">
                     <div
-                      className="progress-bar-fill"
-                      style={{
-                        width: `${percent}%`,
-                        background: barColor,
-                        boxShadow: isWarning ? '0 0 8px rgba(245, 158, 11, 0.4)' : (isOver ? '0 0 8px rgba(244, 63, 94, 0.4)' : 'none'),
-                        transition: 'all 0.3s ease'
-                      }}
+                      className="hq-progress-fill"
+                      style={{ width: `${percent}%`, background: barColor }}
                     />
                   </div>
 
-                  <div className="progress-meta">
+                  <div className="hq-cat-nums" style={{ marginTop: '0.45rem' }}>
                     <span>
                       Terpakai:{' '}
-                      <span className="spent" style={{ color: isOver ? '#f43f5e' : (isWarning ? '#d97706' : 'inherit') }}>
+                      <strong style={{ color: isOver ? '#e11d48' : 'var(--text-main)' }}>
                         {formatIdr(spent)}
-                      </span>
+                      </strong>
                     </span>
-                    <span>Budget: {budget > 0 ? formatIdr(budget) : 'Belum diatur'}</span>
+                    <span>Pagu: {budget > 0 ? formatIdr(budget) : 'Belum diatur'}</span>
                   </div>
+                </div>
 
-                  <div style={{ marginTop: '0.6rem', paddingTop: '0.5rem', borderTop: '1px solid var(--bg-subtle)', fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: isOver ? '#f43f5e' : (isWarning ? '#b45309' : 'var(--text-muted)') }}>
-                      {isOver ? `⚠️ Lebih ${formatIdr(spent - budget)}` : `Sisa ${formatIdr(budget - spent)}`}
-                    </span>
-                  </div>
+                <div className="hq-cat-foot">
+                  <span style={{ color: isOver ? '#e11d48' : 'var(--text-muted)', fontWeight: isOver ? 700 : 500 }}>
+                    {isOver ? `Lebih ${formatIdr(spent - budget)}` : `Sisa ${formatIdr(budget - spent)}`}
+                  </span>
+                  <span style={{ color: 'var(--text-dim)' }}>{percent}%</span>
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      {/* Adziima Transaction Diary for Current Month */}
-      <div className="pastel-card" style={{ padding: '1.4rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.8rem', marginBottom: '1.2rem' }}>
+      {/* BAND 4: Full-Width Transaction Ledger */}
+      <section>
+        <div className="hq-section-header">
           <div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>
-              Riwayat Transaksi ({monthLabel})
-            </h3>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Catatan harian pengeluaran dan pemasukan bulan {monthLabel}
+            <h2 className="hq-section-title">Riwayat Transaksi ({monthLabel})</h2>
+            <p className="hq-section-subtitle">
+              {filteredTransactions.length} dari {currentMonthTx.length} catatan ditampilkan
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <div style={{ display: 'flex', gap: '0.45rem', flexWrap: 'wrap' }}>
             <button
-              className="btn-back-home"
+              type="button"
+              className="hq-btn"
               onClick={() => handleExportExcel(selectedMonth)}
-              style={{ background: 'var(--pastel-green-soft)', borderColor: '#a7f3d0', color: '#047857' }}
               title={`Unduh Rekapan Excel Bulan ${monthLabel}`}
             >
               <Download size={14} />
@@ -529,119 +361,144 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             </button>
 
             <a
-              href={googleDriveUrl || 'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing'}
+              href={
+                googleDriveUrl ||
+                'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing'
+              }
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-back-home"
-              style={{ background: '#ecfdf5', borderColor: '#6ee7b7', color: '#047857', textDecoration: 'none' }}
+              className="hq-btn"
               title="Buka Folder Google Drive"
             >
-              <FolderUp size={14} />
+              <FolderUp size={14} color="#059669" />
               <span>Buka Drive</span>
             </a>
           </div>
         </div>
 
-        {/* Filter bar */}
-        <div style={{ display: 'flex', gap: '0.6rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '180px' }}>
+        {/* Inline Edge-to-Edge Filter Bar */}
+        <div className="hq-filter-bar">
+          <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: '420px' }}>
+            <Search
+              size={14}
+              color="var(--text-dim)"
+              style={{ position: 'absolute', left: '0.7rem', top: '50%', transform: 'translateY(-50%)' }}
+            />
             <input
               type="text"
-              placeholder="Cari transaksi..."
+              placeholder="Cari transaksi atau catatan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="form-input"
-              style={{ padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}
+              className="hq-input-inline"
+              style={{ width: '100%', paddingLeft: '2.1rem' }}
             />
           </div>
 
           <select
             value={selectedCatFilter}
             onChange={(e) => setSelectedCatFilter(e.target.value)}
-            className="form-select"
-            style={{ width: 'auto', padding: '0.5rem 0.8rem', fontSize: '0.85rem' }}
+            className="hq-input-inline"
+            style={{ minWidth: '170px', cursor: 'pointer' }}
           >
             <option value="all">Semua Pos</option>
-            {adziimaCategories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+            {currentCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
         </div>
 
+        {/* Flat Ledger Rows */}
         {filteredTransactions.length === 0 ? (
-          <div className="empty-state">
-            <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'var(--bg-subtle)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.6rem', color: 'var(--text-dim)' }}>
-              <Wallet size={24} />
-            </div>
-            <p style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-main)' }}>
+          <div className="hq-empty">
+            <p style={{ fontWeight: 700, color: 'var(--text-main)' }}>
               Belum ada transaksi di bulan {monthLabel}
             </p>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              Uangmu masih utuh dan tersimpan rapi! Klik "+ Catat Transaksi" setiap selesai belanja atau jajan.
+            <p style={{ fontSize: '0.82rem', marginTop: '0.25rem' }}>
+              Klik tombol &quot;Catat Pengeluaran&quot; atau &quot;Pemasukan&quot; di atas untuk mencatat transaksi.
             </p>
           </div>
         ) : (
-          <div>
+          <div className="hq-ledger">
             {filteredTransactions.map((tx) => {
-              const cat = adziimaCategories.find(c => c.id === tx.category) || { name: tx.category, iconName: 'Tag', color: '#64748b' };
+              const cat = currentCategories.find((c) => c.id === tx.category) || {
+                name: tx.category,
+                iconName: 'Tag',
+                color: '#64748b'
+              };
               const isIncome = tx.type === 'Masuk';
 
               return (
-                <div key={tx.id} className="tx-item">
-                  <div className="tx-left">
-                    <div className="tx-category-badge" style={{ background: isIncome ? '#ecfdf5' : 'var(--bg-subtle)' }}>
-                      <CategoryIcon name={isIncome ? 'TrendingUp' : cat.iconName} size={18} color={isIncome ? '#059669' : cat.color} />
+                <div key={tx.id} className="hq-ledger-row">
+                  <div className="hq-ledger-left">
+                    <div
+                      className="hq-ledger-icon"
+                      style={{
+                        background: isIncome ? '#ecfdf5' : 'var(--bg-surface)',
+                        borderColor: isIncome ? '#a7f3d0' : 'var(--border-subtle)'
+                      }}
+                    >
+                      <CategoryIcon
+                        name={isIncome ? 'TrendingUp' : cat.iconName}
+                        size={16}
+                        color={isIncome ? '#059669' : cat.color}
+                      />
                     </div>
-                    <div className="tx-details">
-                      <h4>
-                        {tx.title}
-                        {isIncome && (
-                          <span style={{ fontSize: '0.72rem', background: '#ecfdf5', color: '#059669', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)', marginLeft: '0.4rem' }}>
-                            Pemasukan
-                          </span>
-                        )}
-                      </h4>
-                      <div className="tx-meta">
+
+                    <div className="hq-ledger-body">
+                      <div className="hq-ledger-title">
+                        <span>{tx.title}</span>
+                        {isIncome && <span className="hq-badge hq-badge-green">Pemasukan</span>}
+                      </div>
+
+                      <div className="hq-ledger-meta">
                         <span>{formatDateIndo(tx.date)}</span>
                         {!isIncome && (
                           <>
-                            <span>•</span>
+                            <span>·</span>
                             <span>{cat.name}</span>
                           </>
                         )}
                         {tx.paymentMethod && (
                           <>
-                            <span>•</span>
-                            <span style={{ fontWeight: 600, color: isIncome ? '#059669' : 'inherit' }}>
+                            <span>·</span>
+                            <span style={{ fontWeight: 600, color: isIncome ? '#059669' : 'var(--text-secondary)' }}>
                               {isIncome ? `Masuk ke ${tx.paymentMethod}` : tx.paymentMethod}
                             </span>
                           </>
                         )}
                         {tx.notes && (
                           <>
-                            <span>•</span>
-                            <span style={{ fontStyle: 'italic' }}>"{tx.notes}"</span>
+                            <span>·</span>
+                            <span style={{ fontStyle: 'italic' }}>&quot;{tx.notes}&quot;</span>
                           </>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="tx-right">
-                    <div className="tx-amount" style={{ color: isIncome ? '#059669' : '#f43f5e' }}>
+                  <div className="hq-ledger-right">
+                    <div
+                      className="hq-ledger-amount"
+                      style={{ color: isIncome ? '#059669' : '#e11d48' }}
+                    >
                       {isIncome ? `+${formatIdr(tx.amountIdr)}` : `-${formatIdr(tx.amountIdr)}`}
                     </div>
-                    <div className="tx-actions">
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
                       <button
+                        type="button"
                         onClick={() => onEditTx(tx)}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        className="hq-btn-icon"
                         title="Edit Transaksi"
                       >
                         <Edit2 size={14} />
                       </button>
                       <button
+                        type="button"
                         onClick={() => deleteTransaction('adziima', tx.id)}
-                        style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer', padding: '0.2rem' }}
+                        className="hq-btn-icon danger"
                         title="Hapus"
                       >
                         <Trash2 size={14} />
@@ -653,7 +510,99 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
             })}
           </div>
         )}
-      </div>
+      </section>
+
+      {/* Modal Editor for Total Money */}
+      {isEditingMoney && (
+        <div className="modal-overlay" onClick={() => setIsEditingMoney(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
+            <div className="modal-header">
+              <h3>Atur Saldo Adziima</h3>
+              <button className="modal-close-btn" onClick={() => setIsEditingMoney(false)}>
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMoney}>
+              <div className="form-group">
+                <label className="form-label">Pilih Mode Pengaturan</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('current_balance')}
+                    className={`hq-btn ${balanceMode === 'current_balance' ? 'hq-btn-blue' : ''}`}
+                    style={{ flexDirection: 'column', gap: '0.1rem', padding: '0.6rem 0.5rem' }}
+                  >
+                    <span>Saldo Kas Sekarang</span>
+                    <span style={{ fontSize: '0.68rem', opacity: 0.85, fontWeight: 500 }}>Uang Riil Saat Ini</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setBalanceMode('initial_fund')}
+                    className={`hq-btn ${balanceMode === 'initial_fund' ? 'hq-btn-blue' : ''}`}
+                    style={{ flexDirection: 'column', gap: '0.1rem', padding: '0.6rem 0.5rem' }}
+                  >
+                    <span>Modal Awal Bulan</span>
+                    <span style={{ fontSize: '0.68rem', opacity: 0.85, fontWeight: 500 }}>Sebelum Belanja</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  {balanceMode === 'current_balance'
+                    ? 'Uang Kas / Rekening Saat Ini (Rp) *'
+                    : 'Modal Awal Adziima di Awal Bulan (Rp) *'}
+                </label>
+                <input
+                  type="number"
+                  className="form-input"
+                  style={{ fontSize: '1.15rem', fontWeight: 800 }}
+                  placeholder="Contoh: 2700000"
+                  value={moneyInput}
+                  onChange={(e) => setMoneyInput(e.target.value)}
+                  autoFocus
+                  required
+                />
+                <div style={{ fontSize: '0.78rem', color: '#0284c7', marginTop: '0.3rem', fontWeight: 700 }}>
+                  Terbaca: {formatIdr(parseFloat(moneyInput) || 0)}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: '0.7rem 0.85rem',
+                  background: 'var(--bg-surface)',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-line)',
+                  fontSize: '0.76rem',
+                  color: 'var(--text-secondary)',
+                  marginBottom: '0.5rem',
+                  lineHeight: 1.45
+                }}
+              >
+                {balanceMode === 'current_balance' ? (
+                  <>
+                    <strong>Sisa Saldo Kas</strong> akan langsung menjadi{' '}
+                    <strong>{formatIdr(parseFloat(moneyInput) || 0)}</strong>. Seluruh riwayat{' '}
+                    {currentMonthTx.length} transaksi bulan {monthLabel} tetap tersimpan aman.
+                  </>
+                ) : (
+                  <>
+                    Nominal ini dijadikan patokan modal awal bulan {monthLabel}, lalu dikurangi pengeluaran bulan ini.
+                  </>
+                )}
+              </div>
+
+              <button type="submit" className="submit-btn blue">
+                <Check size={16} />
+                <span>Simpan Saldo</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Manage Categories Modal */}
       <ManageCategoriesModal

@@ -4,48 +4,71 @@ import LandingPage from './components/LandingPage';
 import YasmeenView from './components/YasmeenView';
 import AdziimaView from './components/AdziimaView';
 import GoldSavingsView from './components/GoldSavingsView';
-import BusinessView from './components/BusinessView';
 import QuickAddModal from './components/QuickAddModal';
 import EditProfileModal from './components/EditProfileModal';
 import CloudSyncModal from './components/CloudSyncModal';
 import PinLockScreen from './components/PinLockScreen';
 import ChangePinModal from './components/ChangePinModal';
-import { Heart, Plus, Home, Lock, KeyRound } from 'lucide-react';
+import { getLocalDateString } from './utils/formatters';
+import {
+  LayoutGrid,
+  Coins,
+  Cloud,
+  RefreshCw,
+  FolderUp,
+  KeyRound,
+  Lock
+} from 'lucide-react';
 
 function PocketAppContent() {
-  const { activeView, setActiveView, isAppUnlocked, unlockApp, lockApp, securityPin, users } = usePocket();
+  const {
+    activeView,
+    setActiveView,
+    setSelectedMonth,
+    isAppUnlocked,
+    unlockApp,
+    lockApp,
+    securityPin,
+    users,
+    isCloudConnected,
+    isCloudSyncing,
+    googleDriveUrl
+  } = usePocket();
 
-  // Sync active view to document body for pure pastel background switching
   React.useEffect(() => {
     document.body.className = `view-${activeView}`;
   }, [activeView]);
 
-  // Add & Edit Transaction Modal
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingTx, setEditingTx] = useState(null);
   const [modalDefaultType, setModalDefaultType] = useState('Keluar');
   const [modalInitialData, setModalInitialData] = useState(null);
 
-  // Edit Profile & Photo Modal
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [targetProfileUser, setTargetProfileUser] = useState('yasmeen');
 
-  // Multi-Device Cloud Sync Modal
   const [isCloudModalOpen, setIsCloudModalOpen] = useState(false);
-
-  // Change Security PIN Modal
   const [isChangePinOpen, setIsChangePinOpen] = useState(false);
 
-  // If the app is locked, show the cute Pastel PIN Lock Screen!
   if (!isAppUnlocked) {
     return (
       <PinLockScreen
         onUnlock={unlockApp}
-        correctPin={securityPin || '1234'}
+        correctPin={securityPin || '123456'}
         users={users}
       />
     );
   }
+
+  const navigateToView = (view) => {
+    if (view === 'yasmeen' || view === 'adziima') {
+      const curMonth = getLocalDateString().slice(0, 7);
+      if (setSelectedMonth && curMonth >= '2026-10') {
+        setSelectedMonth(curMonth);
+      }
+    }
+    setActiveView(view);
+  };
 
   const handleOpenAdd = (defaultType = 'Keluar', initialData = null) => {
     setEditingTx(null);
@@ -64,102 +87,152 @@ function PocketAppContent() {
     setIsEditProfileOpen(true);
   };
 
+  const driveHref =
+    googleDriveUrl ||
+    'https://drive.google.com/drive/folders/1G5Mm3lnpdx_4T3QYqODurGBZdK1Kv5CX?usp=sharing';
+
+  const navItems = [
+    { id: 'landing', label: 'Ringkasan', activeClass: 'active', dotColor: null, icon: LayoutGrid },
+    { id: 'yasmeen', label: 'Yasmeen', activeClass: 'active-pink', dotColor: '#db2777', icon: null },
+    { id: 'adziima', label: 'Adziima', activeClass: 'active-blue', dotColor: '#0284c7', icon: null },
+    { id: 'gold', label: 'Emas 24K', activeClass: 'active-gold', dotColor: '#d97706', icon: Coins }
+  ];
+
+  const renderNavTabs = () =>
+    navItems.map((item) => {
+      const isActive = activeView === item.id;
+      const IconComp = item.icon;
+      return (
+        <button
+          key={item.id}
+          type="button"
+          onClick={() => navigateToView(item.id)}
+          className={`hq-nav-tab ${isActive ? item.activeClass : ''}`}
+        >
+          {item.dotColor ? (
+            <span className="hq-nav-dot" style={{ background: item.dotColor }} />
+          ) : (
+            IconComp && <IconComp size={15} />
+          )}
+          <span>{item.label}</span>
+        </button>
+      );
+    });
+
   return (
-    <div className="app-container">
-      {/* Route Views */}
-      {activeView === 'landing' && (
-        <LandingPage
-          onOpenEditProfile={handleOpenEditProfile}
-          onOpenCloudModal={() => setIsCloudModalOpen(true)}
-          onOpenAdd={handleOpenAdd}
-          onOpenChangePin={() => setIsChangePinOpen(true)}
-          onLockApp={lockApp}
-        />
-      )}
+    <div className="hq-shell">
+      {/* Persistent Full-Width Edge-to-Edge Sticky Topbar */}
+      <nav className="hq-topbar">
+        <div className="hq-topbar-inner">
+          <div className="hq-topbar-left">
+            <button
+              type="button"
+              className="hq-brand"
+              onClick={() => navigateToView('landing')}
+              title="Kembali ke Ringkasan"
+            >
+              <span className="hq-brand-mark">Z</span>
+              <span className="hq-brand-text">Zimeira</span>
+              <span className="hq-brand-sub">Adziima & Yasmeen</span>
+            </button>
 
-      {activeView === 'yasmeen' && (
-        <YasmeenView
-          onOpenAdd={handleOpenAdd}
-          onEditTx={handleEditTx}
-          onOpenEditProfile={() => handleOpenEditProfile('yasmeen')}
-          onOpenCloudModal={() => setIsCloudModalOpen(true)}
-        />
-      )}
+            <div className="hq-nav-tabs">{renderNavTabs()}</div>
+          </div>
 
-      {activeView === 'adziima' && (
-        <AdziimaView
-          onOpenAdd={handleOpenAdd}
-          onEditTx={handleEditTx}
-          onOpenEditProfile={() => handleOpenEditProfile('adziima')}
-          onOpenCloudModal={() => setIsCloudModalOpen(true)}
-        />
-      )}
+          <div className="hq-topbar-right">
+            <button
+              type="button"
+              onClick={() => setIsCloudModalOpen(true)}
+              className="hq-btn"
+              title="Sinkronisasi Cloud Multi-Device"
+            >
+              {isCloudSyncing ? (
+                <RefreshCw size={14} className="animate-spin" color="#059669" />
+              ) : (
+                <span className={`hq-status-dot ${isCloudConnected ? 'online' : 'offline'}`} />
+              )}
+              <Cloud size={14} />
+              <span className="hq-topbar-utility-label">
+                {isCloudConnected ? 'Cloud' : 'Sync'}
+              </span>
+            </button>
 
-      {activeView === 'gold' && (
-        <GoldSavingsView
-          onOpenCloudModal={() => setIsCloudModalOpen(true)}
-        />
-      )}
+            <a
+              href={driveHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hq-btn"
+              title="Buka Folder Google Drive Rekapan Bulanan"
+            >
+              <FolderUp size={14} color="#059669" />
+              <span className="hq-topbar-utility-label">Drive</span>
+            </a>
 
-      {activeView === 'business' && (
-        <BusinessView
-          onOpenCloudModal={() => setIsCloudModalOpen(true)}
-        />
-      )}
+            <button
+              type="button"
+              onClick={() => setIsChangePinOpen(true)}
+              className="hq-btn hq-btn-ghost"
+              title="Ubah PIN Keamanan"
+            >
+              <KeyRound size={14} />
+              <span className="hq-topbar-utility-label">PIN</span>
+            </button>
 
-      {/* Footer */}
-      <footer style={{ marginTop: '3.5rem', textAlign: 'center', color: 'var(--text-dim)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-        <span>Zimeira · Adziima & Yasmeen</span>
-        <Heart size={13} color="#f472b6" fill="#f472b6" />
-        <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
-        <button
-          onClick={() => setIsCloudModalOpen(true)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            fontSize: 'inherit',
-            padding: 0
-          }}
-        >
-          ☁️ Sinkronisasi Multi-Device
-        </button>
-        <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
-        <button
-          onClick={() => setIsChangePinOpen(true)}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            fontSize: 'inherit',
-            padding: 0
-          }}
-        >
-          🔑 Ganti PIN
-        </button>
-        <span style={{ margin: '0 0.3rem', opacity: 0.4 }}>•</span>
-        <button
-          onClick={lockApp}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'inherit',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            fontSize: 'inherit',
-            padding: 0
-          }}
-          title="Kunci aplikasi ini sekarang"
-        >
-          🔒 Kunci
-        </button>
+            <button
+              type="button"
+              onClick={lockApp}
+              className="hq-btn hq-btn-ghost"
+              title="Kunci Aplikasi Sekarang"
+            >
+              <Lock size={14} />
+              <span className="hq-topbar-utility-label">Kunci</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Full-Width Sub-Navigation Strip */}
+        <div className="hq-mobile-nav">{renderNavTabs()}</div>
+      </nav>
+
+      {/* Full-Width Edge-to-Edge Main Workspace */}
+      <main className="hq-main">
+        {activeView === 'landing' && (
+          <LandingPage
+            onOpenEditProfile={handleOpenEditProfile}
+            onOpenCloudModal={() => setIsCloudModalOpen(true)}
+          />
+        )}
+
+        {activeView === 'yasmeen' && (
+          <YasmeenView
+            onOpenAdd={handleOpenAdd}
+            onEditTx={handleEditTx}
+            onOpenEditProfile={() => handleOpenEditProfile('yasmeen')}
+            onOpenCloudModal={() => setIsCloudModalOpen(true)}
+          />
+        )}
+
+        {activeView === 'adziima' && (
+          <AdziimaView
+            onOpenAdd={handleOpenAdd}
+            onEditTx={handleEditTx}
+            onOpenEditProfile={() => handleOpenEditProfile('adziima')}
+            onOpenCloudModal={() => setIsCloudModalOpen(true)}
+          />
+        )}
+
+        {activeView === 'gold' && (
+          <GoldSavingsView onOpenCloudModal={() => setIsCloudModalOpen(true)} />
+        )}
+      </main>
+
+      {/* Minimal Edge-to-Edge Footer */}
+      <footer className="hq-footer">
+        <span>Zimeira · Keuangan Pribadi Adziima & Yasmeen</span>
+        <span>{isCloudConnected ? 'Tersinkronisasi otomatis ke Cloud' : 'Mode penyimpanan lokal'}</span>
       </footer>
 
-      {/* Quick Add / Edit Transaction Modal */}
+      {/* Modals */}
       <QuickAddModal
         isOpen={isAddModalOpen}
         onClose={() => {
@@ -172,20 +245,17 @@ function PocketAppContent() {
         initialData={modalInitialData}
       />
 
-      {/* Edit Profile & Photo Modal */}
       <EditProfileModal
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
         targetUserId={targetProfileUser}
       />
 
-      {/* Cloud Sync Modal */}
       <CloudSyncModal
         isOpen={isCloudModalOpen}
         onClose={() => setIsCloudModalOpen(false)}
       />
 
-      {/* Change Security PIN Modal */}
       <ChangePinModal
         isOpen={isChangePinOpen}
         onClose={() => setIsChangePinOpen(false)}
