@@ -245,44 +245,96 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
           </button>
         </div>
 
-        <div className="hq-matrix-grid">
+        <div className="hq-budget-list">
+          <div className="hq-budget-head">
+            <span>Pos Pengeluaran</span>
+            <span>Progres Anggaran</span>
+            <span style={{ textAlign: 'right' }}>Terpakai / Pagu</span>
+            <span style={{ textAlign: 'right' }}>Sisa / Selisih</span>
+            <span style={{ textAlign: 'right' }}>Edit</span>
+          </div>
+
           {currentCategories.map((cat) => {
             const spending = adziima.spending[cat.id] || { totalIdr: 0, count: 0 };
             const spent = spending.totalIdr;
             const budget = cat.budgetIdr || 0;
-            const percent =
-              budget > 0
-                ? Math.min(100, Math.round((spent / budget) * 100))
-                : spent > 0
-                ? 100
-                : 0;
+            const remaining = budget - spent;
+            const rawPercent =
+              budget > 0 ? Math.round((spent / budget) * 100) : spent > 0 ? 100 : 0;
+            const barPercent = Math.min(100, rawPercent);
             const isOver = budget > 0 && spent > budget;
-            const isWarning = percent >= 50 && !isOver;
+            const isWarning = rawPercent >= 50 && !isOver;
             const barColor = isOver ? '#e11d48' : isWarning ? '#f59e0b' : '#0284c7';
+            const rowStateClass = isOver ? 'is-over' : isWarning ? 'is-warn' : 'is-safe';
 
             return (
-              <div key={cat.id} className="hq-matrix-cell">
-                <div className="hq-cat-head">
-                  <div className="hq-cat-title-wrap">
-                    <div
-                      className="hq-cat-icon"
-                      style={{
-                        background: `${cat.color || '#0284c7'}18`,
-                        borderColor: `${cat.color || '#0284c7'}40`
-                      }}
-                    >
-                      <CategoryIcon name={cat.iconName} size={16} color={cat.color || '#0284c7'} />
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                        <span className="hq-cat-name">{cat.name}</span>
-                        {isOver && <span className="hq-badge hq-badge-red">Over</span>}
-                        {isWarning && <span className="hq-badge hq-badge-amber">50%+</span>}
-                      </div>
-                      {cat.note && <div className="hq-cat-note">{cat.note}</div>}
-                    </div>
+              <div key={cat.id} className={`hq-budget-row ${rowStateClass}`}>
+                <div className="hq-budget-col-name">
+                  <div
+                    className="hq-cat-icon"
+                    style={{
+                      background: `${cat.color || '#0284c7'}18`,
+                      borderColor: `${cat.color || '#0284c7'}40`
+                    }}
+                  >
+                    <CategoryIcon name={cat.iconName} size={16} color={cat.color || '#0284c7'} />
                   </div>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="hq-cat-name">{cat.name}</div>
+                    {cat.note && <div className="hq-cat-note">{cat.note}</div>}
+                  </div>
+                </div>
 
+                <div className="hq-budget-col-progress">
+                  <div className="hq-progress-track" style={{ flex: 1, height: '8px' }}>
+                    <div
+                      className="hq-progress-fill"
+                      style={{ width: `${barPercent}%`, background: barColor }}
+                    />
+                  </div>
+                  <span
+                    className="tabular-nums"
+                    style={{
+                      fontSize: '0.76rem',
+                      fontWeight: 800,
+                      color: isOver ? '#e11d48' : isWarning ? '#b45309' : 'var(--text-muted)',
+                      minWidth: '38px',
+                      textAlign: 'right'
+                    }}
+                  >
+                    {rawPercent}%
+                  </span>
+                  {isOver ? (
+                    <span className="hq-badge hq-badge-red">Over</span>
+                  ) : isWarning ? (
+                    <span className="hq-badge hq-badge-amber">50%+</span>
+                  ) : (
+                    <span className="hq-badge hq-badge-green">Aman</span>
+                  )}
+                </div>
+
+                <div className="hq-budget-col-amounts">
+                  <strong style={{ color: isOver ? '#e11d48' : 'var(--text-main)' }}>
+                    {formatIdr(spent)}
+                  </strong>
+                  <span style={{ color: 'var(--text-dim)' }}>/</span>
+                  <span style={{ color: 'var(--text-muted)' }}>
+                    {budget > 0 ? formatIdr(budget) : 'Rp 0'}
+                  </span>
+                </div>
+
+                <div className="hq-budget-col-diff">
+                  <span
+                    style={{
+                      color: isOver ? '#e11d48' : remaining > 0 ? '#059669' : 'var(--text-muted)',
+                      fontWeight: isOver ? 800 : 600
+                    }}
+                  >
+                    {isOver ? `Lebih ${formatIdr(spent - budget)}` : `Sisa ${formatIdr(remaining)}`}
+                  </span>
+                </div>
+
+                <div className="hq-budget-col-action">
                   {editingCatId === cat.id ? (
                     <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center' }}>
                       <input
@@ -290,14 +342,14 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                         value={catBudgetInput}
                         onChange={(e) => setCatBudgetInput(e.target.value)}
                         className="hq-input-inline"
-                        style={{ width: '96px', padding: '0.25rem 0.45rem', fontSize: '0.78rem' }}
+                        style={{ width: '105px', padding: '0.28rem 0.45rem', fontSize: '0.78rem' }}
                         autoFocus
                       />
                       <button
                         type="button"
                         onClick={() => handleSaveCatBudget(cat.id)}
                         className="hq-btn hq-btn-blue"
-                        style={{ padding: '0.28rem 0.5rem' }}
+                        style={{ padding: '0.3rem 0.5rem' }}
                       >
                         <Check size={13} />
                       </button>
@@ -309,35 +361,9 @@ export default function AdziimaView({ onOpenAdd, onEditTx, onOpenEditProfile, on
                       className="hq-btn-icon"
                       title="Atur target budget pos ini"
                     >
-                      <Edit2 size={13} />
+                      <Edit2 size={14} />
                     </button>
                   )}
-                </div>
-
-                <div>
-                  <div className="hq-progress-track">
-                    <div
-                      className="hq-progress-fill"
-                      style={{ width: `${percent}%`, background: barColor }}
-                    />
-                  </div>
-
-                  <div className="hq-cat-nums" style={{ marginTop: '0.45rem' }}>
-                    <span>
-                      Terpakai:{' '}
-                      <strong style={{ color: isOver ? '#e11d48' : 'var(--text-main)' }}>
-                        {formatIdr(spent)}
-                      </strong>
-                    </span>
-                    <span>Pagu: {budget > 0 ? formatIdr(budget) : 'Belum diatur'}</span>
-                  </div>
-                </div>
-
-                <div className="hq-cat-foot">
-                  <span style={{ color: isOver ? '#e11d48' : 'var(--text-muted)', fontWeight: isOver ? 700 : 500 }}>
-                    {isOver ? `Lebih ${formatIdr(spent - budget)}` : `Sisa ${formatIdr(budget - spent)}`}
-                  </span>
-                  <span style={{ color: 'var(--text-dim)' }}>{percent}%</span>
                 </div>
               </div>
             );
