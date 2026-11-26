@@ -264,7 +264,44 @@ function PocketAppContent() {
   );
 }
 
+// Ubah ke false jika sewaktu-waktu ingin mengaktifkan kembali akses publik di Vercel
+const LOCAL_ONLY_MODE = true;
+
+function isLocalhost() {
+  if (typeof window === 'undefined') return false;
+  const host = window.location.hostname;
+  return (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === '[::1]' ||
+    host.endsWith('.local')
+  );
+}
+
 export default function App() {
+  const isDisabledPublic = LOCAL_ONLY_MODE && !isLocalhost();
+
+  React.useEffect(() => {
+    if (isDisabledPublic) {
+      document.title = '';
+      document.body.style.backgroundColor = '#000000';
+    }
+  }, [isDisabledPublic]);
+
+  if (isDisabledPublic) {
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          width: '100vw',
+          height: '100vh',
+          backgroundColor: '#000000'
+        }}
+      />
+    );
+  }
+
   return (
     <PocketProvider>
       <PocketAppContent />
