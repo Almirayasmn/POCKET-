@@ -265,7 +265,7 @@ function PocketAppContent() {
 }
 
 // Ubah ke false jika sewaktu-waktu ingin mengaktifkan kembali akses publik di Vercel
-const LOCAL_ONLY_MODE = true;
+const LOCAL_ONLY_MODE = false;
 
 function isLocalhost() {
   if (typeof window === 'undefined') return false;
